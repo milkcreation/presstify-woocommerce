@@ -1,5 +1,6 @@
 {
   "name": "presstify-plugins/woocommerce",
+  "time": "2018-04-24",
   "description": "PresstiFy Plugin WooCommerce",
   "type": "presstify-plugins",
   "keywords": ["presstify", "plugins", "wordpress", "woocommerce"],

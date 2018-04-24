@@ -83,7 +83,7 @@ class Forms extends \tiFy\App\Factory
         
         if ( 1 === sizeof( $countries ) ) :
             $field .= '<strong>' . current( array_values( $countries ) ) . '</strong>';
-            $field .= '<input type="hidden" name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" value="' . current( array_keys( $countries ) ) . '" ' . implode( ' ', $custom_attributes ) . ' class="country_to_state" />';
+            $field .= '<input type="hidden" name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" value="' . current( array_keys( $countries ) ) . '" ' . implode( ' ', array_filter( (array) $args['custom_attributes'] ) ) . ' class="country_to_state" />';
         else :
             $field .= tify_control_dropdown(
                 array(
