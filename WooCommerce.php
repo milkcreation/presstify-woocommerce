@@ -3,7 +3,7 @@
 Plugin Name: Woocommerce
 Plugin URI: http://presstify.com/plugins/woocommerce
 Description: Support de Woocommerce
-Version: 1.0.0
+Version: 1.0.1
 Author: Milkcreation
 Author URI: http://milkcreation.fr
 */
