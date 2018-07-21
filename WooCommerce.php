@@ -14,7 +14,9 @@ Author URI: http://milkcreation.fr
  */
 namespace tiFy\Plugins\WooCommerce;
 
-class WooCommerce extends \tiFy\App\Plugin
+use tiFy\App\Plugin;
+
+class WooCommerce extends Plugin
 {
     /**
      * CONSTRUCTEUR
@@ -83,7 +85,12 @@ class WooCommerce extends \tiFy\App\Plugin
         if( self::tFyAppConfig( 'multishop' ) ) :
             new MultiShop\MultiShop( self::tFyAppConfig( 'multishop' ) );
         endif;
-        
+
+        // Chargement des templates avec le moteur de gabarit PHP Plates
+        if($this->appServiceHas('tiFyApp')) :
+            new TemplateLoader($this->appServiceGet('tiFyApp'));
+        endif;
+
         // Fonctions d'aide à la saisie
         include self::tFyAppDirname() .'/Helpers.php';
         
