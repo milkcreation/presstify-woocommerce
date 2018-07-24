@@ -3,7 +3,7 @@
 Plugin Name: Woocommerce
 Plugin URI: http://presstify.com/plugins/woocommerce
 Description: Support de Woocommerce
-Version: 1.1.0
+Version: 1.1.1
 Author: Milkcreation
 Author URI: http://milkcreation.fr
 */
@@ -87,8 +87,9 @@ class WooCommerce extends Plugin
         endif;
 
         // Chargement des templates avec le moteur de gabarit PHP Plates
-        if($this->appServiceHas('tiFyApp')) :
-            new TemplateLoader($this->appServiceGet('tiFyApp'));
+        $service = self::tFyAppConfig( 'template_loader' )? : 'tiFyApp';
+        if($this->appServiceHas($service)) :
+            new TemplateLoader($this->appServiceGet($service));
         endif;
 
         // Fonctions d'aide à la saisie
