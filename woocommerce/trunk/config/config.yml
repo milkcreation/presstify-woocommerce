@@ -57,3 +57,6 @@ checkout:
     rate:               0
     ## Message d'erreur - %s reprend le montant minimum et la devise
     notice:             "<?php _e( 'Désolé, le montant minimum des commandes est fixé à %s', 'tify' );?>"
+# Chargement des templates avec le moteur de gabarit PHP Plates
+## Définition du service à charger
+template_loader:
