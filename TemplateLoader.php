@@ -55,7 +55,7 @@ class TemplateLoader extends AbstractAppController
      */
     public function template_include($template)
     {
-        if (is_woocommerce()) :
+        if (is_woocommerce() || is_account_page() || is_cart() || is_checkout()) :
             if (preg_match('#' . preg_quote(get_stylesheet_directory(), DIRECTORY_SEPARATOR) . '#', $template)) :
                 $directory = get_stylesheet_directory() . DIRECTORY_SEPARATOR . WC()->template_path();
             else :
