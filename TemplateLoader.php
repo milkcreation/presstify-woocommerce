@@ -3,6 +3,7 @@
 namespace tiFy\Plugins\WooCommerce;
 
 use tiFy\App\AbstractAppController;
+use tiFy\Core\Router\Router;
 
 class TemplateLoader extends AbstractAppController
 {
@@ -55,7 +56,7 @@ class TemplateLoader extends AbstractAppController
      */
     public function template_include($template)
     {
-        if (is_woocommerce() || is_account_page() || is_cart() || is_checkout()) :
+        if (is_woocommerce() || is_account_page() || is_cart() || is_checkout() || apply_filters('tify_woocommerce_use_wc_templates', false)) :
             if (preg_match('#' . preg_quote(get_stylesheet_directory(), DIRECTORY_SEPARATOR) . '#', $template)) :
                 $directory = get_stylesheet_directory() . DIRECTORY_SEPARATOR . WC()->template_path();
             else :
