@@ -27,7 +27,7 @@ class TemplateLoader extends AbstractAppController
      */
     public function loadWooTemplate($template = '', $args = [])
     {
-        $folder = 'wc';
+        $folder = uniqid();
 
         if (preg_match('#' . preg_quote(get_stylesheet_directory(), DIRECTORY_SEPARATOR) . '#', $template)) :
             $directory = get_stylesheet_directory() . DIRECTORY_SEPARATOR . WC()->template_path();
@@ -35,7 +35,6 @@ class TemplateLoader extends AbstractAppController
             $directory = WC()->plugin_path() . '/templates' . DIRECTORY_SEPARATOR;
         endif;
 
-        $this->app->appTemplates()->removeFolder($folder);
         $this->app->appTemplates()->addFolder($folder, $directory, true);
 
         $patterns = $replacements = [];
@@ -45,6 +44,8 @@ class TemplateLoader extends AbstractAppController
         $path = preg_replace($patterns, $replacements, $template);
         $name = "{$folder}::{$path}";
         echo $this->app->appTemplateRender($name, $args);
+
+        $this->app->appTemplates()->removeFolder($folder);
     }
 
     /**
