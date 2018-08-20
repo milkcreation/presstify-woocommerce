@@ -1,0 +1,48 @@
+{
+  "name": "presstify-plugins/woocommerce",
+  "description": "PresstiFy Plugin WooCommerce",
+  "type": "presstify-plugin",
+  "keywords": [
+    "presstify",
+    "plugins",
+    "wordpress",
+    "woocommerce"
+  ],
+  "homepage": "https://svn.milkcreation.fr/presstify-plugins/woocommerce",
+  "time": "2018-08-20",
+  "license": "proprietary",
+  "authors": [
+    {
+      "name": "Jordy Manner",
+      "email": "jordy.manner@milkcreation.fr",
+      "role": "Developper"
+    },
+    {
+      "name": "Julien Picard",
+      "email": "julien@tigreblanc.fr",
+      "role": "Developper"
+    }
+  ],
+  "repositories": [
+    {
+      "type": "composer",
+      "url": "http://composer.tigreblanc.fr/presstify/"
+    }
+  ],
+  "require": {
+    "composer/installers": "~1.0",
+    "presstify/framework": "^1.4"
+  },
+  "autoload": {
+    "psr-4": {
+      "tiFy\\Plugins\\WooCommerce\\": ""
+    }
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "config" : {
+    "preferred-install": "dist",
+    "sort-packages": true,
+    "optimize-autoloader": true
+  }
+}
