@@ -1,8 +1,24 @@
 <?php
+
 /**
  * FONCTIONS D'AIDE A LA SAISIE
  */
+
+use tiFy\Plugins\WooCommerce\Cart;
 use tiFy\Plugins\WooCommerce\Functions;
+use tiFy\tiFy;
+
+if (!function_exists('tify_wc_cart')) :
+    /**
+     * Classe de rappel de traitement du panier.
+     *
+     * @return Cart
+     */
+    function tify_wc_cart()
+    {
+        return tiFy::getContainer()->get(Cart::class);
+    }
+endif;
 
 /**
  * Encapsulation HTML de la décimal d'un prix
