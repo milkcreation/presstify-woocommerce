@@ -2,10 +2,10 @@
 
 namespace tiFy\Plugins\WooCommerce;
 
-use tiFy\App\AbstractAppController;
+use tiFy\App\Dependency\AbstractAppDependency;
 use tiFy\Core\Router\Router;
 
-class TemplateLoader extends AbstractAppController
+class TemplateLoader extends AbstractAppDependency
 {
     /**
      * {@inheritdoc}
