@@ -6,6 +6,7 @@
 
 use tiFy\Plugins\WooCommerce\Cart;
 use tiFy\Plugins\WooCommerce\Functions;
+use tiFy\Plugins\WooCommerce\MultiShop\MultiShop;
 use tiFy\tiFy;
 
 if (!function_exists('tify_wc_cart')) :
@@ -21,18 +22,22 @@ if (!function_exists('tify_wc_cart')) :
 endif;
 
 /**
- * Encapsulation HTML de la décimal d'un prix
+ * Encapsulation HTML de la décimal d'un prix.
+ *
  * @param string $price
  * @param array $args
+ *
  * @return string
  */
-function tify_wc_price_wrap_decimal( $price, $args = array() )
+function tify_wc_price_wrap_decimal($price, $args = [])
 {
-    return Functions::priceWrapDecimal( $price, $args );   
+    return Functions::priceWrapDecimal($price, $args);
 }
 
 /**
- * Retourne le nombre d'article dans le panier
+ * Retourne le nombre d'article dans le panier.
+ *
+ * @return int
  */
 function tify_wc_cart_contents_count()
 {
@@ -42,10 +47,9 @@ function tify_wc_cart_contents_count()
 /**
  * MULTIBOUTIQUE
  */
-use tiFy\Plugins\WooCommerce\MultiShop\MultiShop;
-
 /**
- * Récupération de l'identifiant de la boutique courante
+ * Récupération de l'identifiant de la boutique courante.
+ *
  * @return string
  */
 function tify_wc_multi_current_shop_id()
@@ -54,17 +58,20 @@ function tify_wc_multi_current_shop_id()
 }
 
 /**
- * Récupération de la page d'accroche d'une boutique déclarée
- * @param string $shop_id identifiant de déclaration de la boutique
+ * Récupération de la page d'accroche d'une boutique déclarée.
+ *
+ * @param string $shop_id identifiant de déclaration de la boutique.
+ *
  * @return int $post_id
  */
-function tify_wc_multi_get_hook_id( $shop_id )
+function tify_wc_multi_get_hook_id($shop_id)
 {
-    return Multishop::getShopHookId( $shop_id );
+    return Multishop::getShopHookId($shop_id);
 }
 
 /**
- * Récupération de la page d'accroche de la boutique courante
+ * Récupération de la page d'accroche de la boutique courante.
+ *
  * @return int $post_id
  */
 function tify_wc_multi_current_hook_id()
@@ -73,36 +80,42 @@ function tify_wc_multi_current_hook_id()
 }
 
 /**
- * Vérifie si la page courante est l'accroche d'une boutique
+ * Vérifie si la page courante est l'accroche d'une boutique.
+ *
  * @return bool
  */
-function tify_wc_multi_is_hook( $shop_id = null )
+function tify_wc_multi_is_hook($shop_id = null)
 {
-    return Multishop::isShopHook( $shop_id );
+    return Multishop::isShopHook($shop_id);
 }
 
 /**
- * Récupération l'identifiant de la catégorie d'accroche d'une boutique déclarée
- * @param string $shop_id identifiant de déclaration de la boutique
+ * Récupération l'identifiant de la catégorie d'accroche d'une boutique déclarée.
+ *
+ * @param string $shop_id identifiant de déclaration de la boutique.
+ *
  * @return int $term_id
  */
-function tify_wc_multi_get_term_id( $shop_id )
+function tify_wc_multi_get_term_id($shop_id)
 {
-    return Multishop::getShopTermId( $shop_id );
+    return Multishop::getShopTermId($shop_id);
 }
 
 /**
- * Récupération de la catégorie d'accroche d'une boutique déclarée
- * @param string $shop_id identifiant de déclaration de la boutique
+ * Récupération de la catégorie d'accroche d'une boutique déclarée.
+ *
+ * @param string $shop_id identifiant de déclaration de la boutique.
+ *
  * @return obj $term
  */
-function tify_wc_multi_get_term( $shop_id )
+function tify_wc_multi_get_term($shop_id)
 {
-    return Multishop::getShopTerm( $shop_id );
+    return Multishop::getShopTerm($shop_id);
 }
 
 /**
- * Récupération l'identifiant de la catégorie d'accroche d'une boutique courante
+ * Récupération l'identifiant de la catégorie d'accroche d'une boutique courante.
+ *
  * @return int $term_id
  */
 function tify_wc_multi_current_term_id()
@@ -111,7 +124,8 @@ function tify_wc_multi_current_term_id()
 }
 
 /**
- * Récupération de la catégorie d'accroche de la boutique courante
+ * Récupération de la catégorie d'accroche de la boutique courante.
+ *
  * @return obj $term
  */
 function tify_wc_multi_current_term()
@@ -120,11 +134,13 @@ function tify_wc_multi_current_term()
 }
 
 /**
- * Vérifie si la page courante fait partie de l'ecosystème d'une boutique déclarée
- * @param string $shop_id identifiant de déclaration de la boutique
+ * Vérifie si la page courante fait partie de l'ecosystème d'une boutique déclarée.
+ *
+ * @param string $shop_id identifiant de déclaration de la boutique.
+ *
  * @return bool
  */
-function tify_wc_multi_in_shop( $shop_id )
+function tify_wc_multi_in_shop($shop_id)
 {
-    return Multishop::inShop( $shop_id );
+    return Multishop::inShop($shop_id);
 }
