@@ -114,7 +114,7 @@ class WooCommerce extends Plugin
         $service = $this->appConfig('template_loader') ?: (class_exists($appClassname) ? $appClassname : '');
 
         if ($app = $this->appServiceGet($service)) :
-            new TemplateLoader($app);
+            new TemplateLoader($app, $this->appConfig('views'));
         endif;
 
         // Fonctions d'aide à la saisie

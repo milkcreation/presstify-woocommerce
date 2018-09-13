@@ -2,19 +2,50 @@
 
 namespace tiFy\Plugins\WooCommerce;
 
+use tiFy\Contracts\App\AppInterface;
+use tiFy\Contracts\Views\ViewsInterface;
 use tiFy\App\Dependency\AbstractAppDependency;
 use tiFy\Core\Router\Router;
 
 class TemplateLoader extends AbstractAppDependency
 {
     /**
+     * @var ViewsInterface
+     */
+    protected $views;
+
+    /**
+     * CONSTRUCTEUR.
+     *
+     * @param AppInterface $app
+     * @param ViewsInterface $views
+     *
+     */
+    public function __construct($app, $views = null)
+    {
+        $this->views = $views instanceof ViewsInterface ? $views : $app->appTemplates();
+
+        parent::__construct($app);
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function boot()
     {
-        $this->app->appAddFilter('template_include', [$this, 'template_include'], 99);
-        $this->app->appAddFilter('wc_get_template', [$this, 'wc_get_template'], 10, 5);
-        $this->app->appAddFilter('wc_get_template_part', [$this, 'wc_get_template_part'], 10, 3);
+        add_action(
+            'init',
+            function() {
+                $this->views->addFolder('wctheme', get_stylesheet_directory() . DIRECTORY_SEPARATOR . \WC()->template_path());
+                $this->views->addFolder('wcplugin', \WC()->plugin_path() . '/templates' . DIRECTORY_SEPARATOR);
+            }
+        );
+
+        add_filter('template_include', [$this, 'template_include'], 99);
+
+        add_filter('wc_get_template', [$this, 'wc_get_template'], 10, 5);
+
+        add_filter('wc_get_template_part', [$this, 'wc_get_template_part'], 10, 3);
     }
 
     /**
@@ -27,25 +58,23 @@ class TemplateLoader extends AbstractAppDependency
      */
     public function loadWooTemplate($template = '', $args = [])
     {
-        $folder = uniqid();
-
         if (preg_match('#' . preg_quote(get_stylesheet_directory(), DIRECTORY_SEPARATOR) . '#', $template)) :
-            $directory = get_stylesheet_directory() . DIRECTORY_SEPARATOR . WC()->template_path();
+            $folder = 'wctheme';
+            $directory = $this->views->getFolders()->get($folder)->getPath();
         else :
-            $directory = WC()->plugin_path() . '/templates' . DIRECTORY_SEPARATOR;
+            $folder = 'wcplugin';
+            $directory = $this->views->getFolders()->get($folder)->getPath();
         endif;
-
-        $this->app->appTemplates()->addFolder($folder, $directory, true);
 
         $patterns = $replacements = [];
         $patterns[] = '#' . preg_quote($directory, DIRECTORY_SEPARATOR) . '#';
         $patterns[] = '#\.php?$#';
         $replacements[] = '';
         $path = preg_replace($patterns, $replacements, $template);
-        $name = "{$folder}::{$path}";
-        echo $this->app->appTemplateRender($name, $args);
 
-        $this->app->appTemplates()->removeFolder($folder);
+        $name = "{$folder}::{$path}";
+
+        echo $this->views->render($name, $args);
     }
 
     /**
@@ -59,9 +88,11 @@ class TemplateLoader extends AbstractAppDependency
     {
         if (is_woocommerce() || is_account_page() || is_cart() || is_checkout() || apply_filters('tify_woocommerce_use_wc_templates', false)) :
             if (preg_match('#' . preg_quote(get_stylesheet_directory(), DIRECTORY_SEPARATOR) . '#', $template)) :
-                $directory = get_stylesheet_directory() . DIRECTORY_SEPARATOR . WC()->template_path();
+                $folder = 'wctheme';
+                $directory = $this->views->getFolders()->get($folder)->getPath();
             else :
-                $directory = WC()->plugin_path() . '/templates' . DIRECTORY_SEPARATOR;
+                $folder = 'wcplugin';
+                $directory = $this->views->getFolders()->get($folder)->getPath();
             endif;
 
             $template = preg_replace(
@@ -69,9 +100,8 @@ class TemplateLoader extends AbstractAppDependency
                 '',
                 $template
             );
-            $this->app->appTemplates()->addFolder('wc', $directory, true);
 
-            $template = "wc::{$template}";
+            $template = "{$folder}::{$template}";
         endif;
 
         return $template;
@@ -96,7 +126,7 @@ class TemplateLoader extends AbstractAppDependency
 
         $this->loadWooTemplate($located, $args);
 
-        return dirname(__FILE__) . '/index.php';
+        return __DIR__ . '/index.php';
     }
 
     /**
