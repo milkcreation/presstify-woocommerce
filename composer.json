@@ -9,7 +9,7 @@
     "woocommerce"
   ],
   "homepage": "https://svn.milkcreation.fr/presstify-plugins/woocommerce",
-  "time": "2018-08-20",
+  "time": "2018-10-05",
   "license": "proprietary",
   "authors": [
     {
@@ -34,6 +34,9 @@
     "presstify/framework": "^1.4"
   },
   "autoload": {
+    "files": [
+       "helpers.php"
+    ],
     "psr-4": {
       "tiFy\\Plugins\\WooCommerce\\": ""
     }
@@ -41,8 +44,9 @@
   "minimum-stability": "dev",
   "prefer-stable": true,
   "config" : {
+    "optimize-autoloader": true,
     "preferred-install": "dist",
-    "sort-packages": true,
-    "optimize-autoloader": true
+    "secure-http": false,
+    "sort-packages": true
   }
 }
