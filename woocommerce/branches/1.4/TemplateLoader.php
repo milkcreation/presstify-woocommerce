@@ -4,10 +4,9 @@ namespace tiFy\Plugins\WooCommerce;
 
 use tiFy\Contracts\App\AppInterface;
 use tiFy\Contracts\Views\ViewsInterface;
-use tiFy\App\Dependency\AbstractAppDependency;
 use tiFy\Core\Router\Router;
 
-class TemplateLoader extends AbstractAppDependency
+class TemplateLoader
 {
     /**
      * @var ViewsInterface
@@ -25,14 +24,6 @@ class TemplateLoader extends AbstractAppDependency
     {
         $this->views = $views instanceof ViewsInterface ? $views : $app->appTemplates();
 
-        parent::__construct($app);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function boot()
-    {
         add_action(
             'init',
             function() {
