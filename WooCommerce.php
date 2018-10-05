@@ -6,7 +6,7 @@
  * @author Jordy Manner <jordy@milkcreation.fr> && Julien Picard <julien@tigreblanc.fr>
  * @package presstify-plugins/woocommerce
  * @namespace \tiFy\Plugins\WooCommerce
- * @version 1.4.2
+ * @version 1.4.3
  */
 
 /**
@@ -116,9 +116,6 @@ class WooCommerce extends Plugin
         if ($app = $this->appServiceGet($service)) :
             new TemplateLoader($app, $this->appConfig('views'));
         endif;
-
-        // Fonctions d'aide à la saisie
-        include $this->appDirname() . '/Helpers.php';
 
         // Déclenchement des événements
         $this->appAddAction('init', null, 1);
