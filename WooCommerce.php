@@ -6,7 +6,7 @@
  * @author Jordy Manner <jordy@milkcreation.fr> && Julien Picard <julien@tigreblanc.fr>
  * @package presstify-plugins/woocommerce
  * @namespace \tiFy\Plugins\WooCommerce
- * @version 1.4.1
+ * @version 2.0.0
  */
 
 /**
@@ -67,6 +67,12 @@ class WooCommerce extends Plugin
         $Forms = self::getOverride(Forms::class);
         $this->appServiceAdd(Forms::class, new $Forms($this->appConfig('forms')));
 
+        // Boutique multiple
+        if ($multishop_conf = $this->appConfig('multishop')) :
+            $MultiShop = self::getOverride(MultiShop::class);
+            $this->appServiceAdd(MultiShop::class, new $MultiShop($multishop_conf));
+        endif;
+
         // Paiement
         $this->appServiceAdd(Order::class, self::loadOverride(Order::class));
 
@@ -103,21 +109,13 @@ class WooCommerce extends Plugin
             $this->appServiceAdd(PaymentGateway::class ,new $PaymentGateway($payment_gateway_conf));
         endif;
 
-        // Boutique multiple
-        if ($multishop_conf = $this->appConfig('multishop')) :
-            $MultiShop = self::getOverride(MultiShop::class);
-            $this->appServiceAdd(MultiShop::class, new $MultiShop($multishop_conf));
-        endif;
-
         // Chargement des templates avec le moteur de gabarit PHP Plates
         $appClassname = tiFy::getConfig('app.namespace') . "\\" . tiFy::getConfig('app.bootstrap');
         $service = $this->appConfig('template_loader') ?: (class_exists($appClassname) ? $appClassname : '');
-        if ($app = $this->appServiceGet($service)) :
-            new TemplateLoader($app);
-        endif;
 
-        // Fonctions d'aide à la saisie
-        include $this->appDirname() . '/Helpers.php';
+        if ($app = $this->appServiceGet($service)) :
+            new TemplateLoader($app, $this->appConfig('views'));
+        endif;
 
         // Déclenchement des événements
         $this->appAddAction('init', null, 1);

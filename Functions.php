@@ -30,7 +30,9 @@ class Functions
     }
     
     /**
-     * Retourne le nombre d'article dans le panier
+     * Retourne le nombre d'article dans le panier.
+     *
+     * @return int
      */
     public static function cartContentsCount()
     {

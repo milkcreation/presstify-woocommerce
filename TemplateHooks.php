@@ -138,25 +138,27 @@ class TemplateHooks extends \tiFy\App\Factory
     {
         parent::__construct();
 
-        foreach ((array)$hooks as $tag => $functions) :
-            if (!isset(self::$Hooks[$tag])) :
-                $this->registerHook($tag);
-            endif;
-
-            if (empty($functions)) :
-                continue;
-            endif;
-
-            foreach ($functions as $function => $priority) :
-                if (!isset(self::$Hooks[$tag][$function])) :
-                    $this->add($tag, $function, $priority);
-                elseif (!$priority) :
-                    $this->remove($tag, $function, self::$Hooks[$tag][$function]);
-                elseif (self::$Hooks[$tag][$function] !== (int)$priority) :
-                    $this->change($tag, $function, $priority);
+        $this->appAddAction('init', function() use ($hooks) {
+            foreach ((array)$hooks as $tag => $functions) :
+                if (!isset(self::$Hooks[$tag])) :
+                    $this->registerHook($tag);
                 endif;
+
+                if (empty($functions)) :
+                    continue;
+                endif;
+
+                foreach ($functions as $function => $priority) :
+                    if (!isset(self::$Hooks[$tag][$function])) :
+                        self::add($tag, $function, $priority);
+                    elseif (!$priority) :
+                        self::remove($tag, $function, self::$Hooks[$tag][$function]);
+                    elseif (self::$Hooks[$tag][$function] !== (int)$priority) :
+                        self::change($tag, $function, $priority);
+                    endif;
+                endforeach;
             endforeach;
-        endforeach;
+        });
 
         // Contextualisation
         add_action('wp', [$this, 'wp'], 99);

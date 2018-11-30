@@ -299,7 +299,9 @@ class MultiShop extends \tiFy\App
     }
 
     /**
-     * Récupération la catégorie d'affichage d'une boutique
+     * Récupération la catégorie d'affichage d'une boutique.
+     *
+     * @return \WP_Term
      */
     final public static function getShopTerm($shop_id)
     {
