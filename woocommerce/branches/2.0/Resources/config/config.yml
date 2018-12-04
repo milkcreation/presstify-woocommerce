@@ -1,0 +1,14 @@
+# ACCROCHAGE / DECROCHAGE / RE-ORDONNANCEMENT DES ELEMENTS DE TEMPLATES
+template-hooks:
+
+# PLATEFORMES DE PAIEMENT
+payment_gateway:
+  WC_Gateway_BACS:      true
+  WC_Gateway_Cheque:    true
+  WC_Gateway_COD:       true
+  WC_Gateway_Paypal:    true
+  Custom:               true
+
+# Chargement des templates avec le moteur de gabarit PHP Plates
+## Définition du service à charger
+template_loader:

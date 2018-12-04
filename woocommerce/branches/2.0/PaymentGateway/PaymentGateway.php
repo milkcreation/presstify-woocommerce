@@ -1,5 +1,5 @@
 <?php
-namespace tiFy\Plugins\WooCommerce\PaymentGateway;
+namespace tiFy\Plugins\Woocommerce\PaymentGateway;
 
 class PaymentGateway extends \tiFy\App\Factory
 {    

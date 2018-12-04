@@ -1,0 +1,244 @@
+<?php
+
+namespace tiFy\Plugins\Woocommerce;
+
+use tiFy\App\Container\AppServiceProvider;
+use tiFy\Plugins\Woocommerce\Assets\Assets;
+use tiFy\Plugins\Woocommerce\Cart\Cart;
+use tiFy\Plugins\Woocommerce\Checkout\Checkout;
+use tiFy\Plugins\Woocommerce\Form\Form;
+use tiFy\Plugins\Woocommerce\Functions\Functions;
+use tiFy\Plugins\Woocommerce\Mail\Mail;
+use tiFy\Plugins\Woocommerce\Metabox\Product;
+use tiFy\Plugins\Woocommerce\Multishop\Multishop;
+use tiFy\Plugins\Woocommerce\Multishop\Factory;
+use tiFy\Plugins\Woocommerce\Order\Order;
+use tiFy\Plugins\Woocommerce\Query\Query;
+use tiFy\Plugins\Woocommerce\Routing\Routing;
+use tiFy\Plugins\Woocommerce\Shipping\Shipping;
+use tiFy\Plugins\Woocommerce\Shortcodes\Shortcodes;
+
+class WoocommerceServiceProvider extends AppServiceProvider
+{
+    protected $concrete = [
+        'assets'            => Assets::class,
+        'cart'              => Cart::class,
+        'checkout'          => Checkout::class,
+        'form'              => Form::class,
+        'functions'         => Functions::class,
+        'mail'              => Mail::class,
+        'metabox.product'   => Product::class,
+        'multishop'         => Multishop::class,
+        'multishop.factory' => Factory::class,
+        'order'             => Order::class,
+        'query'             => Query::class,
+        'routing'           => Routing::class,
+        'shipping'          => Shipping::class,
+        'shortcodes'        => Shortcodes::class,
+    ];
+
+    /**
+     * Liste des fournisseurs de service.
+     * @var array
+     */
+    protected $provides = [
+        'woocommerce',
+        'woocommerce.assets',
+        'woocommerce.cart',
+        'woocommerce.checkout',
+        'woocommerce.form',
+        'woocommerce.functions',
+        'woocommerce.mail',
+        'woocommerce.metabox.product',
+        'woocommerce.multishop',
+        'woocommerce.multishop.factory',
+        'woocommerce.order',
+        'woocommerce.query',
+        'woocommerce.routing',
+        'woocommerce.shipping',
+        'woocommerce.shortcodes',
+    ];
+
+    /**
+     * Liste des services personnalisés.
+     * @var array
+     */
+    protected $customs = [];
+
+    public function boot()
+    {
+        add_action('after_setup_tify', function () {
+            $providers = config('woocommerce.providers', []);
+            array_walk($providers, function ($v, $k) {
+                $this->customs[$k] = $v;
+            });
+
+            $this->app->get('woocommerce');
+            $this->app->get('woocommerce.assets');
+            $this->app->get('woocommerce.cart');
+            $this->app->get('woocommerce.checkout');
+            $this->app->get('woocommerce.form');
+            $this->app->get('woocommerce.functions');
+            $this->app->get('woocommerce.mail');
+            $this->app->get('woocommerce.metabox.product');
+            $this->app->get('woocommerce.multishop');
+            $this->app->get('woocommerce.order');
+            $this->app->get('woocommerce.query');
+            $this->app->get('woocommerce.routing');
+            $this->app->get('woocommerce.shipping');
+            $this->app->get('woocommerce.shortcodes');
+        });
+    }
+
+    public function getConcrete($alias)
+    {
+        return $this->customs[$alias] ?? $this->concrete[$alias];
+    }
+
+    public function register()
+    {
+        $this->app->share('woocommerce', new Woocommerce());
+        $this->registerAssets();
+        $this->registerCart();
+        $this->registerCheckout();
+        $this->registerForm();
+        $this->registerFunctions();
+        $this->registerMail();
+        $this->registerMetaboxProduct();
+        $this->registerMultishop();
+        $this->registerMultishopFactory();
+        $this->registerOrder();
+        $this->registerQuery();
+        $this->registerRouting();
+        $this->registerShipping();
+        $this->registerShortcodes();
+    }
+
+    public function registerAssets()
+    {
+        $this->app->share('woocommerce.assets', function () {
+            $attrs = config('woocommerce.assets', []);
+            $concrete = $this->getConcrete('assets');
+
+            return new $concrete($attrs);
+        });
+    }
+
+    public function registerCart()
+    {
+        $this->app->share('woocommerce.cart', function () {
+            $concrete = $this->getConcrete('cart');
+
+            return new $concrete();
+        });
+    }
+
+    public function registerCheckout()
+    {
+        $this->app->share('woocommerce.checkout', function () {
+            $attrs = config('woocommerce.checkout', []);
+            $concrete = $this->getConcrete('checkout');
+
+            return new $concrete($attrs);
+        });
+    }
+
+    public function registerForm()
+    {
+        $this->app->share('woocommerce.form', function () {
+            $attrs = config('woocommerce.form', []);
+            $concrete = $this->getConcrete('form');
+
+            return new $concrete($attrs);
+        });
+    }
+
+    public function registerFunctions()
+    {
+        $this->app->share('woocommerce.functions', new Functions());
+    }
+
+    public function registerMail()
+    {
+        $this->app->share('woocommerce.mail', function () {
+            $concrete = $this->getConcrete('mail');
+
+            return new $concrete();
+        });
+    }
+
+    public function registerMetaboxProduct()
+    {
+        $this->app->share('woocommerce.metabox.product', function () {
+            $concrete = $this->getConcrete('metabox.product');
+
+            return new $concrete();
+        });
+    }
+
+    public function registerMultishop()
+    {
+        $this->app->share('woocommerce.multishop', function () {
+            $attrs = config('woocommerce.multishop', []);
+            $concrete = $this->getConcrete('multishop');
+
+            return new $concrete($attrs);
+        });
+    }
+
+    public function registerMultishopFactory()
+    {
+        $this->app->bind('woocommerce.multishop.factory', function ($shopId, $shopAttrs) {
+            $concrete = $this->getConcrete('multishop.factory');
+
+            return new $concrete($shopId, $shopAttrs);
+        });
+    }
+
+    public function registerOrder()
+    {
+        $this->app->share('woocommerce.order', function () {
+            $concrete = $this->getConcrete('order');
+
+            return new $concrete();
+        });
+    }
+
+    public function registerQuery()
+    {
+        $this->app->share('woocommerce.query', function () {
+            $concrete = $this->getConcrete('query');
+
+            return new $concrete();
+        });
+    }
+
+    public function registerRouting()
+    {
+        $this->app->share('woocommerce.routing', function () {
+            $attrs = config('woocommerce.routing', []);
+            $concrete = $this->getConcrete('routing');
+
+            return new $concrete($attrs);
+        });
+    }
+
+    public function registerShipping()
+    {
+        $this->app->share('woocommerce.shipping', function () {
+            $concrete = $this->getConcrete('shipping');
+
+            return new $concrete();
+        });
+    }
+
+    public function registerShortcodes()
+    {
+        $this->app->share('woocommerce.shortcodes', function () {
+            $attrs = config('woocommerce.shortcodes', []);
+            $concrete = $this->getConcrete('shortcodes');
+
+            return new $concrete($attrs);
+        });
+    }
+}

@@ -4,9 +4,9 @@
  * FONCTIONS D'AIDE A LA SAISIE
  */
 
-use tiFy\Plugins\WooCommerce\Cart;
-use tiFy\Plugins\WooCommerce\Functions;
-use tiFy\Plugins\WooCommerce\MultiShop\MultiShop;
+use tiFy\Plugins\Woocommerce\Cart;
+use tiFy\Plugins\Woocommerce\Functions;
+use tiFy\Plugins\Woocommerce\MultiShop\Multishop;
 use tiFy\tiFy;
 
 if (!function_exists('tify_wc_cart')) :
