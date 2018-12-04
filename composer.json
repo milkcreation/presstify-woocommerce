@@ -38,7 +38,7 @@
        "helpers.php"
     ],
     "psr-4": {
-      "tiFy\\Plugins\\WooCommerce\\": ""
+      "tiFy\\Plugins\\Woocommerce\\": ""
     }
   },
   "minimum-stability": "dev",
