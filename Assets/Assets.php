@@ -2,11 +2,10 @@
 
 namespace tiFy\Plugins\Woocommerce\Assets;
 
-use tiFy\Plugins\Woocommerce\Contracts\Assets as AssetsContract;
 use tiFy\Kernel\Params\ParamsBag;
+use tiFy\Plugins\Woocommerce\Contracts\Assets as AssetsContract;
+use tiFy\Plugins\Woocommerce\WoocommerceResolverTrait;
 
-//use tiFy\Core\ScriptLoader\ScriptLoader as tiFyScriptLoader;
-//use \tiFy\Plugins\Woocommerce\Routing as Tags;
 //use \tiFy\Plugins\Woocommerce\Form;
 
 /**
@@ -16,6 +15,8 @@ use tiFy\Kernel\Params\ParamsBag;
  */
 class Assets extends ParamsBag implements AssetsContract
 {
+    use WoocommerceResolverTrait;
+
     /**
      * Liste des styles déclarés par contexte.
      * @var array
@@ -78,227 +79,229 @@ class Assets extends ParamsBag implements AssetsContract
 
         $this->wcStyles = array_merge($this->wcStyles, $this->get('wc_styles', []));
         $this->wcScripts = array_merge($this->wcScripts, $this->get('wc_scripts', []));
-        $this->min = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '.min' : '';
+        $this->min = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '' : '.min';
 
         $this->registerAppAssets();
-
-        //add_action('init', [$this, 'init']);
-        //add_filter('woocommerce_enqueue_styles', [$this, 'woocommerce_enqueue_styles']);
-        //add_action('wp_enqueue_scripts', [$this, 'wp_enqueue_scripts'], 25);
+        $this->dequeueWcStyles();
+        $this->dequeueWcScripts();
+        $this->enqueue();
     }
 
-    protected function registerAppAssets()
+    /**
+     * Déclaration des styles/scripts de l'application.
+     *
+     * @return void
+     */
+    public function registerAppAssets()
     {
         add_action(
             'init',
             function () {
-
+                foreach ($this->routing()->getRoutes() as $route) :
+                    if (file_exists(get_stylesheet_directory() . "/dist/css/wc-{$route}" . $this->min . '.css')) :
+                        wp_register_style('tify_wc_' . $route, get_stylesheet_directory_uri() . "/dist/css/wc-{$route}" . $this->min . '.css');
+                        $this->addStyle($route, 'tify_wc_' . $route);
+                    endif;
+                    if (file_exists(get_stylesheet_directory() . "/dist/js/wc-{$route}" . $this->min . ".js")) :
+                        wp_register_script('tify_wc_' . $route, get_stylesheet_directory_uri() . "/dist/js/wc-{$route}" . $this->min . '.js');
+                        $this->addScript($route, 'tify_wc_' . $route);
+                    endif;
+                endforeach;
             }
         );
     }
 
     /**
-     * DECLENCHEURS
+     * Désactivation des styles WooCommerce.
+     *
+     * @return void
      */
-    /**
-     * Initialisation globale
-     */
-    public function init()
+    public function dequeueWcStyles()
     {
-        // STYLES        
-        foreach (Tags::getAll() as $tag) :
-            if (file_exists(get_stylesheet_directory() . "/dist/css/wc-{$tag}" . static::$Min . ".css")) :
-                tiFyScriptLoader::register_style(
-                    'tify_wc_' . $tag,
-                    [
-                        'src' => get_stylesheet_directory_uri() . "/dist/css/wc-{$tag}" . static::$Min . ".css"
-                    ]
-                );
-                self::addStyle($tag, 'tify_wc_' . $tag);
-            endif;
-        endforeach;
+        add_filter(
+            'woocommerce_enqueue_styles',
+            function ($wcStyles) {
+                foreach ($this->wcStyles as $handle => $bypass) :
+                    if ($bypass) :
+                        continue;
+                    endif;
+                    unset($wcStyles[$handle]);
+                endforeach;
 
-        // SCRIPTS       
-        foreach (Tags::getAll() as $tag) :
-            if (file_exists(get_stylesheet_directory() . "/dist/js/wc-{$tag}" . static::$Min . ".js")) :
-                tiFyScriptLoader::register_script(
-                    'tify_wc_' . $tag,
-                    [
-                        'src' => get_stylesheet_directory_uri() . "/dist/js/wc-{$tag}" . static::$Min . ".js"
-                    ]
-                );
-                self::addScript($tag, 'tify_wc_' . $tag);
-            endif;
-        endforeach;
+                return $wcStyles;
+            }
+        );
     }
 
     /**
-     * Chargement des feuilles de styles de l'interface utilisateur
+     * Désactivation des scripts WooCommerce.
+     *
+     * @return void
      */
-    final public function woocommerce_enqueue_styles($styles)
+    public function dequeueWcScripts()
     {
-        foreach (self::$WcEnqueueStyles as $handle => $bypass) :
-            if ($bypass)
-                continue;
-            unset($styles[$handle]);
-        endforeach;
-
-        return $styles;
+        add_action(
+            'wp_enqueue_scripts',
+            function () {
+                foreach ($this->wcScripts as $handle => $bypass) :
+                    if ($bypass) :
+                        continue;
+                    endif;
+                    wp_dequeue_script($handle);
+                endforeach;
+            },
+            25
+        );
     }
 
     /**
-     * Mise en file des scripts de l'interface utilisateur
+     * Mise en queue des styles/scripts de l'application.
+     *
+     * @return void
      */
-    final public function wp_enqueue_scripts()
+    public function enqueue()
     {
-        /**
-         * Désactivation des scripts natifs de woocommerce
-         */
-        foreach (self::$WcEnqueueScripts as $handle => $bypass) :
-            if ($bypass)
-                continue;
-            wp_dequeue_script($handle);
-        endforeach;
+        add_action(
+            'wp_enqueue_scripts',
+            function () {
+                if ($this->form()->istiFySelectJsCountry() && ($this->routing()->is('checkout') || $this->routing()->is('account_page'))) :
+                    wp_dequeue_script('select2');
+                    wp_dequeue_style('select2');
+                endif;
 
-        /**
-         * Remplacement de la liste de selection des pays par tiFyDropdown
-         */
-        if (Form::istiFyDropdownCountry()) :
-            if (is_checkout() || is_account_page()) :
-                tify_control_enqueue('dropdown');
-                wp_dequeue_script('select2');
-                wp_dequeue_style('select2');
-            endif;
+                $this->enqueue_scripts_before_global();
+                if (file_exists(get_stylesheet_directory() . "/dist/css/wc-global" . $this->min . ".css")) :
+                    wp_enqueue_style('tify_wc_global', get_stylesheet_directory_uri() . "/dist/css/wc-global" . $this->min . ".css");
+                endif;
+                if (file_exists(get_stylesheet_directory() . "/dist/js/wc-global" . $this->min . ".js")) :
+                    wp_enqueue_script('tify_wc_global', get_stylesheet_directory_uri() . "/dist/js/wc-global" . $this->min . ".js");
+                endif;
+                $this->enqueue_scripts_after_global();
+
+                foreach ($this->routing()->getRoutes() as $route) :
+                    if ($this->routing()->is($route)) :
+                        $this->enqueue_scripts_before($route);
+                        if (is_callable([$this, 'enqueue_scripts_before_' . $route])) :
+                            call_user_func([$this, 'enqueue_scripts_before_' . $route]);
+                        endif;
+
+                        if ($this->hasStyle($route)) :
+                            foreach ($this->getStyles($route) as $style) :
+                                wp_enqueue_style($style);
+                            endforeach;
+                        endif;
+
+                        if ($this->hasScript($route)) :
+                            foreach ($this->getScripts($route) as $script) :
+                                wp_enqueue_script($script);
+                            endforeach;
+                        endif;
+
+                        if (is_callable([$this, 'enqueue_scripts_after_' . $route])) :
+                            call_user_func([$this, 'enqueue_scripts_after_' . $route]);
+                        endif;
+                        $this->enqueue_scripts_after($route);
+                    endif;
+                endforeach;
+            },
+            25
+        );
+    }
+
+    /**
+     * Déclaration d'un style dans un contexte.
+     *
+     * @param string $tag Nom du contexte.
+     * @param string $hook Nom du style.
+     *
+     * @return void
+     */
+    public function addStyle($tag, $hook)
+    {
+        // Bypass
+        if (!$this->routing()->exists($tag)) :
+            return null;
         endif;
 
-        // Script Global
-        $this->enqueue_scripts_before_global();
-        if (file_exists(get_stylesheet_directory() . "/dist/css/wc-global" . static::$Min . ".css")) :
-            wp_enqueue_style('tify_wc_global', get_stylesheet_directory_uri() . "/dist/css/wc-global" . static::$Min . ".css");
+        if (!isset($this->styles[$tag])) :
+            $this->styles[$tag] = [];
         endif;
-        if (file_exists(get_stylesheet_directory() . "/dist/js/wc-global" . static::$Min . ".js")) :
-            wp_enqueue_script('tify_wc_global', get_stylesheet_directory_uri() . "/dist/js/wc-global" . static::$Min . ".js");
+
+        array_push($this->styles[$tag], $hook);
+    }
+
+    /**
+     * Vérification d'existence d'un style dans un contexte.
+     *
+     * @param string $tag Nom du contexte.
+     *
+     * @return bool
+     */
+    public function hasStyle($tag)
+    {
+        return $this->routing()->is($tag) && !empty($this->styles[$tag]);
+    }
+
+    /**
+     * Récupération des styles d'un contexte.
+     *
+     * @param string $tag Nom du contexte.
+     *
+     * @return array|false
+     */
+    public function getStyles($tag)
+    {
+        return $this->hasStyle($tag) ? array_unique($this->styles[$tag]) : false;
+    }
+
+    /**
+     * Déclaration d'un script dans un contexte.
+     *
+     * @param string $tag Nom du contexte.
+     * @param string $hook Nom du style.
+     *
+     * @return void
+     */
+    public function addScript($tag, $hook)
+    {
+        // Bypass
+        if (!$this->routing()->exists($tag)) :
+            return null;
         endif;
-        $this->enqueue_scripts_after_global();
 
-        foreach (Tags::getAll() as $tag) :
-            if (Tags::isCurrent($tag)) :
-                $this->enqueue_scripts_before($tag);
+        if (!isset($this->scripts[$tag])) :
+            $this->scripts[$tag] = [];
+        endif;
 
-                if (is_callable([$this, 'enqueue_scripts_before_' . $tag])) :
-                    call_user_func([$this, 'enqueue_scripts_before_' . $tag]);
-                endif;
-
-                if (self::hasStyle($tag)) :
-                    foreach (self::getStyles($tag) as $hook) :
-                        wp_enqueue_style($hook);
-                    endforeach;
-                endif;
-                if (self::hasScript($tag)) :
-                    foreach (self::getScripts($tag) as $hook) :
-                        wp_enqueue_script($hook);
-                    endforeach;
-                endif;
-
-                $this->enqueue_scripts_after($tag);
-                if (is_callable([$this, 'enqueue_scripts_after_' . $tag])) :
-                    call_user_func([$this, 'enqueue_scripts_after_' . $tag]);
-                endif;
-            endif;
-        endforeach;
+        array_push($this->scripts[$tag], $hook);
     }
 
     /**
-     * CONTROLEURS
+     * Vérification d'existence d'un script dans un contexte.
+     *
+     * @param string $tag Nom du contexte.
+     *
+     * @return bool
      */
-    /**
-     * Déclaration d'un style dans un contexte
-     */
-    final public static function addStyle($tag, $hook)
+    public function hasScript($tag)
     {
-        // Bypass
-        if (!Tags::is($tag))
-            return;
-
-        if (!isset(self::$Styles[$tag]))
-            self::$Styles[$tag] = [];
-
-        array_push(self::$Styles[$tag], $hook);
+        return $this->routing()->is($tag) && !empty($this->scripts[$tag]);
     }
 
     /**
-     * Vérification d'existance d'un style dans un contexte
+     * Récupération des scripts d'un contexte.
+     *
+     * @param string $tag Nom du contexte.
+     *
+     * @return array|false
      */
-    final public static function hasStyle($tag)
+    public function getScripts($tag)
     {
-        // Bypass
-        if (!Tags::is($tag))
-            return false;
-
-        return !empty(self::$Styles[$tag]);
+        return $this->hasScript($tag) ? array_unique($this->scripts[$tag]) : false;
     }
 
     /**
-     * Récupération des styles d'un contexte
-     */
-    final public static function getStyles($tag)
-    {
-        // Bypass
-        if (!self::hasStyle($tag))
-            return [];
-
-        return array_unique(self::$Styles[$tag]);
-    }
-
-    /**
-     * Déclaration d'un script dans un contexte
-     */
-    final public static function addScript($tag, $hook)
-    {
-        // Bypass
-        if (!Tags::is($tag))
-            return;
-
-        if (!isset(self::$Scripts[$tag]))
-            self::$Scripts[$tag] = [];
-
-        array_push(self::$Scripts[$tag], $hook);
-    }
-
-    /**
-     * Vérification d'existance d'un script dans un contexte
-     */
-    final public static function hasScript($tag)
-    {
-        // Bypass
-        if (!Tags::is($tag))
-            return false;
-
-        return !empty(self::$Scripts[$tag]);
-    }
-
-    /**
-     * Récupération des scripts d'un contexte
-     */
-    final public static function getScripts($tag)
-    {
-        // Bypass
-        if (!self::hasScript($tag))
-            return [];
-
-        return array_unique(self::$Scripts[$tag]);
-    }
-
-    /**
-     * Définition de la minification des scripts
-     */
-    public function setMin()
-    {
-        return SCRIPT_DEBUG ? '' : '.min';
-    }
-
-    /**
-     * SURCHARGE
+     * SURCHARGE DES CONTEXTES WOOCOMMERCE EXISTANTS.
      */
     /**
      * Mise en file des pré-scripts globaux (exception - ne correspond pas à une conditionnel Woocommerce)
