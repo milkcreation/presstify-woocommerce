@@ -8,55 +8,59 @@ use tiFy\Plugins\Woocommerce\Contracts\Checkout as CheckoutContract;
 class Checkout extends ParamsBag implements CheckoutContract
 {
     /**
-     * Minimum de commande
+     * Minimum de commande.
+     * @var array
      */
-    protected static $MinPurchase  = [
-        'rate'          => 0,
-        'based_on'      => 'subtotal',
-        'notice'        => 'Désolé, le montant minimum des commandes est fixé à %s'
+    protected $minPurchase = [
+        'rate'     => 0,
+        'based_on' => 'subtotal',
+        'notice'   => 'Désolé, le montant minimum des commandes est fixé à %s'
     ];
 
     /**
-     * CONSTRUCTEUR
+     * CONSTRUCTEUR.
+     *
+     * @return void
      */
     public function __construct($attrs = [])
     {
         parent::__construct($attrs);
 
-        return;
+        $this->setMinPurchase($this->get('min_purchase', []));
+        $this->bindToProcess($this->minPurchase);
+    }
 
-        // Traitement des attributs
-        /// Minimum de commande
-        if (! empty($attrs['mininum_purchase'])) :
-            self::$MinPurchase = wp_parse_args($attrs['mininum_purchase'], self::$MinPurchase);
-            if (! in_array(self::$MinPurchase['based_on'], ['subtotal','subtotal_ex_tax','total'])) :
-                self::$MinPurchase['based_on'] = 'subtotal';
+    /**
+     * {@inheritdoc}
+     */
+    public function setMinPurchase($minPurchase)
+    {
+        if ($minPurchase) :
+            $this->minPurchase = array_merge($this->minPurchase, $minPurchase);
+            if (!in_array($this->minPurchase['based_on'], ['subtotal', 'subtotal_ex_tax', 'total'])) :
+                $this->minPurchase['based_on'] = 'subtotal';
             endif;
         endif;
-        
-        // Initialisation du minimum de commande
-        if (self::$MinPurchase['rate']) :
-            add_action('woocommerce_before_checkout_process', [$this, 'minimum_purchase']);
-        endif;
     }
-    
+
     /**
-     * DECLENCHEURS
+     * {@inheritdoc}
      */
-    /**
-     * Définition du montant minimum de commande
-     */
-    public function minimum_purchase() 
+    public function bindToProcess($minPurchase)
     {
-        $min_purchase   = self::$MinPurchase['rate'];
-        $based_on       = self::$MinPurchase['based_on'];
-        $cart_base      = WC()->cart->{$based_on};
-        
-    	if ($cart_base < $min_purchase) :
-    		wc_add_notice( 
-		        sprintf(self::$MinPurchase['notice'], $min_purchase . get_woocommerce_currency_symbol()),
-    		    'error'
-		    );
-    	endif;
+        if ($minPurchase['rate']) :
+            add_action(
+                'woocommerce_before_checkout_process',
+                function () use ($minPurchase) {
+                    $cartBase = WC()->cart->{$minPurchase['based_on']};
+                    if ($cartBase < $minPurchase['rate']) :
+                        wc_add_notice(
+                            sprintf($minPurchase['notice'], $minPurchase['rate'] . get_woocommerce_currency_symbol()),
+                            'error'
+                        );
+                    endif;
+                }
+            );
+        endif;
     }
 }

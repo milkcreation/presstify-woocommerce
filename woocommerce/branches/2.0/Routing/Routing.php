@@ -6,7 +6,8 @@ use tiFy\Kernel\Params\ParamsBag;
 use tiFy\Plugins\Woocommerce\Contracts\Routing as RoutingContract;
 
 /**
- * IDENTIFIANTS DE CONTEXTE
+ * Gestion des routes WooCommerce.
+ *
  * @see Woocommerce/includes/wc-conditional-functions.php
  * @see https://docs.woocommerce.com/document/conditional-tags/
  */
@@ -49,28 +50,24 @@ class Routing extends ParamsBag implements RoutingContract
     /**
      * CONSTRUCTEUR.
      *
-     * @param array $routes Liste des routes personnalisées.
+     * @param array $customWcRoutes Liste des routes personnalisées.
      */
     public function __construct($customWcRoutes = [])
     {
         parent::__construct($customWcRoutes);
 
-        foreach ($this->all() as $routeName => $routeAttrs) :
-            $this->addCustom($routeName, $routeAttrs);
+        foreach ($this->all() as $customWcRouteName => $customWcRouteAttrs) :
+            $this->addCustom($customWcRouteName, $customWcRouteAttrs);
         endforeach;
 
         $this->routes = array_merge($this->wcRoutes, $this->getCustomRoutes());
 
         $this->registerCustomRoutesAdmin();
+        $this->bindToWooCommerce();
     }
 
     /**
-     * Ajout d'une route personnalisée.
-     *
-     * @param string $route Nom de la route.
-     * @param array $routeAttrs Attributs de la route personnalisée.
-     *
-     * @return array|bool
+     * {@inheritdoc}
      */
     public function addCustom($routeName, $routeAttrs = [])
     {
@@ -82,21 +79,29 @@ class Routing extends ParamsBag implements RoutingContract
     }
 
     /**
-     * Vérification de l'existence d'une route personnalisée.
-     *
-     * @param string $route Nom de la route
-     *
-     * @return bool
+     * {@inheritdoc}
      */
-    public function isCustom($route)
+    public function customRouteAdminExists()
     {
-        return in_array($route, $this->getCustomRoutes());
+        foreach ($this->customWcRoutes as $routeName => $routeAttrs) :
+            if (!empty($routeAttrs['admin']) && $routeAttrs['admin']) :
+                return true;
+            endif;
+        endforeach;
+
+        return false;
     }
 
     /**
-     * Récupération des routes personnalisées.
-     *
-     * @return array
+     * {@inheritdoc}
+     */
+    public function exists($route)
+    {
+        return in_array($route, $this->getRoutes());
+    }
+
+    /**
+     * {@inheritdoc}
      */
     public function getCustomRoutes()
     {
@@ -104,9 +109,7 @@ class Routing extends ParamsBag implements RoutingContract
     }
 
     /**
-     * Récupération de la liste des identifiants de contextes autorisés.
-     *
-     * @return array
+     * {@inheritdoc}
      */
     public function getRoutes()
     {
@@ -114,53 +117,54 @@ class Routing extends ParamsBag implements RoutingContract
     }
 
     /**
-     * Vérification d'une route.
-     *
-     * @param string $route Nom de la route.
-     *
-     * @return bool
+     * {@inheritdoc}
      */
     public function is($route)
     {
-        return in_array($route, $this->getRoutes());
-    }
-
-    /**
-     * Récupération des contexte de la page courante
-     *
-     * @return array tag de la page courante | false si la page courante n'est pas un contexte Woocommerce
-     */
-    final public static function current()
-    {
-        $context = [];
-        foreach (self::getAll() as $tag) :
-            if (is_callable('is_' . $tag) && @ call_user_func('is_' . $tag)) :
-                array_push($context, $tag);
-            endif;
-        endforeach;
-
-        if (empty($context))
+        if (!$this->exists($route)) :
             return false;
+        endif;
 
-        return $context;
+        $callable = (is_callable('is_' . $route) && call_user_func('is_' . $route)) || (method_exists($this, 'is_' . $route) && call_user_func([$this, 'is_' . $route]));
+
+        if ($this->isCustom($route)) :
+            return $callable || is_page(wc_get_page_id($route)) || ((int)get_query_var('page_id') === wc_get_page_id($route));
+        else :
+            return $callable;
+        endif;
     }
 
     /**
-     * Vérifie si la page courante correspond au contexte
-     *
-     * @return bool
+     * {@inheritdoc}
      */
-    final public static function isCurrent($context)
+    public function isCustom($route)
     {
-        if ($current = self::current())
-            return in_array($context, (array)$current);
+        return in_array($route, $this->getCustomRoutes());
     }
 
+    /**
+     * {@inheritdoc}
+     */
+    public function bindToWooCommerce()
+    {
+        add_filter(
+            'is_woocommerce',
+            function ($cond) {
+                if (!$customWcRoutes = $this->getCustomRoutes()) :
+                    return $cond;
+                endif;
+
+                foreach ($customWcRoutes as $customWcRoute) :
+                    $cond = $cond || $this->is($customWcRoute);
+                endforeach;
+
+                return $cond;
+            }
+        );
+    }
 
     /**
-     * Déclaration des interfaces d'administration pour les routes personnalisées.
-     *
-     * @return void
+     * {@inheritdoc}
      */
     public function registerCustomRoutesAdmin()
     {
@@ -209,21 +213,5 @@ class Routing extends ParamsBag implements RoutingContract
                 }
             );
         endif;
-    }
-
-    /**
-     * Vérification de l'existence d'une route administrable.
-     *
-     * @return bool
-     */
-    public function customRouteAdminExists()
-    {
-        foreach ($this->customWcRoutes as $routeName => $routeAttrs) :
-            if (!empty($routeAttrs['admin']) && $routeAttrs['admin']) :
-                return true;
-            endif;
-        endforeach;
-
-        return false;
     }
 }

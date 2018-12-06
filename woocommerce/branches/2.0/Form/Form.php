@@ -13,62 +13,129 @@ use tiFy\Plugins\Woocommerce\Contracts\Form as FormContract;
 class Form extends ParamsBag implements FormContract
 {
     /**
-     * Remplacement de la liste de selection des pays par tiFyDropdown
+     * Remplacement de la liste de sélection des pays par une liste de type tiFySelectJs.
+     * @var bool
      */
-    protected static $tiFyDropdownCountry = false;
+    protected $tiFySelectJsCountry = false;
 
     /**
-     * CONSTRUCTEUR
+     * CONSTRUCTEUR.
+     *
+     * @retun void
      */
     public function __construct($attrs = [])
     {
         parent::__construct($attrs);
 
-        return;
-        var_dump(__CLASS__);
-        exit;
+        $this->tiFySelectJsCountry = $this->get('tify_select_js_country', $this->tiFySelectJsCountry);
 
-        // Traitement des attributs
-        /// Remplacement de la liste de selection des pays par tiFyDropdown
-        if (!empty($attrs['tify_dropdown_country']))
-            self::$tiFyDropdownCountry = true;
+        $this->setAddressFormFields('billing', $this->get('billing', []));
+        $this->setAddressFormFields('shipping', $this->get('shipping', []));
+        $this->setCheckoutFormFields($this->get('checkout', []));
+
+        $this->setFormFieldArgs();
+
 
         // Court-circuitage des attributs de champ de formulaire
-        add_filter('woocommerce_form_field_args', [$this, 'woocommerce_form_field_args'], 10, 3);
-        add_filter('woocommerce_form_field_tify_dropdown_country', [$this, 'woocommerce_form_field_tify_dropdown_country'], 10, 4);
+        //add_filter('woocommerce_form_field_tify_dropdown_country', [$this, 'woocommerce_form_field_tify_dropdown_country'], 10, 4);
     }
 
     /**
-     * DECLENCHEURS
+     * {@inheritdoc}
      */
-    /**
-     * Court-circuitage des attributs de champ de formulaire
-     *
-     * @param array $args
-     * @param string $key
-     * @param string $value
-     *
-     * @return mixed
-     */
-    final public function woocommerce_form_field_args($args, $key, $value)
+    public function setFormFieldArgs()
     {
-        // Remplacement de la liste de selection des pays par tiFyDropdown
-        if (in_array($key, ['billing_country', 'shipping_country']) && self::$tiFyDropdownCountry) :
-            $args['type'] = 'tify_dropdown_country';
-        endif;
+        add_filter(
+            'woocommerce_form_field_args',
+            function ($args, $key, $value) {
+                if (in_array($key, ['billing_country', 'shipping_country']) && $this->tiFySelectJsCountry) :
+                    $args['type'] = 'tify_select_js_country';
+                endif;
 
-        if (method_exists($this, 'form_field_args_' . $key)) :
-            return call_user_func([$this, 'form_field_args_' . $key], $args, $value);
-        else :
-            return call_user_func([$this, 'form_fields_args'], $args, $key, $value);
+                if (method_exists($this, 'form_field_args_' . $key)) :
+                    return call_user_func([$this, 'form_field_args_' . $key], $args, $value);
+                else :
+                    return call_user_func([$this, 'form_fields_args'], $args, $key, $value);
+                endif;
+            },
+            10,
+            3
+        );
+    }
+
+    /**
+     * Surcharge des champs de formulaire d'adresse de facturation et de livraison.
+     *
+     * @param string $formId Identifiant du formulaire (billing|shipping)
+     * @param array $fields Champs de formulaire écrasants.
+     *
+     * @see woocommerce_form_field()
+     *
+     * @return void
+     */
+    public function setAddressFormFields($formId, $fields)
+    {
+        if ($fields) :
+            add_filter(
+                "woocommerce_{$formId}_fields",
+                function ($currentFields) use ($formId, $fields) {
+                    return $this->overwriteFormFields($formId, $currentFields, $fields);
+                }
+            );
         endif;
+    }
+
+    /**
+     * Surcharge des champs des différents formulaires au niveau du processus commande.
+     *
+     * @param array $forms Formulaires à surcharger.
+     *
+     * @return void
+     */
+    public function setCheckoutFormFields($forms)
+    {
+        if ($forms) :
+            add_filter(
+                'woocommerce_checkout_fields',
+                function ($currentForms) use ($forms) {
+                    foreach ($forms as $form => $fields) :
+                        if (!isset($currentForms[$form])) :
+                            continue;
+                        endif;
+                        $currentForms[$form] = $this->overwriteFormFields($form, $currentForms[$form], $fields);
+                    endforeach;
+
+                    return $currentForms;
+                }
+            );
+        endif;
+    }
+
+    /**
+     * Surcharge des champs d'un formulaire.
+     *
+     * @param int|string $formId Identifiant du formulaire (billing|shipping|account|order)
+     * @param array $currentFields Champs de formulaire à écraser.
+     * @param array $newFields Champs de formulaire écrasants.
+     *
+     * @return array
+     */
+    public function overwriteFormFields($formId, $currentFields, $newFields)
+    {
+        foreach ($newFields as $slug => $attrs) :
+            if (isset($currentFields["{$formId}_{$slug}"])) :
+                $currentFields["{$formId}_{$slug}"] = array_merge($currentFields["{$formId}_{$slug}"], $attrs);
+            endif;
+        endforeach;
+
+        return $currentFields;
     }
 
     /**
      *
      * @see wp-content/plugins/woocommerce/includes/wc-template-functions.php
      */
-    final public function woocommerce_form_field_tify_dropdown_country($field, $key, $args, $value)
+    /*final public function woocommerce_form_field_tify_dropdown_country($field, $key, $args, $value)
     {
         $field = "";
 
@@ -119,17 +186,14 @@ class Form extends ParamsBag implements FormContract
         $field = sprintf($field_container, $container_class, $container_id, $field);
 
         return $field;
-    }
+    }*/
 
     /**
-     * CONTROLEURS
+     * {@inheritdoc}
      */
-    /**
-     * Vérification du remplacement de la liste de choix des pays
-     */
-    final public static function istiFyDropdownCountry()
+    public function istiFySelectJsCountry()
     {
-        return !empty(self::$tiFyDropdownCountry);
+        return $this->tiFySelectJsCountry;
     }
 
     /**
