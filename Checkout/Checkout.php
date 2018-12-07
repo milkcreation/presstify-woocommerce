@@ -31,9 +31,13 @@ class Checkout extends ParamsBag implements CheckoutContract
     }
 
     /**
-     * {@inheritdoc}
+     * Définition d'un montant minimum de commande.
+     *
+     * @param array $minPurchase Montant minimum de commande.
+     *
+     * @return void
      */
-    public function setMinPurchase($minPurchase)
+    protected function setMinPurchase($minPurchase)
     {
         if ($minPurchase) :
             $this->minPurchase = array_merge($this->minPurchase, $minPurchase);
@@ -44,9 +48,13 @@ class Checkout extends ParamsBag implements CheckoutContract
     }
 
     /**
-     * {@inheritdoc}
+     * Branchement du montant minimum de commande à l'environnement WooCommerce.
+     *
+     * @param array $minPurchase Montant minimum de commande.
+     *
+     * @return void
      */
-    public function bindToProcess($minPurchase)
+    protected function bindToProcess($minPurchase)
     {
         if ($minPurchase['rate']) :
             add_action(

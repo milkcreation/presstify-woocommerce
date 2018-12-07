@@ -125,10 +125,10 @@ class Routing extends ParamsBag implements RoutingContract
             return false;
         endif;
 
-        $callable = (is_callable('is_' . $route) && call_user_func('is_' . $route)) || (method_exists($this, 'is_' . $route) && call_user_func([$this, 'is_' . $route]));
+        $callable = (is_callable('is_' . $route) && @call_user_func('is_' . $route)) || (method_exists($this, 'is_' . $route) && @call_user_func([$this, 'is_' . $route]));
 
         if ($this->isCustom($route)) :
-            return $callable || is_page(wc_get_page_id($route)) || ((int)get_query_var('page_id') === wc_get_page_id($route));
+            return $callable || ((int)get_query_var('page_id') === wc_get_page_id($route));
         else :
             return $callable;
         endif;

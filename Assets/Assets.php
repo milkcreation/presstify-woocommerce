@@ -92,7 +92,7 @@ class Assets extends ParamsBag implements AssetsContract
      *
      * @return void
      */
-    public function registerAppAssets()
+    protected function registerAppAssets()
     {
         add_action(
             'init',
@@ -116,7 +116,7 @@ class Assets extends ParamsBag implements AssetsContract
      *
      * @return void
      */
-    public function dequeueWcStyles()
+    protected function dequeueWcStyles()
     {
         add_filter(
             'woocommerce_enqueue_styles',
@@ -138,7 +138,7 @@ class Assets extends ParamsBag implements AssetsContract
      *
      * @return void
      */
-    public function dequeueWcScripts()
+    protected function dequeueWcScripts()
     {
         add_action(
             'wp_enqueue_scripts',
@@ -159,7 +159,7 @@ class Assets extends ParamsBag implements AssetsContract
      *
      * @return void
      */
-    public function enqueue()
+    protected function enqueue()
     {
         add_action(
             'wp_enqueue_scripts',

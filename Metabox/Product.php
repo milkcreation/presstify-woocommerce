@@ -3,147 +3,177 @@
  * @see /wp-content/plugins/woocommerce/includes/admin/meta-boxes/class-wc-meta-box-product-data.php
  * @see http://www.remicorson.com/mastering-woocommerce-products-custom-fields/
  */
+
 namespace tiFy\Plugins\Woocommerce\Metabox;
 
 use tiFy\Plugins\Woocommerce\Contracts\Metabox as MetaboxContract;
+use tiFy\PostType\Metadata\Post as PostMeta;
 
 class Product implements MetaboxContract
 {
+    /**
+     * CONSTRUCTEUR.
+     *
+     * @return void
+     */
     public function __construct()
     {
-        add_action( 'current_screen', array( $this, 'current_screen' ) );
-        
+        add_action('current_screen', [$this, 'current_screen']);
+
         // Données de produit
         /// Modifications des onglets 
-        add_filter( 'woocommerce_product_data_tabs', array( $this, 'woocommerce_product_data_tabs' ) );
+        add_filter('woocommerce_product_data_tabs', [$this, 'woocommerce_product_data_tabs']);
         /// Ajout d'onglets personnalisés
-        add_action( 'woocommerce_product_write_panel_tabs', array( $this, 'woocommerce_product_write_panel_tabs' ) );       
+        add_action('woocommerce_product_write_panel_tabs', [$this, 'woocommerce_product_write_panel_tabs']);
         /// Ajout de panneaux d'édition personnalisés
-        add_action( 'woocommerce_product_data_panels', array( $this, 'woocommerce_product_data_panels' ) );
-        
+        add_action('woocommerce_product_data_panels', [$this, 'woocommerce_product_data_panels']);
+
         /// Onglet Général
         /// @see /wp-content/plugins/woocommerce/includes/admin/meta-boxes/views/html-product-data-general.php
         //// Ajout de champs prix
-        add_action( 'woocommerce_product_options_pricing', array( $this, 'woocommerce_product_options_pricing' ) );
+        add_action('woocommerce_product_options_pricing', [$this, 'woocommerce_product_options_pricing']);
         /// Ajout de champs téléchargement
-        add_action( 'woocommerce_product_options_downloads', array( $this, 'woocommerce_product_options_downloads' ) );
+        add_action('woocommerce_product_options_downloads', [$this, 'woocommerce_product_options_downloads']);
         /// Ajout de champs taxe
-        add_action( 'woocommerce_product_options_tax', array( $this, 'woocommerce_product_options_tax' ) );
+        add_action('woocommerce_product_options_tax', [$this, 'woocommerce_product_options_tax']);
         /// Ajout de champs additionnels
-        add_action( 'woocommerce_product_options_general_product_data', array( $this, 'woocommerce_product_options_general_product_data' ) );
-        
+        add_action('woocommerce_product_options_general_product_data', [$this, 'woocommerce_product_options_general_product_data']);
+
         /// Onglet Inventaire
         /// @see /wp-content/plugins/woocommerce/includes/admin/meta-boxes/views/html-product-data-inventory.php
         //// Ajout de champs sku/UGS (indentification produit)
-        add_action( 'woocommerce_product_options_sku', array( $this, 'woocommerce_product_options_sku' ) );
+        add_action('woocommerce_product_options_sku', [$this, 'woocommerce_product_options_sku']);
         //// Ajout de champs gestion de stock (si actif)
-        add_action( 'woocommerce_product_options_stock_status', array( $this, 'woocommerce_product_options_stock_status' ) );
+        add_action('woocommerce_product_options_stock_status', [$this, 'woocommerce_product_options_stock_status']);
         //// Ajout de champs Vente individuelle
-        add_action( 'woocommerce_product_options_sold_individually', array( $this, 'woocommerce_product_options_sold_individually' ) );
+        add_action('woocommerce_product_options_sold_individually', [$this, 'woocommerce_product_options_sold_individually']);
         /// Ajout de champs additionnels
-        add_action( 'woocommerce_product_options_inventory_product_data', array( $this, 'woocommerce_product_options_inventory_product_data' ) );
-        
-        //@todo A COMPLETER
+        add_action('woocommerce_product_options_inventory_product_data', [$this, 'woocommerce_product_options_inventory_product_data']);
     }
-    
-    /**
-     * DECLENCHEURS
-     */
-    /**
-     * Affichage de l'écran courant
-     */
-    final public function current_screen( $current_screen )
-    {                        
-        // Bypass
-        if( ! is_a( $current_screen, 'WP_Screen' )  )
-            return;
-        if( $current_screen->id !== 'product' )
-            return;   
 
-        // Déclaration des metadonnées à enregistrer
-        // @todo Gestion des meta multi et fonctions de sanitize_callback
-        foreach( $this->register_meta() as $k => $meta ) :
-            \tify_meta_post_register( $current_screen->id, $meta, true );
+    /**
+     * Affichage de l'écran courant.
+     *
+     * @return void
+     */
+    public function current_screen($current_screen)
+    {
+        // Bypass
+        if (!is_a($current_screen, 'WP_Screen'))
+            return;
+        if ($current_screen->id !== 'product')
+            return;
+
+        /** @var PostMeta $postMeta */
+        $postMeta = app(PostMeta::class);
+        foreach ($this->metadatas() as $meta => $single) :
+            if (is_numeric($meta)) :
+                $meta = (string) $single;
+                $single = true;
+            endif;
+
+            $postMeta->register($current_screen->id, $meta, $single);
         endforeach;
     }
-    
+
     /**
-     * CONTROLEURS
-     */
-    /**
-     * Déclaration des métadonnée à enregistrée
-     */
-    public function register_meta()
-    {
-        return array();
-    }
-    
-    /**
-     * DONNEES PRODUIT
-     */
-    /**
-     * Modification des onglets
-     * @param array $tabs
+     * Déclaration des métadonnées à enregistrer.
+     *
      * @return array
      */
-    public function woocommerce_product_data_tabs( $tabs ) 
+    public function metadatas()
+    {
+        return [];
+    }
+
+    /**
+     * DONNEES PRODUIT.
+     */
+    /**
+     * Modification des onglets.
+     *
+     * @param array $tabs Onglets existants.
+     *
+     * @return array
+     */
+    public function woocommerce_product_data_tabs($tabs)
     {
         return $tabs;
     }
-    
+
     /**
-     * Ajout d'onglets personnalisés
+     * Ajout d'onglets personnalisés.
      */
-    public function woocommerce_product_write_panel_tabs() {}
-    
+    public function woocommerce_product_write_panel_tabs()
+    {
+    }
+
     /**
-     * Ajout de panneaux d'édition personnalisés
+     * Ajout de panneaux d'édition personnalisés.
      */
-    public function woocommerce_product_data_panels() {}
-    
+    public function woocommerce_product_data_panels()
+    {
+    }
+
     /**
-     * ONGLET GENERAL
-     */
-    /**
-     * Ajout de champs - PRIX
-     */
-    public function woocommerce_product_options_pricing() {}
-    
-    /**
-     * Ajout de champs - TÉLÉCHARGEMENT
-     */
-    public function woocommerce_product_options_downloads() {}
-    
-    /**
-     * Ajout de champs - TAXE
-     */
-    public function woocommerce_product_options_tax() {}
-    
-    /**
-     * Ajout de champs - ADDITIONNELS
-     */
-    public function woocommerce_product_options_general_product_data() {}
-    
-    /**
-     * ONGLET INVENTAIRE
+     * ONGLET GENERAL.
      */
     /**
-     * Ajout de champs - IDENTIFICATION PRODUIT
+     * Ajout de champs - PRIX.
      */
-    public function woocommerce_product_options_sku() {}
-    
+    public function woocommerce_product_options_pricing()
+    {
+    }
+
     /**
-     * Ajout de champs - GESTION DE STOCK
+     * Ajout de champs - TÉLÉCHARGEMENT.
      */
-    public function woocommerce_product_options_stock_status() {}
-    
+    public function woocommerce_product_options_downloads()
+    {
+    }
+
     /**
-     * Ajout de champs - VENTE INDIVIDUELLE
+     * Ajout de champs - TAXE.
      */
-    public function woocommerce_product_options_sold_individually() {}
-    
+    public function woocommerce_product_options_tax()
+    {
+    }
+
     /**
-     * Ajout de champs - ADDITIONNELS
+     * Ajout de champs - ADDITIONNELS.
      */
-    public function woocommerce_product_options_inventory_product_data() {}
+    public function woocommerce_product_options_general_product_data()
+    {
+    }
+
+    /**
+     * ONGLET INVENTAIRE.
+     */
+    /**
+     * Ajout de champs - IDENTIFICATION PRODUIT.
+     */
+    public function woocommerce_product_options_sku()
+    {
+    }
+
+    /**
+     * Ajout de champs - GESTION DE STOCK.
+     */
+    public function woocommerce_product_options_stock_status()
+    {
+    }
+
+    /**
+     * Ajout de champs - VENTE INDIVIDUELLE.
+     */
+    public function woocommerce_product_options_sold_individually()
+    {
+    }
+
+    /**
+     * Ajout de champs - ADDITIONNELS.
+     */
+    public function woocommerce_product_options_inventory_product_data()
+    {
+    }
 }

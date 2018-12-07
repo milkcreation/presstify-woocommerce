@@ -1,13 +1,9 @@
 <?php
 
-/**
- * FONCTIONS D'AIDE A LA SAISIE
- */
-
-use tiFy\Plugins\Woocommerce\Cart;
-use tiFy\Plugins\Woocommerce\Functions;
-use tiFy\Plugins\Woocommerce\MultiShop\Multishop;
-use tiFy\tiFy;
+use tiFy\Plugins\Woocommerce\Cart\Cart;
+use tiFy\Plugins\Woocommerce\Functions\Functions;
+use tiFy\Plugins\Woocommerce\Shortcodes\Shortcodes;
+//use tiFy\Plugins\Woocommerce\MultiShop\Multishop;
 
 if (!function_exists('tify_wc_cart')) :
     /**
@@ -17,32 +13,63 @@ if (!function_exists('tify_wc_cart')) :
      */
     function tify_wc_cart()
     {
-        return tiFy::getContainer()->get(Cart::class);
+        return app()->get('woocommerce.cart');
     }
 endif;
 
-/**
- * Encapsulation HTML de la décimal d'un prix.
- *
- * @param string $price
- * @param array $args
- *
- * @return string
- */
-function tify_wc_price_wrap_decimal($price, $args = [])
-{
-    return Functions::priceWrapDecimal($price, $args);
-}
+if (!function_exists('tify_wc_price_wrap_decimal')) :
+    /**
+     * Encapsulation HTML de la décimal d'un prix.
+     *
+     * @param string $price
+     * @param array $args
+     *
+     *
+     * @return string
+     */
+    function tify_wc_price_wrap_decimal($price, $args = [])
+    {
+        /** @var Functions $functions */
+        $functions = app()->get('woocommerce.functions');
 
-/**
- * Retourne le nombre d'article dans le panier.
- *
- * @return int
- */
-function tify_wc_cart_contents_count()
-{
-    return Functions::cartContentsCount();
-}
+        return $functions->priceWrapDecimal($price, $args);
+    }
+endif;
+
+if (!function_exists('tify_wc_cart_contents_count')) :
+    /**
+     * Retourne le nombre d'article dans le panier.
+     *
+     * @return int
+     */
+    function tify_wc_cart_contents_count()
+    {
+        /** @var Functions $functions */
+        $functions = app()->get('woocommerce.functions');
+
+        return $functions->cartContentsCount();
+    }
+endif;
+
+if (!function_exists('tify_wc_do_shortcode')) :
+    /**
+     * Execution d'un shortcode WooCommerce en dehors de la boucle.
+     *
+     * @param string $shortcode Nom du shortcode.
+     * @param array $attrs Attributs du shortcode.
+     *
+     * @see class-wc-shortcodes.php
+     *
+     * @return mixed
+     */
+    function tify_wc_do_shortcode($shortcode, $attrs = [])
+    {
+        /** @var Shortcodes $shortcodes */
+        $shortcodes = app()->get('woocommerce.shortcodes');
+
+        return $shortcodes->do($shortcode, $attrs = []);
+    }
+endif;
 
 /**
  * MULTIBOUTIQUE
