@@ -65,6 +65,9 @@ class WoocommerceServiceProvider extends AppServiceProvider
      */
     protected $customs = [];
 
+    /**
+     * {@inheritdoc}
+     */
     public function boot()
     {
         add_action('after_setup_tify', function () {
@@ -90,11 +93,23 @@ class WoocommerceServiceProvider extends AppServiceProvider
         });
     }
 
+    /**
+     * Récupération de la classe de rappel d'un service.
+     *
+     * @param string $alias Alias de qualification.
+     *
+     * @return string
+     */
     public function getConcrete($alias)
     {
         return $this->customs[$alias] ?? $this->concrete[$alias];
     }
 
+    /**
+     * Déclaration des services.
+     *
+     * @return void
+     */
     public function register()
     {
         $this->app->share('woocommerce', new Woocommerce());
@@ -114,6 +129,11 @@ class WoocommerceServiceProvider extends AppServiceProvider
         $this->registerShortcodes();
     }
 
+    /**
+     * Déclaration du service de chargement des ressources.
+     *
+     * @return void
+     */
     public function registerAssets()
     {
         $this->app->share('woocommerce.assets', function () {
@@ -124,6 +144,11 @@ class WoocommerceServiceProvider extends AppServiceProvider
         });
     }
 
+    /**
+     * Déclaration du service de gestion du panier.
+     *
+     * @return void
+     */
     public function registerCart()
     {
         $this->app->share('woocommerce.cart', function () {
@@ -133,6 +158,11 @@ class WoocommerceServiceProvider extends AppServiceProvider
         });
     }
 
+    /**
+     * Déclaration du service de gestion du processus de commande.
+     *
+     * @return void
+     */
     public function registerCheckout()
     {
         $this->app->share('woocommerce.checkout', function () {
@@ -143,6 +173,11 @@ class WoocommerceServiceProvider extends AppServiceProvider
         });
     }
 
+    /**
+     * Déclaration du service de gestion des formulaires.
+     *
+     * @return void
+     */
     public function registerForm()
     {
         $this->app->share('woocommerce.form', function () {
@@ -153,11 +188,21 @@ class WoocommerceServiceProvider extends AppServiceProvider
         });
     }
 
+    /**
+     * Déclaration du service des fonctions utiles.
+     *
+     * @return void
+     */
     public function registerFunctions()
     {
         $this->app->share('woocommerce.functions', new Functions());
     }
 
+    /**
+     * Déclaration du service de debug mail.
+     *
+     * @return void
+     */
     public function registerMail()
     {
         $this->app->share('woocommerce.mail', function () {
@@ -167,6 +212,11 @@ class WoocommerceServiceProvider extends AppServiceProvider
         });
     }
 
+    /**
+     * Déclaration du service de gestion backoffice des métadonnées produit.
+     *
+     * @return void
+     */
     public function registerMetaboxProduct()
     {
         $this->app->share('woocommerce.metabox.product', function () {
@@ -176,6 +226,11 @@ class WoocommerceServiceProvider extends AppServiceProvider
         });
     }
 
+    /**
+     * Déclaration du service de gestion d'une multiboutique.
+     *
+     * @return void
+     */
     public function registerMultishop()
     {
         $this->app->share('woocommerce.multishop', function () {
@@ -186,6 +241,11 @@ class WoocommerceServiceProvider extends AppServiceProvider
         });
     }
 
+    /**
+     * Déclaration du service de gestion d'une boutique dans l'environnement multiboutique.
+     *
+     * @return void
+     */
     public function registerMultishopFactory()
     {
         $this->app->bind('woocommerce.multishop.factory', function ($shopId, $shopAttrs) {
@@ -195,6 +255,11 @@ class WoocommerceServiceProvider extends AppServiceProvider
         });
     }
 
+    /**
+     * Déclaration du service de gestion des commandes.
+     *
+     * @return void
+     */
     public function registerOrder()
     {
         $this->app->share('woocommerce.order', function () {
@@ -204,6 +269,11 @@ class WoocommerceServiceProvider extends AppServiceProvider
         });
     }
 
+    /**
+     * Déclaration du service de gestion des requêtes de récupération des produits.
+     *
+     * @return void
+     */
     public function registerQuery()
     {
         $this->app->share('woocommerce.query', function () {
@@ -213,6 +283,11 @@ class WoocommerceServiceProvider extends AppServiceProvider
         });
     }
 
+    /**
+     * Déclaration du service de gestion des routes.
+     *
+     * @return void
+     */
     public function registerRouting()
     {
         $this->app->share('woocommerce.routing', function () {
@@ -223,6 +298,11 @@ class WoocommerceServiceProvider extends AppServiceProvider
         });
     }
 
+    /**
+     * Déclaration du service de gestion de l'expédition.
+     *
+     * @return void
+     */
     public function registerShipping()
     {
         $this->app->share('woocommerce.shipping', function () {
@@ -232,6 +312,11 @@ class WoocommerceServiceProvider extends AppServiceProvider
         });
     }
 
+    /**
+     * Déclaration du service de gestion des shortcodes.
+     *
+     * @return void
+     */
     public function registerShortcodes()
     {
         $this->app->share('woocommerce.shortcodes', function () {

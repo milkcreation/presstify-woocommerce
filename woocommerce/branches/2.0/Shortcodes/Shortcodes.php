@@ -8,7 +8,6 @@ use tiFy\Plugins\Woocommerce\Contracts\Shortcodes as ShortcodesContract;
 /**
  * GESTION DES SHORTCODES
  * Permet de désactiver l'exécution des shortcodes dans l'éditeur et de les lancer en dehors
- * ex: echo \tiFy\Plugins\Woocommerce\Shortcodes::doing( 'my_account' );
  *
  * @see https://docs.woocommerce.com/document/woocommerce-shortcodes/
  * @see https://docs.woocommerce.com/document/shortcodes/
@@ -16,69 +15,93 @@ use tiFy\Plugins\Woocommerce\Contracts\Shortcodes as ShortcodesContract;
 class Shortcodes extends ParamsBag implements ShortcodesContract
 {
     /**
-     * Listes des shortcodes Woocommerce
+     * Listes des shortcodes WooCommerce.
+     * @var array
      */
-    protected static $Shortcodes = [
-        'woocommerce_cart' => true, 'woocommerce_checkout' => true, 'woocommerce_order_tracking' => true, 'woocommerce_my_account' => true
+    protected $shortcodes = [
+        'woocommerce_cart'           => true,
+        'woocommerce_checkout'       => true,
+        'woocommerce_order_tracking' => true,
+        'woocommerce_my_account'     => true
     ];
 
     /**
-     * CONSTRUCTEUR
+     * CONSTRUCTEUR.
+     *
+     * @return void
      */
     public function __construct($shortcodes = [])
     {
         parent::__construct($shortcodes);
 
-        return;
+        $this->disablePostContentShortcodes();
+        $this->disableShortcodes($this->all());
+    }
 
-        // Désactivation de l'éxecution du shortcode Woocommerce dans le contenu de page
-        add_filter('pre_do_shortcode_tag', [$this, 'pre_do_shortcode_tag'], 10, 4);
-        
+    /**
+     * Désactivation de l'éxecution du shortcode WooCommerce dans le contenu de page.
+     *
+     * @return void
+     */
+    public function disablePostContentShortcodes()
+    {
+        add_action(
+            'pre_do_shortcode_tag',
+            function ($output, $tag, $attr, $m) {
+                if (!in_array($tag, array_keys($this->shortcodes)) || !in_the_loop() || $this->shortcodes[$tag]) :
+                    return $output;
+                endif;
+
+                return null;
+            },
+            10,
+            4
+        );
+    }
+
+    /**
+     * Désactivation des shortcodes.
+     *
+     * @param array $shortcodes Liste des shortcodes.
+     *
+     * @return void
+     */
+    public function disableShortcodes($shortcodes)
+    {
         foreach ($shortcodes as $shortcode => $enabled) :
             if (!$enabled) :
-                Shortcodes::disable($shortcode);
+                $this->disable($shortcode);
             endif;
         endforeach;
     }
 
     /**
-     * DECLENCHEURS
+     * Désactivation d'un shortcode.
+     *
+     * @param string $shortcode Nom du shortcode.
+     *
+     * @return void
      */
-    /**
-     * Désactivation de l'éxecution du shortcode Woocommerce dans le contenu de page
-     */
-    public function pre_do_shortcode_tag($output, $tag, $attr, $m)
-    {
-        if (!in_array($tag, array_keys(self::$Shortcodes)))
-            return $output;
-        if (!in_the_loop())
-            return $output;
-        if (self::$Shortcodes[$tag])
-            return $output;
-
-        return '';
-    }
-
-    /**
-     * CONTROLEURS
-     */
-    /**
-     * Désactivation d'un shortcode
-     */
-    public static function disable($shortcode)
+    public function disable($shortcode)
     {
         // Bypass
-        if (!in_array($shortcode, array_keys(self::$Shortcodes)))
-            return;
-
-        self::$Shortcodes[$shortcode] = false;
+        if (!in_array($shortcode, array_keys($this->shortcodes))) :
+            return null;
+        endif;
+        $this->shortcodes[$shortcode] = false;
     }
 
     /**
-     * Execution d'un shortcode en dehors de la boucle
+     * Execution d'un shortcode WooCommerce en dehors de la boucle.
+     *
+     * @param string $shortcode Nom du shortcode.
+     * @param array $attrs Attributs du shortcode.
+     *
      * @see class-wc-shortcodes.php
+     *
+     * @return mixed
      */
-    public static function doing($shortcode, $attrs = [])
+    public function do($shortcode, $attrs = [])
     {
         if (preg_match('/^woocommerce_(.*)/', $shortcode, $matches)) :
         else :
@@ -86,8 +109,9 @@ class Shortcodes extends ParamsBag implements ShortcodesContract
         endif;
 
         // Bypass
-        if (!in_array($shortcode, array_keys(self::$Shortcodes)))
-            return;
+        if (!in_array($shortcode, array_keys($this->shortcodes))) :
+            return null;
+        endif;
 
         $map = [
             'woocommerce_order_tracking' => 'WC_Shortcodes::order_tracking',
@@ -96,8 +120,9 @@ class Shortcodes extends ParamsBag implements ShortcodesContract
             'woocommerce_my_account'     => 'WC_Shortcodes::my_account',
         ];
 
-        if (!isset($map[$shortcode]))
-            return;
+        if (!isset($map[$shortcode])) :
+            return null;
+        endif;
 
         return call_user_func($map[$shortcode], $attrs);
     }

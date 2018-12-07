@@ -8,69 +8,53 @@ use tiFy\Plugins\Woocommerce\Contracts\Mail as MailContract;
 class Mail implements MailContract
 {
     /**
-     * Classe de rappel de l'email
+     * Classe de rappel de l'email.
      * @var \WC_Email
      */
-    private $Email    = null;
+    private $email    = null;
 
+    /**
+     * CONSTRUCTEUR.
+     *
+     * @return void
+     */
     public function __construct()
     {
-
+        add_action(
+            'template_redirect',
+            function () {
+                $this->debugMail(app()->appRequest()->get('tfywc_email', false));
+            }
+        );
     }
 
     /**
-     * Initialisation
+     * {@inheritdoc}
      */
-    final public function tFyAppOnInit()
+    public function formattingName($name)
     {
-        self::tFyAppActionAdd('template_redirect');
+        $name = implode('', array_map('ucfirst', explode('-', $name)));
+        return implode('_', array_map('ucfirst', explode('_', $name)));
     }
 
     /**
-     * DECLENCHEURS
+     * {@inheritdoc}
      */
-    /**
-     * Redirection de template
-     *
-     * @see \WC_Emails
-     *
-     * @see \WC_Email
-     * @see \WC_Email_New_Order
-     * @see \WC_Email_Cancelled_Order
-     * @see \WC_Email_Failed_Order
-     * @see \WC_Email_Customer_On_Hold_Order
-     * @see \WC_Email_Customer_Processing_Order
-     * @see \WC_Email_Customer_Completed_Order
-     * @see \WC_Email_Customer_Refunded_Order
-     * @see \WC_Email_Customer_Invoice
-     * @see \WC_Email_Customer_Note
-     * @see \WC_Email_Customer_Reset_Password
-     * @see \WC_Email_Customer_New_Account
-     */
-    final public function template_redirect()
+    public function debugMail($mailName)
     {
-        /**
-         * @var string $_REQUEST['tfywc_email']
-         */
-        if(!isset($_REQUEST['tfywc_email'])) :
-            return;
-        endif;
-        if (!is_user_logged_in()) :
-            return;
-        endif;
-        if (!array_intersect(wp_get_current_user()->roles, ['administrator'])) :
-            return;
+        if (!$mailName && !is_user_logged_in() && !array_intersect(wp_get_current_user()->roles, ['administrator'])) :
+            return null;
         endif;
 
         $emails = WC()->mailer()->get_emails();
-        $types[] = $_REQUEST['tfywc_email'];
-        $sanitized = $types[] = StdClass::sanitizeName($_REQUEST['tfywc_email']);
+        $types[] = $mailName;
+        $sanitized = $types[] = $this->formattingName($mailName);
         $types[] = 'WC_Email_' . $sanitized;
 
         foreach ($emails as $name => $inst) :
             foreach ($types as $type) :
                 if (isset($emails[$type])) :
-                    $this->Email = $emails[$type];
+                    $this->email = $emails[$type];
                     break 2;
                 endif;
             endforeach;
@@ -157,24 +141,20 @@ class Mail implements MailContract
     }
 
     /**
-     * Récupération de la classe de rappel de l'email
-     *
-     * @return \WC_Email
+     * {@inheritdoc}
      */
-    final public function getEmail()
+    public function getEmail()
     {
-        return $this->Email;
+        return $this->email;
     }
 
     /**
-     * Récupération du contenu du message de l'email
-     *
-     * @return mixed|string|void
+     * {@inheritdoc}
      */
     public function getMessage()
     {
         if (!$email = $this->getEmail()) :
-            return;
+            return null;
         endif;
 
         $email->setup_locale();
@@ -184,5 +164,4 @@ class Mail implements MailContract
 
         return $message;
     }
-
 }

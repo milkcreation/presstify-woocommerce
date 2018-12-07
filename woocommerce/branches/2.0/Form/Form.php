@@ -29,6 +29,7 @@ class Form extends ParamsBag implements FormContract
 
         $this->tiFySelectJsCountry = $this->get('tify_select_js_country', $this->tiFySelectJsCountry);
 
+        $this->addAddressFields($this->get('add_address_fields', []));
         $this->setAddressFormFields('billing', $this->get('billing', []));
         $this->setAddressFormFields('shipping', $this->get('shipping', []));
         $this->setCheckoutFormFields($this->get('checkout', []));
@@ -41,9 +42,65 @@ class Form extends ParamsBag implements FormContract
     }
 
     /**
-     * {@inheritdoc}
+     * Ajout de champs personnalisés aux formulaires d'adresse de facturation/livraison.
+     *
+     * @param array $additionalFields Liste des champs personnalisés.
+     *
+     * @see woocommerce_form_field()
+     *
+     * @return void
      */
-    public function setFormFieldArgs()
+    protected function addAddressFields($additionalFields)
+    {
+        if ($additionalFields) :
+            add_filter(
+                'woocommerce_default_address_fields',
+                function ($fields) use ($additionalFields) {
+                    foreach ($additionalFields as $field => $attrs) :
+                        if (!isset($fields[$field])) :
+                            $fields[$field] = $attrs;
+                        endif;
+                    endforeach;
+
+                    return $fields;
+                }
+            );
+            add_filter(
+                'woocommerce_customer_meta_fields',
+                function ($fields) use ($additionalFields) {
+                    foreach ($additionalFields as $slug => $attrs) :
+                        if (!empty($attrs['admin'])) :
+                            foreach ($attrs['admin'] as $addressType => $adminAttrs) :
+                                $_slug = "{$addressType}_{$slug}";
+                                if (!$addressType || isset($fields[$addressType]['fields'][$_slug]) || !$adminAttrs) :
+                                    continue;
+                                endif;
+                                if (!empty($adminAttrs['before'])) :
+                                    $pos = array_search("{$addressType}_{$adminAttrs['before']}", array_keys($fields[$addressType]['fields']));
+                                    $fields[$addressType]['fields'] = array_merge(
+                                        array_slice($fields[$addressType]['fields'], 0, $pos),
+                                        [$_slug => $adminAttrs],
+                                        array_slice($fields[$addressType]['fields'], $pos)
+                                    );
+                                else :
+                                    $fields[$addressType]['fields'][$_slug] = $adminAttrs;
+                                endif;
+                            endforeach;
+                        endif;
+                    endforeach;
+
+                    return $fields;
+                }
+            );
+        endif;
+    }
+
+    /**
+     * Court-circuitage des attributs de champ de formulaire.
+     *
+     * @return void
+     */
+    protected function setFormFieldArgs()
     {
         add_filter(
             'woocommerce_form_field_args',
@@ -73,7 +130,7 @@ class Form extends ParamsBag implements FormContract
      *
      * @return void
      */
-    public function setAddressFormFields($formId, $fields)
+    protected function setAddressFormFields($formId, $fields)
     {
         if ($fields) :
             add_filter(
@@ -92,7 +149,7 @@ class Form extends ParamsBag implements FormContract
      *
      * @return void
      */
-    public function setCheckoutFormFields($forms)
+    protected function setCheckoutFormFields($forms)
     {
         if ($forms) :
             add_filter(
@@ -112,19 +169,17 @@ class Form extends ParamsBag implements FormContract
     }
 
     /**
-     * Surcharge des champs d'un formulaire.
-     *
-     * @param int|string $formId Identifiant du formulaire (billing|shipping|account|order)
-     * @param array $currentFields Champs de formulaire à écraser.
-     * @param array $newFields Champs de formulaire écrasants.
-     *
-     * @return array
+     * {@inheritdoc}
      */
     public function overwriteFormFields($formId, $currentFields, $newFields)
     {
         foreach ($newFields as $slug => $attrs) :
             if (isset($currentFields["{$formId}_{$slug}"])) :
-                $currentFields["{$formId}_{$slug}"] = array_merge($currentFields["{$formId}_{$slug}"], $attrs);
+                if ($attrs === false) :
+                    unset($currentFields["{$formId}_{$slug}"]);
+                else :
+                    $currentFields["{$formId}_{$slug}"] = array_merge($currentFields["{$formId}_{$slug}"], $attrs);
+                endif;
             endif;
         endforeach;
 

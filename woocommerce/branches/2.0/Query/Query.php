@@ -1,7 +1,4 @@
 <?php
-/**
- * @Overrideable
- */
 
 /**
  * REQUETE DE RECUPERATION DES ELEMENTS DE PAGE
@@ -11,108 +8,135 @@
 namespace tiFy\Plugins\Woocommerce\Query;
 
 use tiFy\Plugins\Woocommerce\Contracts\Query as QueryContract;
-//use \tiFy\Plugins\Woocommerce\ConditionalTags as Tags;
+use tiFy\Plugins\Woocommerce\WoocommerceResolverTrait;
 
 class Query implements QueryContract
 {
+    use WoocommerceResolverTrait;
+
     /**
-     * CONSTRUCTEUR
+     * CONSTRUCTEUR.
+     *
+     * @return void
      */
     public function __construct()
     {
-        /*parent::_construct();
+        add_action(
+            'pre_get_posts',
+            function (&$wpQuery) {
+                /** @var \WP_Query $wpQuery */
+                if (is_admin()) :
+                    return null;
+                endif;
 
-        // Court-circuitage des requêtes de récupération de produit
-        add_action('pre_get_posts', array($this, 'pre_get_posts'), 99);*/
+                if ($wpQuery->is_main_query()) :
+                    foreach ($this->routing()->getRoutes() as $route) :
+                        if ($this->routing()->is($route)) :
+                            call_user_func_array([$this, 'get_posts'], [&$wpQuery, $route]);
+                            if (method_exists($this, 'get_posts_' . $route)) :
+                                call_user_func_array([$this, 'get_posts_' . $route], [&$wpQuery]);
+                            endif;
+                        endif;
+                    endforeach;
+                endif;
+            },
+            99
+        );
     }
 
     /**
-     * DECLENCHEURS
+     * Court-circuitage par défaut de la requête de récupération.
+     *
+     * @param \WP_Query $wpQuery Instance globale de la requête WordPress.
+     * @param string $tag Nom du contexte.
+     *
+     * @return void
      */
-    /**
-     * Court-circuitage de la requête principale de récupération de produit
-     */
-    final public function pre_get_posts(&$query)
-    {
-        if (is_admin()) :
-            return;
-        endif;
-
-        if ($query->is_main_query()) :
-            foreach (Tags::getAll() as $tag) :
-                if (!Tags::isCurrent($tag)) {
-                    continue;
-                }
-
-                call_user_func_array(array($this, 'get_posts'), array(&$query, $tag));
-                call_user_func_array(array($this, 'get_posts_' . $tag), array(&$query));
-            endforeach;
-        endif;
-    }
-
-    /**
-     * SURCHARGE
-     */
-    /**
-     * Court-circuitage par défaut de la requête de récupération
-     */
-    public function get_posts(&$query, $tag)
+    public function get_posts(&$wpQuery, $tag)
     {
 
     }
 
     /**
      * Court-circuitage de la requête de récupération de contexte is_shop()
+     *
+     * @param \WP_Query $wpQuery Instance globale de la requête WordPress.
+     *
+     * @return void
      */
-    public function get_posts_shop(&$query)
+    public function get_posts_shop(&$wpQuery)
     {
 
     }
 
     /**
      * Court-circuitage de la requête de récupération de contexte is_product()
+     *
+     * @param \WP_Query $wpQuery Instance globale de la requête WordPress.
+     *
+     * @return void
      */
-    public function get_posts_product(&$query)
+    public function get_posts_product(&$wpQuery)
     {
 
     }
 
     /**
      * Court-circuitage de la requête de récupération de contexte is_product_category()
+     *
+     * @param \WP_Query $wpQuery Instance globale de la requête WordPress.
+     *
+     * @return void
      */
-    public function get_posts_product_category(&$query)
+    public function get_posts_product_category(&$wpQuery)
     {
 
     }
 
     /**
      * Court-circuitage de la requête de récupération de contexte is_product_tag()
+     *
+     * @param \WP_Query $wpQuery Instance globale de la requête WordPress.
+     *
+     * @return void
      */
-    public function get_posts_product_tag(&$query)
+    public function get_posts_product_tag(&$wpQuery)
     {
 
     }
 
     /**
      * Court-circuitage de la requête de récupération de contexte is_cart()
+     *
+     * @param \WP_Query $wpQuery Instance globale de la requête WordPress.
+     *
+     * @return void
      */
-    public function get_posts_cart(&$query)
+    public function get_posts_cart(&$wpQuery)
     {
 
     }
 
     /**
      * Court-circuitage de la requête de récupération de contexte is_checkout()
+     *
+     * @param \WP_Query $wpQuery Instance globale de la requête WordPress.
+     *
+     * @return void
      */
-    public function get_posts_checkout(&$query)
+    public function get_posts_checkout(&$wpQuery)
     {
 
     }
 
     /**
      * Court-circuitage de la requête de récupération de contexte is_account_page()
+     *
+     * @param \WP_Query $wpQuery Instance globale de la requête WordPress.
+     *
+     * @return void
      */
-    public function get_posts_account_page(&$query)
+    public function get_posts_account_page(&$wpQuery)
     {
 
     }
