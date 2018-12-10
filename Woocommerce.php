@@ -56,8 +56,14 @@ class Woocommerce implements WoocommerceContract
      */
     public function __construct()
     {
-        return;
-
+        add_action(
+            'init',
+            function () {
+                add_theme_support('woocommerce');
+            },
+            1
+        );
+        /*
         // Interface d'administration
         $this->appServiceAdd(MetaBoxes::class, self::loadOverride(MetaBoxes::class));
 
@@ -128,19 +134,6 @@ class Woocommerce implements WoocommerceContract
 
         if ($app = $this->appServiceGet($service)) :
             new TemplateLoader($app, $this->appConfig('views'));
-        endif;
-
-        // Déclenchement des événements
-        $this->appAddAction('init', null, 1);
-    }
-
-    /**
-     * Initialisation globale de Wordpress.
-     *
-     * @return void
-     */
-    public function init()
-    {
-        add_theme_support('woocommerce');
+        endif;*/
     }
 }
