@@ -17,24 +17,30 @@ use tiFy\Plugins\Woocommerce\Query\Query;
 use tiFy\Plugins\Woocommerce\Routing\Routing;
 use tiFy\Plugins\Woocommerce\Shipping\Shipping;
 use tiFy\Plugins\Woocommerce\Shortcodes\Shortcodes;
+use tiFy\Plugins\Woocommerce\Views\Template;
+use tiFy\Plugins\Woocommerce\Views\TemplateHooks;
+use tiFy\Plugins\Woocommerce\Views\TemplateLoader;
 
 class WoocommerceServiceProvider extends AppServiceProvider
 {
     protected $concrete = [
-        'assets'            => Assets::class,
-        'cart'              => Cart::class,
-        'checkout'          => Checkout::class,
-        'form'              => Form::class,
-        'functions'         => Functions::class,
-        'mail'              => Mail::class,
-        'metabox.product'   => Product::class,
-        'multishop'         => Multishop::class,
-        'multishop.factory' => Factory::class,
-        'order'             => Order::class,
-        'query'             => Query::class,
-        'routing'           => Routing::class,
-        'shipping'          => Shipping::class,
-        'shortcodes'        => Shortcodes::class,
+        'assets'                => Assets::class,
+        'cart'                  => Cart::class,
+        'checkout'              => Checkout::class,
+        'form'                  => Form::class,
+        'functions'             => Functions::class,
+        'mail'                  => Mail::class,
+        'metabox.product'       => Product::class,
+        'multishop'             => Multishop::class,
+        'multishop.factory'     => Factory::class,
+        'order'                 => Order::class,
+        'query'                 => Query::class,
+        'routing'               => Routing::class,
+        'shipping'              => Shipping::class,
+        'shortcodes'            => Shortcodes::class,
+        'views.template'        => Template::class,
+        'views.template_hooks'  => TemplateHooks::class,
+        'views.template_loader' => TemplateLoader::class
     ];
 
     /**
@@ -57,6 +63,9 @@ class WoocommerceServiceProvider extends AppServiceProvider
         'woocommerce.routing',
         'woocommerce.shipping',
         'woocommerce.shortcodes',
+        'woocommerce.views.template',
+        'woocommerce.views.template_hooks',
+        'woocommerce.views.template_loader'
     ];
 
     /**
@@ -70,26 +79,41 @@ class WoocommerceServiceProvider extends AppServiceProvider
      */
     public function boot()
     {
+        $this->app->singleton(
+            'woocommerce.viewer',
+            function () {
+                $cinfo = class_info($this);
+                $default_dir = $cinfo->getDirname() . '/Resources/views';
+                $viewer = view()
+                    ->setDirectory(is_dir($default_dir) ? $default_dir : null)
+                    ->setOverrideDir((($override_dir = config('woocommerce.viewer.override_dir')) && is_dir($override_dir))
+                        ? $override_dir
+                        : (is_dir($default_dir) ? $default_dir : $cinfo->getDirname()));
+
+                return $viewer;
+            }
+        );
+
         add_action('after_setup_tify', function () {
             $providers = config('woocommerce.providers', []);
             array_walk($providers, function ($v, $k) {
                 $this->customs[$k] = $v;
             });
-
             $this->app->get('woocommerce');
             $this->app->get('woocommerce.assets');
             $this->app->get('woocommerce.cart');
             $this->app->get('woocommerce.checkout');
             $this->app->get('woocommerce.form');
-            $this->app->get('woocommerce.functions');
             $this->app->get('woocommerce.mail');
             $this->app->get('woocommerce.metabox.product');
             $this->app->get('woocommerce.multishop');
             $this->app->get('woocommerce.order');
             $this->app->get('woocommerce.query');
-            $this->app->get('woocommerce.routing');
             $this->app->get('woocommerce.shipping');
             $this->app->get('woocommerce.shortcodes');
+            $this->app->get('woocommerce.views.template');
+            $this->app->get('woocommerce.views.template_hooks');
+            $this->app->get('woocommerce.views.template_loader');
         });
     }
 
@@ -127,6 +151,9 @@ class WoocommerceServiceProvider extends AppServiceProvider
         $this->registerRouting();
         $this->registerShipping();
         $this->registerShortcodes();
+        $this->registerViewsTemplate();
+        $this->registerViewsTemplateHooks();
+        $this->registerViewsTemplateLoader();
     }
 
     /**
@@ -324,6 +351,49 @@ class WoocommerceServiceProvider extends AppServiceProvider
             $concrete = $this->getConcrete('shortcodes');
 
             return new $concrete($attrs);
+        });
+    }
+
+    /**
+     * Déclaration du service de surcharge des éléments de template WooCommerce.
+     *
+     * @return void
+     */
+    public function registerViewsTemplate()
+    {
+        $this->app->share('woocommerce.views.template', function () {
+            $concrete = $this->getConcrete('views.template');
+
+            return new $concrete();
+        });
+    }
+
+    /**
+     * Déclaration du service de gestion des hooks de template de WooCommerce.
+     *
+     * @return void
+     */
+    public function registerViewsTemplateHooks()
+    {
+        $this->app->share('woocommerce.views.template_hooks', function () {
+            $attrs = config('woocommerce.template_hooks', []);
+            $concrete = $this->getConcrete('views.template_hooks');
+
+            return new $concrete($attrs);
+        });
+    }
+
+    /**
+     * Déclaration du service de gestion du chargement des templates WooCommerce.
+     *
+     * @return void
+     */
+    public function registerViewsTemplateLoader()
+    {
+        $this->app->share('woocommerce.views.template_loader', function () {
+            $concrete = $this->getConcrete('views.template_loader');
+
+            return new $concrete(app(), config('woocommerce.template_loader', []));
         });
     }
 }

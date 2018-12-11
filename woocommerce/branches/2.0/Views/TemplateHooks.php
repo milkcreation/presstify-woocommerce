@@ -1,21 +1,21 @@
 <?php
 
-/**
- * @Overrideable
- */
+namespace tiFy\Plugins\Woocommerce\Views;
 
-namespace tiFy\Plugins\Woocommerce;
+use tiFy\Kernel\Params\ParamsBag;
+use tiFy\Plugins\Woocommerce\Contracts\TemplateHooks as TemplateHooksContract;
 
 /**
  * ACCROCHAGE / DECROCHAGE / RE-ORDONNANCEMENT DES ELEMENTS DE TEMPLATES
  * @see Woocommerce/includes/wc-template-hooks.php
  */
-class TemplateHooks extends \tiFy\App\Factory
+class TemplateHooks extends ParamsBag implements TemplateHooksContract
 {
     /**
-     * Listes des accroches d'éléments de template
+     * Liste des accroches d'éléments de template.
+     * @var array
      */
-    protected static $Hooks = [
+    protected $hooks = [
         // GLOBAL - ARCHIVE PRODUITS & PAGE PRODUIT & CATEGORIE DE PRODUIT
         // Pré-affichage de la page de contenu
         'woocommerce_before_main_content'           => [
@@ -132,145 +132,200 @@ class TemplateHooks extends \tiFy\App\Factory
     ];
 
     /**
-     * CONSTRUCTEUR
+     * CONSTRUCTEUR.
+     *
+     * @param array $hooks Listes des accroches d'éléments de template.
+     *
+     * @return void
      */
     public function __construct($hooks = [])
     {
-        parent::__construct();
+        parent::__construct($hooks);
 
-        $this->appAddAction('init', function() use ($hooks) {
-            foreach ((array)$hooks as $tag => $functions) :
-                if (!isset(self::$Hooks[$tag])) :
-                    $this->registerHook($tag);
-                endif;
-
-                if (empty($functions)) :
-                    continue;
-                endif;
-
-                foreach ($functions as $function => $priority) :
-                    if (!isset(self::$Hooks[$tag][$function])) :
-                        self::add($tag, $function, $priority);
-                    elseif (!$priority) :
-                        self::remove($tag, $function, self::$Hooks[$tag][$function]);
-                    elseif (self::$Hooks[$tag][$function] !== (int)$priority) :
-                        self::change($tag, $function, $priority);
-                    endif;
-                endforeach;
-            endforeach;
-        });
-
-        // Contextualisation
-        add_action('wp', [$this, 'wp'], 99);
+        $this->process($this->all());
+        $this->processDeferred();
     }
 
     /**
-     * DECLENCHEURS
+     * Accrochage d'un élément de template.
+     *
+     * @param string $tag Identifiant du crochet.
+     * @param string $function Fonction attachée.
+     * @param int $priority Priorité d'exécution de la fonction attachée.
+     *
+     * @throws \ReflectionException
+     *
+     * @return bool|null
      */
-    /**
-     * Déclaration d'un emplacement d'accroche personnalisé
-     */
-    public function registerHook($tag)
-    {
-        if (!isset(self::$Hooks[$tag])) :
-            self::$Hooks[$tag] = [];
-        endif;
-    }
-
-    /**
-     * Au traitement de la requête principale de wordpress
-     */
-    public function wp()
-    {
-        // Contextualisation
-        if ($matches = preg_grep('/^woocommerce_/', get_class_methods($this))) :
-            foreach ($matches as $tag) :
-                if (!isset(self::$Hooks[$tag])) :
-                    continue;
-                endif;
-
-                add_action($tag, [$this, $tag], -99);
-            endforeach;
-        endif;
-    }
-
-    /**
-     * CONTROLEURS
-     */
-    /**
-     * Accrochage d'un élément de template
-     */
-    final public static function add($tag, $function, $priority = 10)
+    public function add($tag, $function, $priority = 10)
     {
         // Bypass
-        if (!isset(self::$Hooks[$tag])) :
-            return;
+        if (!isset($this->hooks[$tag])) :
+            return null;
         endif;
 
-        $function_id = self::getFunctionIdentifier($function);
+        $function_id = $this->getFunctionIdentifier($function);
 
-        self::$Hooks[$tag][$function_id] = $priority;
+        $this->hooks[$tag][$function_id] = $priority;
 
         return add_action($tag, $function, $priority);
     }
 
     /**
-     * Décrochage d'un élément de template
+     * Ré-accrochage d'un élément de template.
+     *
+     * @param string $tag Identifiant du crochet.
+     * @param string $function Fonction à ré-attacher.
+     * @param int $priority Priorité d'exécution de la fonction attachée.
+     *
+     * @throws \ReflectionException
+     *
+     * @return null
      */
-    final public static function remove($tag, $function, $priority = 10)
+    public function change($tag, $function, $priority = 10)
     {
         // Bypass
-        if (!isset(self::$Hooks[$tag])) :
-            return;
+        if (!isset($this->hooks[$tag]) || !isset($this->hooks[$tag][$function])) :
+            return null;
+        endif;
+
+        if ($this->remove($tag, $function, $this->hooks[$tag][$function])) :
+            $this->add($tag, $function, $priority);
+        endif;
+
+        return null;
+    }
+
+    /**
+     * Récupère l'identifiant d'une fonction, une fonction anonyme sera sérialisée.
+     *
+     * @param string $func
+     *
+     * @throws \ReflectionException
+     *
+     * @return string|null
+     */
+    protected function getFunctionIdentifier($func)
+    {
+        if (is_string($func)) :
+            return $func;
+        endif;
+
+        try {
+            $rf = new \ReflectionFunction($func);
+        } catch (\ReflectionException $exception) {
+            return null;
+        }
+
+        return $rf->__toString();
+    }
+
+    /**
+     * Traitement des crochets définis dans la configuration.
+     *
+     * @param array $hooks Crochets.
+     *
+     * @return void
+     */
+    public function process($hooks)
+    {
+        add_action(
+            'init',
+            function () use ($hooks) {
+                foreach ((array)$hooks as $tag => $functions) :
+                    if (!isset($this->hooks[$tag])) :
+                        $this->registerHook($tag);
+                    endif;
+
+                    if (empty($functions)) :
+                        continue;
+                    endif;
+
+                    foreach ($functions as $function => $priority) :
+                        if (!isset($this->hooks[$tag][$function])) :
+                            $this->add($tag, $function, $priority);
+                        elseif (!$priority) :
+                            $this->remove($tag, $function, $this->hooks[$tag][$function]);
+                        elseif ($this->hooks[$tag][$function] !== (int)$priority) :
+                            $this->change($tag, $function, $priority);
+                        endif;
+                    endforeach;
+                endforeach;
+            }
+        );
+    }
+
+    /**
+     * Traitement différé des crochets.
+     *
+     * @return void
+     */
+    public function processDeferred()
+    {
+        add_action(
+            'wp',
+            function () {
+                if ($matches = preg_grep('/^woocommerce_/', get_class_methods($this))) :
+                    foreach ($matches as $tag) :
+                        if (!isset($this->hooks[$tag])) :
+                            continue;
+                        endif;
+
+                        add_action($tag, [$this, $tag], -99);
+                    endforeach;
+                endif;
+            },
+            99
+        );
+    }
+
+    /**
+     * Déclaration d'un emplacement d'accroche personnalisé.
+     *
+     * @return void
+     */
+    public function registerHook($tag)
+    {
+        if (!isset($this->hooks[$tag])) :
+            $this->hooks[$tag] = [];
+        endif;
+    }
+
+    /**
+     * Décrochage d'un élément de template.
+     *
+     * @param string $tag Identifiant du crochet.
+     * @param string $function Fonction à détacher.
+     * @param int $priority Priorité d'exécution de la fonction attachée.
+     *
+     * @return bool|null
+     */
+    public function remove($tag, $function, $priority = 10)
+    {
+        // Bypass
+        if (!isset($this->hooks[$tag])) :
+            return null;
         endif;
 
         if ($rm = remove_action($tag, $function, $priority)) :
-            unset(self::$Hooks[$tag][$function]);
+            unset($this->hooks[$tag][$function]);
         endif;
 
         return $rm;
     }
 
     /**
-     * Ré-accrochage d'un élément de template
-     */
-    final public static function change($tag, $function, $priority = 10)
-    {
-        // Bypass
-        if (!isset(self::$Hooks[$tag])) :
-            return;
-        endif;
-        if (!isset(self::$Hooks[$tag][$function])) :
-            return;
-        endif;
-
-        if (self::remove($tag, $function, self::$Hooks[$tag][$function])) :
-            self::add($tag, $function, $priority);
-        endif;
-    }
-
-    /**
-     * Récupère l'identifiant d'une fonction, une fonction anonyme sera sérialisée
-     */
-    protected static function getFunctionIdentifier($func)
-    {
-        if (is_string($func)) :
-            return $func;
-        endif;
-
-        $rf = new \ReflectionFunction($func);
-
-        return $rf->__toString();
-    }
-
-    /**
      * SURCHAGE
      */
     /**
-     * Exemple de Contextualisation
+     * Exemple de Contextualisation.
+     *
+     * @throws \ReflectionException
+     *
+     * @return void
      */
     public function woocommerce_before_main_content()
     {
-        self::add(__FUNCTION__, '__return_false', 1);
+        $this->add(__FUNCTION__, '__return_false', 1);
     }
 }   

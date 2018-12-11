@@ -1,44 +1,44 @@
 <?php
-/**
- * @Overrideable
- */
-namespace tiFy\Plugins\Woocommerce;
+
+namespace tiFy\Plugins\Woocommerce\Views;
+
+use tiFy\Plugins\Woocommerce\Contracts\Template as TemplateContract;
 
 /**
- * ELEMENTS DE TEMPLATES
  * @see Woocommerce/includes/wc-template-functions.php
  */
-class Template extends \tiFy\App\Factory
+class Template implements TemplateContract
 {
     /**
-     * CONSTRUCTEUR
+     * CONSTRUCTEUR.
+     *
+     * @return void
      */
     public function __construct()
     {
-        parent::__construct();
-        
         // Court-circuitage des attributs du fil d'Ariane
-        add_filter( 'woocommerce_breadcrumb_defaults', array( $this, 'woocommerce_breadcrumb_defaults' ) );
+        add_filter('woocommerce_breadcrumb_defaults', [$this, 'woocommerce_breadcrumb_defaults']);
     }
-    
+
     /**
      * BREADCRUMB
      */
     /**
      * Court-circuitage des attributs du fil d'Ariane
-     * 
+     *
      * @param array $args
-            array(
-    			'delimiter'   => '&nbsp;&#47;&nbsp;',
-    			'wrap_before' => '<nav class="woocommerce-breadcrumb">',
-    			'wrap_after'  => '</nav>',
-    			'before'      => '',
-    			'after'       => '',
-    			'home'        => _x( 'Home', 'breadcrumb', 'woocommerce' ),
-            )
+     * array(
+     * 'delimiter'   => '&nbsp;&#47;&nbsp;',
+     * 'wrap_before' => '<nav class="woocommerce-breadcrumb">',
+     * 'wrap_after'  => '</nav>',
+     * 'before'      => '',
+     * 'after'       => '',
+     * 'home'        => _x( 'Home', 'breadcrumb', 'woocommerce' ),
+     * )
+     *
      * @return array
      */
-    public function woocommerce_breadcrumb_defaults( $args = array() )
+    public function woocommerce_breadcrumb_defaults($args = [])
     {
         return $args;
     }

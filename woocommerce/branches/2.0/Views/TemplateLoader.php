@@ -1,34 +1,44 @@
 <?php
 
-namespace tiFy\Plugins\Woocommerce;
+namespace tiFy\Plugins\Woocommerce\Views;
 
 use tiFy\Contracts\App\AppInterface;
-use tiFy\Contracts\Views\ViewsInterface;
-use tiFy\Core\Router\Router;
+use tiFy\Kernel\Params\ParamsBag;
+use tiFy\Plugins\Woocommerce\Contracts\TemplateLoader as TemplateLoaderContract;
+use tiFy\Plugins\Woocommerce\WoocommerceResolverTrait;
+use tiFy\View\ViewEngine;
+use WC;
 
-class TemplateLoader
+class TemplateLoader extends ParamsBag implements TemplateLoaderContract
 {
+    use WoocommerceResolverTrait;
+
     /**
-     * @var ViewsInterface
+     * @var ViewEngine
      */
-    protected $views;
+    protected $viewer;
 
     /**
      * CONSTRUCTEUR.
      *
-     * @param AppInterface $app
-     * @param ViewsInterface $views
+     * @param AppInterface $app Instance de l'application.
+     * @param array $attrs Attributs de configuration.
      *
+     * @return void
      */
-    public function __construct($app, $views = null)
+    public function __construct(AppInterface $app, $attrs = [])
     {
-        $this->views = $views instanceof ViewsInterface ? $views : $app->appTemplates();
+        parent::__construct($attrs);
+
+        $viewer = $this->get('viewer');
+
+        $this->viewer =  $viewer instanceof ViewEngine ? $viewer : $app->viewer();
 
         add_action(
             'init',
             function() {
-                $this->views->addFolder('wctheme', get_stylesheet_directory() . DIRECTORY_SEPARATOR . \WC()->template_path());
-                $this->views->addFolder('wcplugin', \WC()->plugin_path() . '/templates' . DIRECTORY_SEPARATOR);
+                $this->viewer->addFolder('wctheme', get_stylesheet_directory() . DIRECTORY_SEPARATOR . WC()->template_path());
+                $this->viewer->addFolder('wcplugin', WC()->plugin_path() . '/templates' . DIRECTORY_SEPARATOR);
             }
         );
 
@@ -51,10 +61,10 @@ class TemplateLoader
     {
         if (preg_match('#' . preg_quote(get_stylesheet_directory(), DIRECTORY_SEPARATOR) . '#', $template)) :
             $folder = 'wctheme';
-            $directory = $this->views->getFolders()->get($folder)->getPath();
+            $directory = $this->viewer->getFolders()->get($folder)->getPath();
         else :
             $folder = 'wcplugin';
-            $directory = $this->views->getFolders()->get($folder)->getPath();
+            $directory = $this->viewer->getFolders()->get($folder)->getPath();
         endif;
 
         $patterns = $replacements = [];
@@ -65,7 +75,7 @@ class TemplateLoader
 
         $name = "{$folder}::{$path}";
 
-        echo $this->views->render($name, $args);
+        echo $this->viewer->render($name, $args);
     }
 
     /**
@@ -80,10 +90,10 @@ class TemplateLoader
         if (is_woocommerce() || is_account_page() || is_cart() || is_checkout() || apply_filters('tify_woocommerce_use_wc_templates', false)) :
             if (preg_match('#' . preg_quote(get_stylesheet_directory(), DIRECTORY_SEPARATOR) . '#', $template)) :
                 $folder = 'wctheme';
-                $directory = $this->views->getFolders()->get($folder)->getPath();
+                $directory = $this->viewer->getFolders()->get($folder)->getPath();
             else :
                 $folder = 'wcplugin';
-                $directory = $this->views->getFolders()->get($folder)->getPath();
+                $directory = $this->viewer->getFolders()->get($folder)->getPath();
             endif;
 
             $template = preg_replace(
@@ -115,9 +125,13 @@ class TemplateLoader
             return $located;
         endif;
 
+        if (!isset($args['args']) && !empty($args)) :
+            $args['args'] = $args;
+        endif;
+
         $this->loadWooTemplate($located, $args);
 
-        return __DIR__ . '/index.php';
+        return $this->viewer()->getDirectory() . '/index.php';
     }
 
     /**
