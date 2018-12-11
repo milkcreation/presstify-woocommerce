@@ -2,6 +2,7 @@
 
 use tiFy\Plugins\Woocommerce\Cart\Cart;
 use tiFy\Plugins\Woocommerce\Functions\Functions;
+use tiFy\Plugins\Woocommerce\Routing\Routing;
 use tiFy\Plugins\Woocommerce\Shortcodes\Shortcodes;
 //use tiFy\Plugins\Woocommerce\MultiShop\Multishop;
 
@@ -48,6 +49,18 @@ if (!function_exists('tify_wc_cart_contents_count')) :
         $functions = app()->get('woocommerce.functions');
 
         return $functions->cartContentsCount();
+    }
+endif;
+
+if (!function_exists('tify_wc_routing')) :
+    /**
+     * Classe de rappel de traitement de gestion des routes WooCommerce.
+     *
+     * @return Routing
+     */
+    function tify_wc_routing()
+    {
+        return app()->get('woocommerce.routing');
     }
 endif;
 

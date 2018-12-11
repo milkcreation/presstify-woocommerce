@@ -13,9 +13,18 @@ use App\Woocommerce\Query\Query;
 use App\Woocommerce\Routing\Routing;
 use App\Woocommerce\Shipping\Shipping;
 use App\Woocommerce\Shortcodes\Shortcodes;
+use App\Woocommerce\Views\Template;
+use App\Woocommerce\Views\TemplateHooks;
+use App\Woocommerce\Views\TemplateLoader;
+use tiFy\View\ViewEngine;
 
 return [
-    // CHARGEMENT DES SCRIPTS
+    /**
+     * Gestion des ressources WooCommerce (styles et scripts).
+     * false = désactivation du style/script.
+     *
+     * @var array
+     */
     'assets'          => [
         /// Chargement des Feuilles de styles natives Woocommerce
         'wc_styles'  => [
@@ -41,15 +50,26 @@ return [
             'woocommerce'                => true
         ]
     ],
-    // COMMANDE
+    /**
+     * Gestion d'un montant minimum de commande.
+     *
+     * @var array
+     */
     'checkout'        => [
         'min_purchase' => [
             'rate'   => 99,
             'notice' => __('Désolé, le montant minimum des commandes est fixé à %s', 'tify')
         ]
     ],
-    // FORMULAIRE
-    /** @see woocommerce_form_field() */
+    /**
+     * Gestion des formulaires WooCommerce.
+     * Surcharge des formulaires existants (billing, shipping, checkout)
+     * Ajout de champs personnalisés sur les formulaires billing et shipping.
+     *
+     * @see woocommerce_form_field()
+     *
+     * @var array
+     */
     'form'            => [
         'tify_select_js_country' => false,
         'add_address_fields'     => [
@@ -167,7 +187,14 @@ return [
             ]
         ]
     ],
-    // BOUTIQUE MULTIPLE
+    /**
+     * Gestion d'une multiboutique.
+     * Déclaration des boutiques.
+     *
+     * @todo
+     *
+     * @var array
+     */
     'multishop'       => [
         'hifi'     => [
             'title' => __('Image et son', 'theme')
@@ -176,7 +203,11 @@ return [
             'title' => __('Securité', 'theme')
         ]
     ],
-    // PLATEFORMES DE PAIEMENT
+    /**
+     * Déclaration des plateformes de paiement.
+     *
+     * @var array
+     */
     'payment_gateway' => [
         'WC_Gateway_BACS'   => true,
         'WC_Gateway_Cheque' => true,
@@ -184,6 +215,11 @@ return [
         'WC_Gateway_Paypal' => true,
         'Custom'            => true
     ],
+    /**
+     * Déclaration et accrochage de routes personnalisées à WooCommerce.
+     *
+     * @var array
+     */
     'routing'         => [
         'shop_homepage' => [
             'admin' => [
@@ -192,35 +228,75 @@ return [
             ]
         ]
     ],
-    // GESTION DES SHORTCODES
-    /// Mettre à false pour désactiver
+    /**
+     * Gestion des shortcodes WooCommerce.
+     * false = désactivation du shortcode.
+     *
+     * @var array
+     */
     'shortcodes'      => [
-        'woocommerce_cart'           => true,
+        'woocommerce_cart'           => false,
         'woocommerce_checkout'       => true,
         'woocommerce_order_tracking' => true,
         'woocommerce_my_account'     => true
     ],
-    // ACCROCHAGE / DECROCHAGE / RE-ORDONNANCEMENT DES ELEMENTS DE TEMPLATES
-    'template-hooks'  => [
-
+    /**
+     * Gestion des hooks wooocommerce (accrochage, décrochage, réordonnnancement).
+     *
+     * @var array
+     */
+    'template_hooks'  => [
+        'woocommerce_before_shop_loop_item'       => [
+            'woocommerce_template_loop_product_link_open'  => 1,
+            'woocommerce_template_loop_product_link_close' => 2
+        ],
+        'woocommerce_before_shop_loop_item_title' => [
+            'woocommerce_show_product_loop_sale_flash'    => false,
+            'woocommerce_template_loop_product_thumbnail' => 10
+        ],
+        'woocommerce_after_shop_loop_item_title'  => [
+            'woocommerce_template_loop_price' => false
+        ]
     ],
-    // Chargement des templates avec le moteur de gabarit PHP Plates
-    /// Définition du service à charger
-    'template_loader' => '',
-    // SERVICES
+    /**
+     * Chargement des templates avec le moteur de gabarit PHP Plates.
+     * Définition du service à charger.
+     *
+     * @var array
+     */
+    /*'template_loader' => [
+        'viewer' => new ViewEngine()
+    ],*/
+    /**
+     * Fournisseurs de services
+     * @var array
+     */
     'providers'       => [
-        'assets'            => Assets::class,
-        'cart'              => Cart::class,
-        'checkout'          => Checkout::class,
-        'form'              => Form::class,
-        'mail'              => Mail::class,
-        'metabox.product'   => Product::class,
-        'multishop'         => Multishop::class,
-        'multishop.factory' => Factory::class,
-        'order'             => Order::class,
-        'query'             => Query::class,
-        'routing'           => Routing::class,
-        'shipping'          => Shipping::class,
-        'shortcodes'        => Shortcodes::class,
+        'assets'                => Assets::class,
+        'cart'                  => Cart::class,
+        'checkout'              => Checkout::class,
+        'form'                  => Form::class,
+        'mail'                  => Mail::class,
+        'metabox.product'       => Product::class,
+        'multishop'             => Multishop::class,
+        'multishop.factory'     => Factory::class,
+        'order'                 => Order::class,
+        'query'                 => Query::class,
+        'routing'               => Routing::class,
+        'shipping'              => Shipping::class,
+        'shortcodes'            => Shortcodes::class,
+        'views.template'        => Template::class,
+        'views.template_hooks'  => TemplateHooks::class,
+        'views.template_loader' => TemplateLoader::class
+    ],
+
+    /**
+     * Attributs de configuration du gestionnaire d'affichage de gabarits.
+     * @see \tiFy\Contracts\View\ViewEngine
+     *
+     * @var array
+     */
+    'viewer'          => [
+        'override_dir' => get_stylesheet_directory() . '/views/layout/wc'
     ]
 ];

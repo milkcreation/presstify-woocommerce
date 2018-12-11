@@ -29,9 +29,6 @@ class Multishop extends ParamsBag implements MultishopContract
 
         parent::__construct($shops);
 
-        /*var_dump($this->all());
-        exit;*/
-
         // Declaration des boutiques
         foreach ($this->all() as $shopId => $shopAttrs) :
             $this->register($shopId, $shopAttrs);
