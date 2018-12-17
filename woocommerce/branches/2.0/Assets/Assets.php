@@ -164,7 +164,8 @@ class Assets extends ParamsBag implements AssetsContract
         add_action(
             'wp_enqueue_scripts',
             function () {
-                if ($this->form()->istiFySelectJsCountry() && ($this->routing()->is('checkout') || $this->routing()->is('account_page'))) :
+                if ($this->form()->isSelectJsEnabled() && ($this->routing()->is('checkout') || $this->routing()->is('account_page'))) :
+                    wp_dequeue_script('selectWoo');
                     wp_dequeue_script('select2');
                     wp_dequeue_style('select2');
                 endif;

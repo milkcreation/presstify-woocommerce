@@ -68,11 +68,12 @@ return [
      *
      * @see woocommerce_form_field()
      *
+     * Champs additionnels : select_js, select_js_country
+     *
      * @var array
      */
     'form'            => [
-        'tify_select_js_country' => false,
-        'add_address_fields'     => [
+        'add_address_fields' => [
             'address_3'      => [
                 'label'    => __('Adresse ligne 3', 'tify'),
                 'required' => true,
@@ -89,9 +90,26 @@ return [
             'portable_phone' => [
                 'label'    => __('Téléphone portable', 'tify'),
                 'priority' => 95
+            ],
+            'civility'       => [
+                'label'   => __('Civilité', 'tify'),
+                'type'    => 'select',
+                'options' => ['madame' => __('Mme', 'tify'), 'monsieur' => __('M.', 'tify')],
+                'admin'   => [
+                    'billing'  => [
+                        'type'    => 'select',
+                        'options' => ['madame' => __('Mme', 'tify'), 'monsieur' => __('M.', 'tify')],
+                        'before'  => 'first_name'
+                    ],
+                    'shipping' => [
+                        'type'    => 'select',
+                        'options' => ['madame' => __('Mme', 'tify'), 'monsieur' => __('M.', 'tify')],
+                        'before'  => 'first_name'
+                    ]
+                ]
             ]
         ],
-        'billing'                => [
+        'billing'            => [
             'first_name' => [
                 'priority' => 20
             ],
@@ -114,19 +132,26 @@ return [
                 'priority' => 70
             ],
             'country'    => [
-                'priority' => 60
+                'priority' => 60,
+                'type'     => 'select_js_country'
             ],
             'state'      => [
-                'priority' => 110
+                'priority' => 110,
+                'type'     => 'select_js_state'
             ],
             'phone'      => [
                 'priority' => 90
             ],
             'email'      => [
                 'priority' => 100
+            ],
+            'civility'   => [
+                'required' => true,
+                'priority' => 15,
+                'type'     => 'select_js'
             ]
         ],
-        'shipping'               => [
+        'shipping'           => [
             'first_name'     => [
                 'priority' => 20
             ],
@@ -149,14 +174,15 @@ return [
                 'priority' => 70
             ],
             'country'        => [
-                'priority' => 60
+                'priority' => 60,
+                'type'     => 'select_js_country'
             ],
             'state'          => [
                 'priority' => 90
             ],
             'portable_phone' => false
         ],
-        'checkout'               => [
+        'checkout'           => [
             // Surcharge formulaire facturation au moment de la commande
             'billing'  => [
                 'last_name' => [
@@ -205,6 +231,8 @@ return [
     ],
     /**
      * Déclaration des plateformes de paiement.
+     *
+     * @todo
      *
      * @var array
      */

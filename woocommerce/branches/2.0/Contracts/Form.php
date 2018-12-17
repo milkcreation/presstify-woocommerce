@@ -7,11 +7,20 @@ use tiFy\Contracts\Kernel\ParamsBag;
 interface Form extends ParamsBag
 {
     /**
-     * Vérification du remplacement de la liste de choix des pays.
+     * Vérification de l'existence d'un champ utilisant le support SelectJs.
+     *
+     * @param array $haystack Champs de formulaire.
      *
      * @return bool
      */
-    public function istiFySelectJsCountry();
+    public function hasSelectJsField($haystack);
+
+    /**
+     * Vérification de l'activation du support SelectJs.
+     *
+     * @return bool
+     */
+    public function isSelectJsEnabled();
 
     /**
      * Surcharge des champs d'un formulaire.
