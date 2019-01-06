@@ -23,7 +23,7 @@ class Mail implements MailContract
         add_action(
             'template_redirect',
             function () {
-                $this->debugMail(app()->appRequest()->get('tfywc_email', false));
+                $this->debugMail(request()->get('tfywc_email', false));
             }
         );
     }
