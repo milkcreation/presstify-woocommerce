@@ -2,7 +2,7 @@
 /**
  * @Overrideable
  */
-namespace tiFy\Plugins\WooCommerce\PaymentGateway;
+namespace tiFy\Plugins\Woocommerce\PaymentGateway;
 
 /**
  * @see https://docs.woocommerce.com/document/paypal-standard/
