@@ -1,6 +1,6 @@
 {
   "name": "presstify-plugins/woocommerce",
-  "description": "PresstiFy Plugin WooCommerce",
+  "description": "Extension PresstiFy de court-circuitage et de fonctionnalités complémentaires woocommerce.",
   "type": "presstify-plugin",
   "keywords": [
     "presstify",
@@ -9,7 +9,7 @@
     "woocommerce"
   ],
   "homepage": "https://svn.tigreblanc.fr/presstify-plugins/woocommerce",
-  "time": "2019-01-06",
+  "time": "2019-01-12",
   "license": "proprietary",
   "authors": [
     {
@@ -31,7 +31,7 @@
   ],
   "require": {
     "composer/installers": "~1.0",
-    "presstify/framework": ">=1.4"
+    "presstify/framework": "2.0.*"
   },
   "autoload": {
     "files": [
