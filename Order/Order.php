@@ -6,8 +6,5 @@ use tiFy\Plugins\Woocommerce\Contracts\Order as OrderContract;
 
 class Order implements OrderContract
 {
-    public function __construct()
-    {
 
-    }
 }

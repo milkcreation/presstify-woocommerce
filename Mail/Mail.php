@@ -3,7 +3,6 @@
 namespace tiFy\Plugins\Woocommerce\Mail;
 
 use tiFy\Plugins\Woocommerce\Contracts\Mail as MailContract;
-//use tiFy\Lib\StdClass;
 
 class Mail implements MailContract
 {

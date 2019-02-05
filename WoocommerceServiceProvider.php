@@ -9,10 +9,11 @@ use tiFy\Plugins\Woocommerce\Checkout\Checkout;
 use tiFy\Plugins\Woocommerce\Form\Form;
 use tiFy\Plugins\Woocommerce\Functions\Functions;
 use tiFy\Plugins\Woocommerce\Mail\Mail;
-use tiFy\Plugins\Woocommerce\Metabox\Product;
+use tiFy\Plugins\Woocommerce\Metabox\Product as MetaboxProduct;
 use tiFy\Plugins\Woocommerce\Multishop\Multishop;
 use tiFy\Plugins\Woocommerce\Multishop\Factory;
 use tiFy\Plugins\Woocommerce\Order\Order;
+use tiFy\Plugins\Woocommerce\Product\Product;
 use tiFy\Plugins\Woocommerce\Query\Query;
 use tiFy\Plugins\Woocommerce\Routing\Routing;
 use tiFy\Plugins\Woocommerce\Shipping\Shipping;
@@ -23,6 +24,10 @@ use tiFy\Plugins\Woocommerce\Views\TemplateLoader;
 
 class WoocommerceServiceProvider extends AppServiceProvider
 {
+    /**
+     * Liste des services par défaut.
+     * @var array
+     */
     protected $concrete = [
         'assets'                => Assets::class,
         'cart'                  => Cart::class,
@@ -30,10 +35,11 @@ class WoocommerceServiceProvider extends AppServiceProvider
         'form'                  => Form::class,
         'functions'             => Functions::class,
         'mail'                  => Mail::class,
-        'metabox.product'       => Product::class,
+        'metabox.product'       => MetaboxProduct::class,
         'multishop'             => Multishop::class,
         'multishop.factory'     => Factory::class,
         'order'                 => Order::class,
+        'product'               => Product::class,
         'query'                 => Query::class,
         'routing'               => Routing::class,
         'shipping'              => Shipping::class,
@@ -42,6 +48,12 @@ class WoocommerceServiceProvider extends AppServiceProvider
         'views.template_hooks'  => TemplateHooks::class,
         'views.template_loader' => TemplateLoader::class
     ];
+
+    /**
+     * Liste des services personnalisés.
+     * @var array
+     */
+    protected $customs = [];
 
     /**
      * Liste des fournisseurs de service.
@@ -69,52 +81,37 @@ class WoocommerceServiceProvider extends AppServiceProvider
     ];
 
     /**
-     * Liste des services personnalisés.
-     * @var array
-     */
-    protected $customs = [];
-
-    /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function boot()
     {
-        $this->app->singleton(
-            'woocommerce.viewer',
-            function () {
-                $cinfo = class_info($this);
-                $default_dir = $cinfo->getDirname() . '/Resources/views';
-                $viewer = view()
-                    ->setDirectory(is_dir($default_dir) ? $default_dir : null)
-                    ->setOverrideDir((($override_dir = config('woocommerce.viewer.override_dir')) && is_dir($override_dir))
-                        ? $override_dir
-                        : (is_dir($default_dir) ? $default_dir : $cinfo->getDirname()));
-
-                return $viewer;
-            }
-        );
-
         add_action('after_setup_tify', function () {
+            $this->getContainer()->get('woocommerce');
+
             $providers = config('woocommerce.providers', []);
             array_walk($providers, function ($v, $k) {
                 $this->customs[$k] = $v;
             });
-            $this->app->get('woocommerce');
-            $this->app->get('woocommerce.assets');
-            $this->app->get('woocommerce.cart');
-            $this->app->get('woocommerce.checkout');
-            $this->app->get('woocommerce.form');
-            $this->app->get('woocommerce.mail');
-            $this->app->get('woocommerce.metabox.product');
-            $this->app->get('woocommerce.multishop');
-            $this->app->get('woocommerce.order');
-            $this->app->get('woocommerce.query');
-            $this->app->get('woocommerce.shipping');
-            $this->app->get('woocommerce.shortcodes');
-            $this->app->get('woocommerce.views.template');
-            $this->app->get('woocommerce.views.template_hooks');
-            $this->app->get('woocommerce.views.template_loader');
+            $this->getContainer()->get('woocommerce.assets');
+            $this->getContainer()->get('woocommerce.cart');
+            $this->getContainer()->get('woocommerce.checkout');
+            $this->getContainer()->get('woocommerce.form');
+            $this->getContainer()->get('woocommerce.mail');
+            $this->getContainer()->get('woocommerce.metabox.product');
+            $this->getContainer()->get('woocommerce.multishop');
+            $this->getContainer()->get('woocommerce.order');
+            $this->getContainer()->get('woocommerce.product');
+            $this->getContainer()->get('woocommerce.query');
+            $this->getContainer()->get('woocommerce.shipping');
+            $this->getContainer()->get('woocommerce.shortcodes');
+            $this->getContainer()->get('woocommerce.views.template');
+            $this->getContainer()->get('woocommerce.views.template_hooks');
+            $this->getContainer()->get('woocommerce.views.template_loader');
         });
+
+        add_action('init', function () {
+            add_theme_support('woocommerce');
+        },1);
     }
 
     /**
@@ -130,13 +127,14 @@ class WoocommerceServiceProvider extends AppServiceProvider
     }
 
     /**
-     * Déclaration des services.
-     *
-     * @return void
+     * @inheritdoc
      */
     public function register()
     {
-        $this->app->share('woocommerce', new Woocommerce());
+        $this->getContainer()->share('woocommerce', function() {
+            return new Woocommerce();
+        });
+
         $this->registerAssets();
         $this->registerCart();
         $this->registerCheckout();
@@ -147,10 +145,13 @@ class WoocommerceServiceProvider extends AppServiceProvider
         $this->registerMultishop();
         $this->registerMultishopFactory();
         $this->registerOrder();
+        $this->registerProduct();
         $this->registerQuery();
         $this->registerRouting();
         $this->registerShipping();
         $this->registerShortcodes();
+        $this->registerViewer();
+        $this->registerViewsTemplate();
         $this->registerViewsTemplate();
         $this->registerViewsTemplateHooks();
         $this->registerViewsTemplateLoader();
@@ -163,7 +164,7 @@ class WoocommerceServiceProvider extends AppServiceProvider
      */
     public function registerAssets()
     {
-        $this->app->share('woocommerce.assets', function () {
+        $this->getContainer()->share('woocommerce.assets', function () {
             $attrs = config('woocommerce.assets', []);
             $concrete = $this->getConcrete('assets');
 
@@ -178,7 +179,7 @@ class WoocommerceServiceProvider extends AppServiceProvider
      */
     public function registerCart()
     {
-        $this->app->share('woocommerce.cart', function () {
+        $this->getContainer()->share('woocommerce.cart', function () {
             $concrete = $this->getConcrete('cart');
 
             return new $concrete();
@@ -192,7 +193,7 @@ class WoocommerceServiceProvider extends AppServiceProvider
      */
     public function registerCheckout()
     {
-        $this->app->share('woocommerce.checkout', function () {
+        $this->getContainer()->share('woocommerce.checkout', function () {
             $attrs = config('woocommerce.checkout', []);
             $concrete = $this->getConcrete('checkout');
 
@@ -207,7 +208,7 @@ class WoocommerceServiceProvider extends AppServiceProvider
      */
     public function registerForm()
     {
-        $this->app->share('woocommerce.form', function () {
+        $this->getContainer()->share('woocommerce.form', function () {
             $attrs = config('woocommerce.form', []);
             $concrete = $this->getConcrete('form');
 
@@ -222,7 +223,9 @@ class WoocommerceServiceProvider extends AppServiceProvider
      */
     public function registerFunctions()
     {
-        $this->app->share('woocommerce.functions', new Functions());
+        $this->getContainer()->share('woocommerce.functions', function () {
+             return new Functions();
+        });
     }
 
     /**
@@ -232,7 +235,7 @@ class WoocommerceServiceProvider extends AppServiceProvider
      */
     public function registerMail()
     {
-        $this->app->share('woocommerce.mail', function () {
+        $this->getContainer()->share('woocommerce.mail', function () {
             $concrete = $this->getConcrete('mail');
 
             return new $concrete();
@@ -246,7 +249,7 @@ class WoocommerceServiceProvider extends AppServiceProvider
      */
     public function registerMetaboxProduct()
     {
-        $this->app->share('woocommerce.metabox.product', function () {
+        $this->getContainer()->share('woocommerce.metabox.product', function () {
             $concrete = $this->getConcrete('metabox.product');
 
             return new $concrete();
@@ -260,7 +263,7 @@ class WoocommerceServiceProvider extends AppServiceProvider
      */
     public function registerMultishop()
     {
-        $this->app->share('woocommerce.multishop', function () {
+        $this->getContainer()->share('woocommerce.multishop', function () {
             $attrs = config('woocommerce.multishop', []);
             $concrete = $this->getConcrete('multishop');
 
@@ -275,7 +278,7 @@ class WoocommerceServiceProvider extends AppServiceProvider
      */
     public function registerMultishopFactory()
     {
-        $this->app->bind('woocommerce.multishop.factory', function ($shopId, $shopAttrs) {
+        $this->getContainer()->bind('woocommerce.multishop.factory', function ($shopId, $shopAttrs) {
             $concrete = $this->getConcrete('multishop.factory');
 
             return new $concrete($shopId, $shopAttrs);
@@ -289,8 +292,22 @@ class WoocommerceServiceProvider extends AppServiceProvider
      */
     public function registerOrder()
     {
-        $this->app->share('woocommerce.order', function () {
+        $this->getContainer()->share('woocommerce.order', function () {
             $concrete = $this->getConcrete('order');
+
+            return new $concrete();
+        });
+    }
+
+    /**
+     * Déclaration du service de gestion des produits.
+     *
+     * @return void
+     */
+    public function registerProduct()
+    {
+        $this->getContainer()->share('woocommerce.product', function () {
+            $concrete = $this->getConcrete('product');
 
             return new $concrete();
         });
@@ -303,7 +320,7 @@ class WoocommerceServiceProvider extends AppServiceProvider
      */
     public function registerQuery()
     {
-        $this->app->share('woocommerce.query', function () {
+        $this->getContainer()->share('woocommerce.query', function () {
             $concrete = $this->getConcrete('query');
 
             return new $concrete();
@@ -317,7 +334,7 @@ class WoocommerceServiceProvider extends AppServiceProvider
      */
     public function registerRouting()
     {
-        $this->app->share('woocommerce.routing', function () {
+        $this->getContainer()->share('woocommerce.routing', function () {
             $attrs = config('woocommerce.routing', []);
             $concrete = $this->getConcrete('routing');
 
@@ -332,7 +349,7 @@ class WoocommerceServiceProvider extends AppServiceProvider
      */
     public function registerShipping()
     {
-        $this->app->share('woocommerce.shipping', function () {
+        $this->getContainer()->share('woocommerce.shipping', function () {
             $concrete = $this->getConcrete('shipping');
 
             return new $concrete();
@@ -346,7 +363,7 @@ class WoocommerceServiceProvider extends AppServiceProvider
      */
     public function registerShortcodes()
     {
-        $this->app->share('woocommerce.shortcodes', function () {
+        $this->getContainer()->share('woocommerce.shortcodes', function () {
             $attrs = config('woocommerce.shortcodes', []);
             $concrete = $this->getConcrete('shortcodes');
 
@@ -359,9 +376,30 @@ class WoocommerceServiceProvider extends AppServiceProvider
      *
      * @return void
      */
+    public function registerViewer()
+    {
+        $this->getContainer()->share('woocommerce.viewer', function () {
+                $cinfo = class_info($this);
+                $default_dir = $cinfo->getDirname() . '/Resources/views';
+                $viewer = view()
+                    ->setDirectory(is_dir($default_dir) ? $default_dir : null)
+                    ->setOverrideDir((($override_dir = config('woocommerce.viewer.override_dir')) && is_dir($override_dir))
+                        ? $override_dir
+                        : (is_dir($default_dir) ? $default_dir : $cinfo->getDirname()));
+
+                return $viewer;
+            }
+        );
+    }
+
+    /**
+     * Déclaration du service de surcharge des éléments de template WooCommerce.
+     *
+     * @return void
+     */
     public function registerViewsTemplate()
     {
-        $this->app->share('woocommerce.views.template', function () {
+        $this->getContainer()->share('woocommerce.views.template', function () {
             $concrete = $this->getConcrete('views.template');
 
             return new $concrete();
@@ -375,7 +413,7 @@ class WoocommerceServiceProvider extends AppServiceProvider
      */
     public function registerViewsTemplateHooks()
     {
-        $this->app->share('woocommerce.views.template_hooks', function () {
+        $this->getContainer()->share('woocommerce.views.template_hooks', function () {
             $attrs = config('woocommerce.template_hooks', []);
             $concrete = $this->getConcrete('views.template_hooks');
 
@@ -390,7 +428,7 @@ class WoocommerceServiceProvider extends AppServiceProvider
      */
     public function registerViewsTemplateLoader()
     {
-        $this->app->share('woocommerce.views.template_loader', function () {
+        $this->getContainer()->share('woocommerce.views.template_loader', function () {
             $concrete = $this->getConcrete('views.template_loader');
 
             return new $concrete(app(), config('woocommerce.template_loader', []));
