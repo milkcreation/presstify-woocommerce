@@ -7,7 +7,6 @@
 namespace tiFy\Plugins\Woocommerce\Metabox;
 
 use tiFy\Plugins\Woocommerce\Contracts\Metabox as MetaboxContract;
-use tiFy\PostType\Metadata\Post as PostMeta;
 
 class Product implements MetaboxContract
 {
@@ -64,15 +63,13 @@ class Product implements MetaboxContract
         if ($current_screen->id !== 'product')
             return;
 
-        /** @var PostMeta $postMeta */
-        $postMeta = app(PostMeta::class);
         foreach ($this->metadatas() as $meta => $single) :
             if (is_numeric($meta)) :
                 $meta = (string) $single;
                 $single = true;
             endif;
 
-            $postMeta->register($current_screen->id, $meta, $single);
+            post_type()->post_meta()->register($current_screen->id, $meta, $single);
         endforeach;
     }
 

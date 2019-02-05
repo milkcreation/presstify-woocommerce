@@ -37,7 +37,7 @@ trait WoocommerceResolverTrait
     public function viewer($view = null, $data = [])
     {
         /** @var ViewEngine $viewer */
-        $viewer = app('woocommerce.viewer');
+        $viewer = app()->get('woocommerce.viewer');
 
         if (func_num_args() === 0) :
             return $viewer;

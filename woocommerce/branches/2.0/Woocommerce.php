@@ -11,7 +11,7 @@ use tiFy\Plugins\Woocommerce\Contracts\Woocommerce as WoocommerceContract;
  * @author Jordy Manner <jordy@milkcreation.fr>
  * @author Julien Picard <julien@tigreblanc.fr>
  * @package tiFy\Plugins\Woocommerce
- * @version 2.0.1
+ * @version 2.0.2
  *
  * @see https://docs.woocommerce.com/wc-apidocs/index.html
  *
@@ -43,20 +43,4 @@ use tiFy\Plugins\Woocommerce\Contracts\Woocommerce as WoocommerceContract;
 class Woocommerce implements WoocommerceContract
 {
     use WoocommerceResolverTrait;
-
-    /**
-     * CONSTRUCTEUR
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        add_action(
-            'init',
-            function () {
-                add_theme_support('woocommerce');
-            },
-            1
-        );
-    }
 }

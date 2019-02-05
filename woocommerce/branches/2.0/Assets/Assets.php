@@ -71,6 +71,8 @@ class Assets extends ParamsBag implements AssetsContract
     /**
      * CONSTRUCTEUR.
      *
+     * @param array $attrs Liste des attributs de configuration.
+     *
      * @return void
      */
     public function __construct($attrs = [])
@@ -85,6 +87,17 @@ class Assets extends ParamsBag implements AssetsContract
         $this->dequeueWcStyles();
         $this->dequeueWcScripts();
         $this->enqueue();
+
+
+        $this->boot();
+    }
+
+    /**
+     *
+     */
+    public function boot()
+    {
+
     }
 
     /**
@@ -161,52 +174,48 @@ class Assets extends ParamsBag implements AssetsContract
      */
     protected function enqueue()
     {
-        add_action(
-            'wp_enqueue_scripts',
-            function () {
-                if ($this->form()->isSelectJsEnabled() && ($this->routing()->is('checkout') || $this->routing()->is('account_page'))) :
-                    wp_dequeue_script('selectWoo');
-                    wp_dequeue_script('select2');
-                    wp_dequeue_style('select2');
-                endif;
+        add_action('wp_enqueue_scripts', function () {
+            if ($this->form()->isSelectJsEnabled() && ($this->routing()->is('checkout') || $this->routing()->is('account_page'))) :
+                wp_dequeue_script('selectWoo');
+                wp_dequeue_script('select2');
+                wp_dequeue_style('select2');
+            endif;
 
-                $this->enqueue_scripts_before_global();
-                if (file_exists(get_stylesheet_directory() . "/dist/css/wc-global" . $this->min . ".css")) :
-                    wp_enqueue_style('tify_wc_global', get_stylesheet_directory_uri() . "/dist/css/wc-global" . $this->min . ".css");
-                endif;
-                if (file_exists(get_stylesheet_directory() . "/dist/js/wc-global" . $this->min . ".js")) :
-                    wp_enqueue_script('tify_wc_global', get_stylesheet_directory_uri() . "/dist/js/wc-global" . $this->min . ".js");
-                endif;
-                $this->enqueue_scripts_after_global();
+            $this->enqueue_scripts_before_global();
+            if (file_exists(get_stylesheet_directory() . "/dist/css/wc-global" . $this->min . ".css")) :
+                wp_enqueue_style('tify_wc_global', get_stylesheet_directory_uri() . "/dist/css/wc-global" . $this->min . ".css");
+            endif;
+            if (file_exists(get_stylesheet_directory() . "/dist/js/wc-global" . $this->min . ".js")) :
+                wp_enqueue_script('tify_wc_global', get_stylesheet_directory_uri() . "/dist/js/wc-global" . $this->min . ".js");
+            endif;
+            $this->enqueue_scripts_after_global();
 
-                foreach ($this->routing()->getRoutes() as $route) :
-                    if ($this->routing()->is($route)) :
-                        $this->enqueue_scripts_before($route);
-                        if (is_callable([$this, 'enqueue_scripts_before_' . $route])) :
-                            call_user_func([$this, 'enqueue_scripts_before_' . $route]);
-                        endif;
-
-                        if ($this->hasStyle($route)) :
-                            foreach ($this->getStyles($route) as $style) :
-                                wp_enqueue_style($style);
-                            endforeach;
-                        endif;
-
-                        if ($this->hasScript($route)) :
-                            foreach ($this->getScripts($route) as $script) :
-                                wp_enqueue_script($script);
-                            endforeach;
-                        endif;
-
-                        if (is_callable([$this, 'enqueue_scripts_after_' . $route])) :
-                            call_user_func([$this, 'enqueue_scripts_after_' . $route]);
-                        endif;
-                        $this->enqueue_scripts_after($route);
+            foreach ($this->routing()->getRoutes() as $route) :
+                if ($this->routing()->is($route)) :
+                    $this->enqueue_scripts_before($route);
+                    if (is_callable([$this, 'enqueue_scripts_before_' . $route])) :
+                        call_user_func([$this, 'enqueue_scripts_before_' . $route]);
                     endif;
-                endforeach;
-            },
-            25
-        );
+
+                    if ($this->hasStyle($route)) :
+                        foreach ($this->getStyles($route) as $style) :
+                            wp_enqueue_style($style);
+                        endforeach;
+                    endif;
+
+                    if ($this->hasScript($route)) :
+                        foreach ($this->getScripts($route) as $script) :
+                            wp_enqueue_script($script);
+                        endforeach;
+                    endif;
+
+                    if (is_callable([$this, 'enqueue_scripts_after_' . $route])) :
+                        call_user_func([$this, 'enqueue_scripts_after_' . $route]);
+                    endif;
+                    $this->enqueue_scripts_after($route);
+                endif;
+            endforeach;
+        }, 999999);
     }
 
     /**

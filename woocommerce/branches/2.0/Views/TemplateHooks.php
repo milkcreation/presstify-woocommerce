@@ -262,21 +262,17 @@ class TemplateHooks extends ParamsBag implements TemplateHooksContract
      */
     public function processDeferred()
     {
-        add_action(
-            'wp',
-            function () {
-                if ($matches = preg_grep('/^woocommerce_/', get_class_methods($this))) :
-                    foreach ($matches as $tag) :
-                        if (!isset($this->hooks[$tag])) :
-                            continue;
-                        endif;
+        add_action('wp', function () {
+            if ($matches = preg_grep('/^woocommerce_/', get_class_methods($this))) :
+                foreach ($matches as $tag) :
+                    if (!isset($this->hooks[$tag])) :
+                        continue;
+                    endif;
 
-                        add_action($tag, [$this, $tag], -99);
-                    endforeach;
-                endif;
-            },
-            99
-        );
+                    add_action($tag, [$this, $tag], -99);
+                endforeach;
+            endif;
+        }, 99);
     }
 
     /**
