@@ -1,15 +1,11 @@
 <?php
 
-namespace App\Routing;
+namespace tiFy\Plugins\Woocommerce\Routing;
 
-use App\AppResolverTrait;
-use App\Views\Layout\Shop\Shop;
 use tiFy\Contracts\Routing\RouteGroup;
 
 class Router
 {
-    use AppResolverTrait;
-
     public function __construct()
     {
         add_action(

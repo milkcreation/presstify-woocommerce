@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Admin\PostType\ProductCat;
+namespace tiFy\Plugins\Woocommerce\Routing\ProductCat;
 
 use League\Uri\Components\HierarchicalPath;
 use tiFy\Metabox\MetaboxWpPostController;
