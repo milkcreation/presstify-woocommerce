@@ -15,12 +15,16 @@ use tiFy\Plugins\Woocommerce\Multishop\Factory;
 use tiFy\Plugins\Woocommerce\Order\Order;
 use tiFy\Plugins\Woocommerce\Product\Product;
 use tiFy\Plugins\Woocommerce\Query\Query;
+use tiFy\Plugins\Woocommerce\Query\QueryProduct;
+use tiFy\Plugins\Woocommerce\Query\QueryProducts;
 use tiFy\Plugins\Woocommerce\Routing\Routing;
 use tiFy\Plugins\Woocommerce\Shipping\Shipping;
 use tiFy\Plugins\Woocommerce\Shortcodes\Shortcodes;
 use tiFy\Plugins\Woocommerce\Views\Template;
 use tiFy\Plugins\Woocommerce\Views\TemplateHooks;
 use tiFy\Plugins\Woocommerce\Views\TemplateLoader;
+use WC_Product;
+use WP_Query;
 
 class WoocommerceServiceProvider extends AppServiceProvider
 {
@@ -41,6 +45,8 @@ class WoocommerceServiceProvider extends AppServiceProvider
         'order'                 => Order::class,
         'product'               => Product::class,
         'query'                 => Query::class,
+        'query.product'         => QueryProduct::class,
+        'query.products'        => QueryProducts::class,
         'routing'               => Routing::class,
         'shipping'              => Shipping::class,
         'shortcodes'            => Shortcodes::class,
@@ -70,8 +76,11 @@ class WoocommerceServiceProvider extends AppServiceProvider
         'woocommerce.metabox.product',
         'woocommerce.multishop',
         'woocommerce.multishop.factory',
+        'woocommerce.product',
         'woocommerce.order',
         'woocommerce.query',
+        'woocommerce.query.product',
+        'woocommerce.query.products',
         'woocommerce.routing',
         'woocommerce.shipping',
         'woocommerce.shortcodes',
@@ -278,24 +287,10 @@ class WoocommerceServiceProvider extends AppServiceProvider
      */
     public function registerMultishopFactory()
     {
-        $this->getContainer()->bind('woocommerce.multishop.factory', function ($shopId, $shopAttrs) {
+        $this->getContainer()->add('woocommerce.multishop.factory', function ($shopId, $shopAttrs) {
             $concrete = $this->getConcrete('multishop.factory');
 
             return new $concrete($shopId, $shopAttrs);
-        });
-    }
-
-    /**
-     * Déclaration du service de gestion des commandes.
-     *
-     * @return void
-     */
-    public function registerOrder()
-    {
-        $this->getContainer()->share('woocommerce.order', function () {
-            $concrete = $this->getConcrete('order');
-
-            return new $concrete();
         });
     }
 
@@ -314,6 +309,20 @@ class WoocommerceServiceProvider extends AppServiceProvider
     }
 
     /**
+     * Déclaration du service de gestion des commandes.
+     *
+     * @return void
+     */
+    public function registerOrder()
+    {
+        $this->getContainer()->share('woocommerce.order', function () {
+            $concrete = $this->getConcrete('order');
+
+            return new $concrete();
+        });
+    }
+
+    /**
      * Déclaration du service de gestion des requêtes de récupération des produits.
      *
      * @return void
@@ -324,6 +333,20 @@ class WoocommerceServiceProvider extends AppServiceProvider
             $concrete = $this->getConcrete('query');
 
             return new $concrete();
+        });
+
+        $this->getContainer()->add('woocommerce.query.product', function ($wc_product = null) {
+            /** @var QueryProduct $concrete */
+            $concrete = $this->getConcrete('query.product');
+
+            return $wc_product instanceof WC_Product ? new $concrete($wc_product) : $concrete::createFromGlobal();
+        });
+
+        $this->getContainer()->add('woocommerce.query.products', function ($wp_query = null) {
+            /** @var QueryProducts $concrete */
+            $concrete = $this->getConcrete('query.products');
+
+            return $wp_query instanceof WP_Query ? new $concrete($wp_query) : $concrete::createFromGlobals();
         });
     }
 

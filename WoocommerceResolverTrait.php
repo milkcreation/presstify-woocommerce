@@ -2,17 +2,19 @@
 
 namespace tiFy\Plugins\Woocommerce;
 
-use tiFy\Contracts\View\ViewController;
 use tiFy\Contracts\View\ViewEngine;
-use tiFy\Plugins\Woocommerce\Contracts\Form;
-use tiFy\Plugins\Woocommerce\Contracts\Routing;
+use tiFy\Plugins\Woocommerce\Contracts\WoocommerceResolverTrait as WoocommerceResolverTraitContract;
 
+/**
+ * Trait WoocommerceResolverTrait
+ * @package tiFy\Plugins\Woocommerce
+ *
+ * @mixin WoocommerceResolverTraitContract
+ */
 trait WoocommerceResolverTrait
 {
     /**
-     * {@inheritdoc}
-     *
-     * @return Form
+     * @inheritdoc
      */
     public function form()
     {
@@ -20,9 +22,23 @@ trait WoocommerceResolverTrait
     }
 
     /**
-     * {@inheritdoc}
-     *
-     * @return Routing
+     * @inheritdoc
+     */
+    public function query_product($product = null)
+    {
+        return app()->get('woocommerce.query.product', [$product]);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function query_products($wp_query = null)
+    {
+        return app()->get('woocommerce.query.products', [$wp_query]);
+    }
+
+    /**
+     * @inheritdoc
      */
     public function routing()
     {
@@ -30,9 +46,7 @@ trait WoocommerceResolverTrait
     }
 
     /**
-     * {@inheritdoc}
-     *
-     * @return ViewController|ViewEngine
+     * @inheritdoc
      */
     public function viewer($view = null, $data = [])
     {
