@@ -5,7 +5,7 @@ namespace tiFy\Plugins\Woocommerce\Form;
 use tiFy\Kernel\Params\ParamsBag;
 use tiFy\Plugins\Woocommerce\Contracts\Form as FormContract;
 use tiFy\Plugins\Woocommerce\WoocommerceResolverTrait;
-use WC;
+use WooCommerce;
 
 /**
  * FORMULAIRES
@@ -51,53 +51,48 @@ class Form extends ParamsBag implements FormContract
     protected function addAddressFields($additionalFields)
     {
         if ($additionalFields) :
-            add_filter(
-                'woocommerce_default_address_fields',
-                function ($fields) use ($additionalFields) {
-                    foreach ($additionalFields as $field => $attrs) :
-                        if (!isset($fields[$field])) :
-                            $fields[$field] = $attrs;
-                        endif;
-                    endforeach;
+            add_filter('woocommerce_default_address_fields', function ($fields) use ($additionalFields) {
+                foreach ($additionalFields as $field => $attrs) :
+                    if (!isset($fields[$field])) :
+                        $fields[$field] = $attrs;
+                    endif;
+                endforeach;
 
-                    return $fields;
-                }
-            );
-            add_filter(
-                'woocommerce_customer_meta_fields',
-                function ($fields) use ($additionalFields) {
-                    foreach ($additionalFields as $slug => $attrs) :
-                        if (!empty($attrs['admin'])) :
-                            foreach ($attrs['admin'] as $addressType => $adminAttrs) :
-                                $_slug = "{$addressType}_{$slug}";
-                                if (!$addressType || isset($fields[$addressType]['fields'][$_slug]) || !$adminAttrs) :
-                                    continue;
-                                endif;
-                                if (!empty($adminAttrs['before'])) :
-                                    $pos = array_search("{$addressType}_{$adminAttrs['before']}", array_keys($fields[$addressType]['fields']));
-                                    $fields[$addressType]['fields'] = array_merge(
-                                        array_slice($fields[$addressType]['fields'], 0, $pos),
-                                        [$_slug => array_merge(
-                                            [
-                                                'label'       => isset($attrs['label']) ? $attrs['label'] : '',
-                                                'description' => '',
-                                                'class'       => ''
-                                            ],
-                                            $adminAttrs
-                                        )
+                return $fields;
+            });
+
+            add_filter('woocommerce_customer_meta_fields', function ($fields) use ($additionalFields) {
+                foreach ($additionalFields as $slug => $attrs) :
+                    if (!empty($attrs['admin'])) :
+                        foreach ($attrs['admin'] as $addressType => $adminAttrs) :
+                            $_slug = "{$addressType}_{$slug}";
+                            if (!$addressType || isset($fields[$addressType]['fields'][$_slug]) || !$adminAttrs) :
+                                continue;
+                            endif;
+                            if (!empty($adminAttrs['before'])) :
+                                $pos = array_search("{$addressType}_{$adminAttrs['before']}", array_keys($fields[$addressType]['fields']));
+                                $fields[$addressType]['fields'] = array_merge(
+                                    array_slice($fields[$addressType]['fields'], 0, $pos),
+                                    [$_slug => array_merge(
+                                        [
+                                            'label'       => isset($attrs['label']) ? $attrs['label'] : '',
+                                            'description' => '',
+                                            'class'       => ''
                                         ],
-                                        array_slice($fields[$addressType]['fields'], $pos)
-                                    );
-                                else :
-                                    $fields[$addressType]['fields'][$_slug] = $adminAttrs;
-                                endif;
-                            endforeach;
-                        endif;
-                    endforeach;
+                                        $adminAttrs
+                                    )
+                                    ],
+                                    array_slice($fields[$addressType]['fields'], $pos)
+                                );
+                            else :
+                                $fields[$addressType]['fields'][$_slug] = $adminAttrs;
+                            endif;
+                        endforeach;
+                    endif;
+                endforeach;
 
-                    return $fields;
-                }
-            );
+                return $fields;
+            });
         endif;
     }
 
@@ -108,25 +103,21 @@ class Form extends ParamsBag implements FormContract
      */
     protected function saveAddress()
     {
-        add_action('woocommerce_after_save_address_validation',
-            function ($user_id, $load_address, $address) {
-                foreach ($address as $key => $field) :
-                    if (!isset($field['type'])) :
-                        $field['type'] = 'text';
-                    endif;
-                    switch ($field['type']) :
-                        case 'checkbox' :
-                            $_POST[$key] = (int)isset($_POST[$key]);
-                            break;
-                        default :
-                            $_POST[$key] = isset($_POST[$key]) ? wc_clean(wp_unslash($_POST[$key])) : '';
-                            break;
-                    endswitch;
-                endforeach;
-            },
-            10,
-            3
-        );
+        add_action('woocommerce_after_save_address_validation', function ($user_id, $load_address, $address) {
+            foreach ($address as $key => $field) :
+                if (!isset($field['type'])) :
+                    $field['type'] = 'text';
+                endif;
+                switch ($field['type']) :
+                    case 'checkbox' :
+                        $_POST[$key] = (int)isset($_POST[$key]);
+                        break;
+                    default :
+                        $_POST[$key] = isset($_POST[$key]) ? wc_clean(wp_unslash($_POST[$key])) : '';
+                        break;
+                endswitch;
+            endforeach;
+        }, 10, 3);
     }
 
     /**
@@ -136,18 +127,13 @@ class Form extends ParamsBag implements FormContract
      */
     protected function setFormFieldArgs()
     {
-        add_filter(
-            'woocommerce_form_field_args',
-            function ($args, $key, $value) {
-                if (method_exists($this, 'form_field_args_' . $key)) :
-                    return call_user_func([$this, 'form_field_args_' . $key], $args, $value);
-                else :
-                    return call_user_func([$this, 'form_fields_args'], $args, $key, $value);
-                endif;
-            },
-            10,
-            3
-        );
+        add_filter('woocommerce_form_field_args', function ($args, $key, $value) {
+            if (method_exists($this, 'form_field_args_' . $key)) :
+                return call_user_func([$this, 'form_field_args_' . $key], $args, $value);
+            else :
+                return call_user_func([$this, 'form_fields_args'], $args, $key, $value);
+            endif;
+        }, 10, 3);
     }
 
     /**
@@ -163,12 +149,9 @@ class Form extends ParamsBag implements FormContract
     protected function setAddressFormFields($formId, $fields)
     {
         if ($fields) :
-            add_filter(
-                "woocommerce_{$formId}_fields",
-                function ($currentFields) use ($formId, $fields) {
-                    return $this->overwriteFormFields($formId, $currentFields, $fields);
-                }
-            );
+            add_filter("woocommerce_{$formId}_fields", function ($currentFields) use ($formId, $fields) {
+                return $this->overwriteFormFields($formId, $currentFields, $fields);
+            });
         endif;
     }
 
@@ -182,19 +165,16 @@ class Form extends ParamsBag implements FormContract
     protected function setCheckoutFormFields($forms)
     {
         if ($forms) :
-            add_filter(
-                'woocommerce_checkout_fields',
-                function ($currentForms) use ($forms) {
-                    foreach ($forms as $form => $fields) :
-                        if (!isset($currentForms[$form])) :
-                            continue;
-                        endif;
-                        $currentForms[$form] = $this->overwriteFormFields($form, $currentForms[$form], $fields);
-                    endforeach;
+            add_filter('woocommerce_checkout_fields', function ($currentForms) use ($forms) {
+                foreach ($forms as $form => $fields) :
+                    if (!isset($currentForms[$form])) :
+                        continue;
+                    endif;
+                    $currentForms[$form] = $this->overwriteFormFields($form, $currentForms[$form], $fields);
+                endforeach;
 
-                    return $currentForms;
-                }
-            );
+                return $currentForms;
+            });
         endif;
     }
 
@@ -316,32 +296,27 @@ class Form extends ParamsBag implements FormContract
      */
     protected function selectJs()
     {
-        add_filter(
-            'woocommerce_form_field_select_js',
-            function ($field, $key, $args, $value) {
-                $field_type = 'select-js';
+        add_filter('woocommerce_form_field_select_js', function ($field, $key, $args, $value) {
+            $field_type = 'select-js';
 
-                $args['attrs'] = array_merge(
-                    [
-                        'class' => esc_attr(implode(' ', $args['input_class']))
-                    ],
-                    isset($args['attrs']) ? $args['attrs'] : []
-                );
+            $args['attrs'] = array_merge(
+                [
+                    'class' => esc_attr(implode(' ', $args['input_class']))
+                ],
+                isset($args['attrs']) ? $args['attrs'] : []
+            );
 
-                $args['picker'] = array_merge(
-                    [
-                        'class' => isset($args['picker_class']) ? esc_attr(implode(' ', $args['picker_class'])) : null
-                    ],
-                    isset($args['picker']) ? $args['picker'] : []
-                );
+            $args['picker'] = array_merge(
+                [
+                    'class' => isset($args['picker_class']) ? esc_attr(implode(' ', $args['picker_class'])) : null
+                ],
+                isset($args['picker']) ? $args['picker'] : []
+            );
 
-                $args['choices'] = isset($args['options']) ? $args['options'] : [];
+            $args['choices'] = isset($args['options']) ? $args['options'] : [];
 
-                return (string)$this->viewer('field/field', compact('args', 'key', 'value', 'field_type'));
-            },
-            10,
-            4
-        );
+            return (string)$this->viewer('field/field', compact('args', 'key', 'value', 'field_type'));
+        }, 10, 4);
     }
 
     /**
@@ -353,42 +328,37 @@ class Form extends ParamsBag implements FormContract
      */
     protected function selectJsCountry()
     {
-        add_filter(
-            'woocommerce_form_field_select_js_country',
-            function ($field, $key, $args, $value) {
-                $countries = 'shipping_country' === $key ? WC()->countries->get_shipping_countries() : WC()->countries->get_allowed_countries();
+        add_filter('woocommerce_form_field_select_js_country', function ($field, $key, $args, $value) {
+            $countries = 'shipping_country' === $key ? WC()->countries->get_shipping_countries() : WC()->countries->get_allowed_countries();
 
-                $singleCountry = (1 === sizeof($countries));
+            $singleCountry = (1 === sizeof($countries));
 
-                $field_type = $singleCountry ? 'single-country' : 'select-js-country';
+            $field_type = $singleCountry ? 'single-country' : 'select-js-country';
 
-                if (!$singleCountry) :
-                    $args['attrs'] = array_merge(
-                        [
-                            'class' => 'country_to_state country_select ' . esc_attr(implode(' ', $args['input_class']))
-                        ],
-                        isset($args['attrs']) ? $args['attrs'] : []
-                    );
+            if (!$singleCountry) :
+                $args['attrs'] = array_merge(
+                    [
+                        'class' => 'country_to_state country_select ' . esc_attr(implode(' ', $args['input_class']))
+                    ],
+                    isset($args['attrs']) ? $args['attrs'] : []
+                );
 
-                    $args['picker'] = array_merge(
-                        [
-                            'class' => 'country_to_state country_select_picker ' . (isset($args['picker_class']) ? esc_attr(implode(' ', $args['picker_class'])) : null)
-                        ],
-                        isset($args['picker']) ? $args['picker'] : []
-                    );
-                    $countries = ['' => esc_html__('Select a country&hellip;', 'woocommerce')] + $countries;
-                    $args['attrs'] = array_merge($args['attrs'], $args['custom_attributes']);
-                else :
-                    $args['custom_attributes'] = $this->getCustomHtmlAttrs($args['custom_attributes']);
-                endif;
+                $args['picker'] = array_merge(
+                    [
+                        'class' => 'country_to_state country_select_picker ' . (isset($args['picker_class']) ? esc_attr(implode(' ', $args['picker_class'])) : null)
+                    ],
+                    isset($args['picker']) ? $args['picker'] : []
+                );
+                $countries = ['' => esc_html__('Select a country&hellip;', 'woocommerce')] + $countries;
+                $args['attrs'] = array_merge($args['attrs'], $args['custom_attributes']);
+            else :
+                $args['custom_attributes'] = $this->getCustomHtmlAttrs($args['custom_attributes']);
+            endif;
 
-                $args['choices'] = $countries;
+            $args['choices'] = $countries;
 
-                return (string)$this->viewer('field/field', compact('args', 'key', 'value', 'field_type'));
-            },
-            10,
-            4
-        );
+            return (string)$this->viewer('field/field', compact('args', 'key', 'value', 'field_type'));
+        }, 10, 4);
     }
 
     /**
@@ -400,42 +370,37 @@ class Form extends ParamsBag implements FormContract
      */
     protected function selectJsState()
     {
-        add_filter(
-            'woocommerce_form_field_select_js_state',
-            function ($field, $key, $args, $value) {
-                $for_country = isset($args['country']) ? $args['country'] : WC()->checkout->get_value('billing_state' === $key ? 'billing_country' : 'shipping_country');
-                $states = WC()->countries->get_states($for_country);
+        add_filter('woocommerce_form_field_select_js_state', function ($field, $key, $args, $value) {
+            $for_country = isset($args['country']) ? $args['country'] : WC()->checkout->get_value('billing_state' === $key ? 'billing_country' : 'shipping_country');
+            $states = WC()->countries->get_states($for_country);
 
-                if (is_array($states) && empty($states)) :
-                    $field_type = 'empty-state';
-                    $args['custom_attributes'] = $this->getCustomHtmlAttrs($args['custom_attributes']);
-                    $args['inline_style'] = 'style="display:none;"';
-                elseif (!is_null($for_country) && is_array($states)) :
-                    $field_type = 'select-js';
-                    $args['attrs'] = array_merge(
-                        [
-                            'class' => 'state_select ' . esc_attr(implode(' ', $args['input_class']))
-                        ],
-                        isset($args['attrs']) ? $args['attrs'] : []
-                    );
+            if (is_array($states) && empty($states)) :
+                $field_type = 'empty-state';
+                $args['custom_attributes'] = $this->getCustomHtmlAttrs($args['custom_attributes']);
+                $args['inline_style'] = 'style="display:none;"';
+            elseif (!is_null($for_country) && is_array($states)) :
+                $field_type = 'select-js';
+                $args['attrs'] = array_merge(
+                    [
+                        'class' => 'state_select ' . esc_attr(implode(' ', $args['input_class']))
+                    ],
+                    isset($args['attrs']) ? $args['attrs'] : []
+                );
 
-                    $args['picker'] = array_merge(
-                        [
-                            'class' => 'state_select_picker ' . (isset($args['picker_class']) ? esc_attr(implode(' ', $args['picker_class'])) : null)
-                        ],
-                        isset($args['picker']) ? $args['picker'] : []
-                    );
-                    $args['choices'] = ['' => esc_html__('Select a state&hellip;', 'woocommerce')] + $states;
-                    $args['attrs'] = array_merge($args['attrs'], $args['custom_attributes']);
-                else :
-                    $field_type = 'text-state';
-                    $args['custom_attributes'] = $this->getCustomHtmlAttrs($args['custom_attributes']);
-                endif;
+                $args['picker'] = array_merge(
+                    [
+                        'class' => 'state_select_picker ' . (isset($args['picker_class']) ? esc_attr(implode(' ', $args['picker_class'])) : null)
+                    ],
+                    isset($args['picker']) ? $args['picker'] : []
+                );
+                $args['choices'] = ['' => esc_html__('Select a state&hellip;', 'woocommerce')] + $states;
+                $args['attrs'] = array_merge($args['attrs'], $args['custom_attributes']);
+            else :
+                $field_type = 'text-state';
+                $args['custom_attributes'] = $this->getCustomHtmlAttrs($args['custom_attributes']);
+            endif;
 
-                return (string)$this->viewer('field/field', compact('args', 'key', 'value', 'field_type'));
-            },
-            10,
-            4
-        );
+            return (string)$this->viewer('field/field', compact('args', 'key', 'value', 'field_type'));
+        }, 10, 4);
     }
 }

@@ -2,7 +2,7 @@
 
 namespace tiFy\Plugins\Woocommerce\Contracts;
 
-interface Woocommerce
+interface Woocommerce extends WoocommerceResolverTrait
 {
 
 }
