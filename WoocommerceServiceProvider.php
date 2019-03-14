@@ -339,7 +339,13 @@ class WoocommerceServiceProvider extends AppServiceProvider
             /** @var QueryProduct $concrete */
             $concrete = $this->getConcrete('query.product');
 
-            return $wc_product instanceof WC_Product ? new $concrete($wc_product) : $concrete::createFromGlobal();
+            if ($wc_product instanceof WC_Product) {
+                return new $concrete($wc_product);
+            } elseif (is_numeric($wc_product)) {
+                return $concrete::createFromId($wc_product);
+            } else {
+                return $concrete::createFromGlobal();
+            }
         });
 
         $this->getContainer()->add('woocommerce.query.products', function ($wp_query = null) {

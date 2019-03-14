@@ -1,11 +1,25 @@
-<?php
+<?php declare(strict_types=1);
 
+use tiFy\Plugins\Woocommerce\Contracts\Woocommerce;
 use tiFy\Plugins\Woocommerce\Cart\Cart;
 use tiFy\Plugins\Woocommerce\Functions\Functions;
 use tiFy\Plugins\Woocommerce\Routing\Routing;
 use tiFy\Plugins\Woocommerce\Shortcodes\Shortcodes;
 //use tiFy\Plugins\Woocommerce\MultiShop\Multishop;
 
+if (!function_exists('woocommerce')) :
+    /**
+     * Instance du plugin.
+     *
+     * @return Woocommerce
+     */
+    function woocommerce(): Woocommerce
+    {
+        return app()->get('woocommerce');
+    }
+endif;
+
+// @todo Tester les anciens helpers
 if (!function_exists('tify_wc_cart')) :
     /**
      * Classe de rappel de traitement du panier.

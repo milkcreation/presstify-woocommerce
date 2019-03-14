@@ -18,23 +18,23 @@ trait WoocommerceResolverTrait
      */
     public function form()
     {
-        return app()->get('woocommerce.form');
+        return $this->resolve('form');
     }
 
     /**
      * @inheritdoc
      */
-    public function query_product($product = null)
+    public function product()
     {
-        return app()->get('woocommerce.query.product', [$product]);
+        return $this->resolve('product');
     }
 
     /**
      * @inheritdoc
      */
-    public function query_products($wp_query = null)
+    public function resolve($alias, ...$args)
     {
-        return app()->get('woocommerce.query.products', [$wp_query]);
+        return app()->get("woocommerce.{$alias}", $args);
     }
 
     /**
@@ -42,7 +42,7 @@ trait WoocommerceResolverTrait
      */
     public function routing()
     {
-        return app()->get('woocommerce.routing');
+        return $this->resolve('routing');
     }
 
     /**
