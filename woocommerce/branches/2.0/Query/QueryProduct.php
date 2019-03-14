@@ -22,11 +22,30 @@ use WP_Post;
 class QueryProduct extends ParamsBag implements QueryProductContract
 {
     /**
+     * Objets QueryProducts des produits enfants.
+     * {@internal Produit variable uniquement}
+     * @var null|QueryProductsContract|QueryProductsContract[]
+     */
+    protected $children;
+
+    /**
+     * Prix de vente maximum (avec et sans taxe).
+     * @var array
+     */
+    protected $max_price = [];
+
+    /**
+     * Prix de vente minimum (avec et sans taxe).
+     * @var array
+     */
+    protected $min_price;
+
+    /**
      * Objet tiFy du produit Parent.
-     * {@internal WC_Product_Variation uniquement}
+     * {@internal Variation uniquement}
      * @var null|QueryProductContract
      */
-    protected $product_parent;
+    protected $parent;
 
     /**
      * Objet Post tiFy.
@@ -52,6 +71,34 @@ class QueryProduct extends ParamsBag implements QueryProductContract
      * @var null|array|QueryProductsContract|QueryProductContract[]
      */
     protected $variations;
+
+    /**
+     * @inheritdoc
+     */
+    public static function createFromGlobal(): ?QueryProductContract
+    {
+        global $product, $post;
+
+        if (!$product instanceof WC_Product) {
+            $product = wc_get_product($post);
+        }
+
+        return $product instanceof WC_Product ? new static($product) : null;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public static function createFromId($product_id): ?QueryProductContract
+    {
+        return (
+            $product_id &&
+            is_numeric($product_id) &&
+            ($wp_product = wc_get_product($product_id)) &&
+            ($wp_product instanceof WC_Product)
+        )
+            ? new static($wp_product) : null;
+    }
 
     /**
      * CONSTRUCTEUR.
@@ -85,29 +132,15 @@ class QueryProduct extends ParamsBag implements QueryProductContract
     /**
      * @inheritdoc
      */
-    public static function createFromGlobal(): ?QueryProductContract
+    public function getChildren()
     {
-        global $product, $post;
-
-        if (!$product instanceof WC_Product) {
-            $product = wc_get_product($post);
+        if (is_null($this->children)) {
+            $this->children = $this->isVariable()
+                ? QueryProducts::createFromIds($this->getProduct()->get_children())
+                : [];
         }
 
-        return $product instanceof WC_Product ? new static($product) : null;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public static function createFromId($product_id): ?QueryProductContract
-    {
-        return (
-            $product_id &&
-            is_numeric($product_id) &&
-            ($wp_product = wc_get_product($product_id)) &&
-            ($wp_product instanceof WC_Product)
-        )
-            ? new static($wp_product) : null;
+        return $this->children ? : null;
     }
 
     /**
@@ -121,21 +154,93 @@ class QueryProduct extends ParamsBag implements QueryProductContract
     /**
      * @inheritdoc
      */
-    public function getProduct(): WC_Product
+    public function getMaxPrice($with_tax = true): float
     {
-        return $this->wc_product;
+        if ($with_tax) {
+            if ( ! isset($this->max_price['with_tax'])) {
+                $this->max_price['with_tax'] = 0;
+
+                if ($this->isVariable()) {
+                    $prices = [];
+                    foreach ($this->getChildren() as $child) {
+                        $prices[] = $child->getPriceIncludingTax();
+                    }
+
+                    $this->max_price['with_tax'] = max($prices);
+                } else {
+                    $this->max_price['with_tax'] = $this->getPriceIncludingTax();
+                }
+            }
+            return $this->max_price['with_tax'];
+        } else {
+            if ( ! isset($this->max_price['without_tax'])) {
+                $this->max_price['without_tax'] = 0;
+
+                if ($this->isVariable()) {
+                    $prices = [];
+                    foreach ($this->getChildren() as $child) {
+                        $prices[] = $child->getPriceExcludingTax();
+                    }
+
+                    $this->max_price['without_tax'] = max($prices);
+                } else {
+                    $this->max_price['without_tax'] = $this->getPriceExcludingTax();
+                }
+            }
+            return $this->max_price['without_tax'];
+        }
     }
 
     /**
      * @inheritdoc
      */
-    public function getProductParent(): ?QueryProductContract
+    public function getMinPrice($with_tax = true): float
+    {
+        if ($with_tax) {
+            if ( ! isset($this->min_price['with_tax'])) {
+                $this->min_price['with_tax'] = 0;
+
+                if ($this->isVariable()) {
+                    $prices = [];
+                    foreach ($this->getChildren() as $child) {
+                        $prices[] = $child->getPriceIncludingTax();
+                    }
+
+                    $this->min_price['with_tax'] = min($prices);
+                } else {
+                    $this->min_price['with_tax'] = $this->getPriceIncludingTax();
+                }
+            }
+            return $this->min_price['with_tax'];
+        } else {
+            if ( ! isset($this->min_price['without_tax'])) {
+                $this->min_price['without_tax'] = 0;
+
+                if ($this->isVariable()) {
+                    $prices = [];
+                    foreach ($this->getChildren() as $child) {
+                        $prices[] = $child->getPriceExcludingTax();
+                    }
+
+                    $this->min_price['without_tax'] = min($prices);
+                } else {
+                    $this->min_price['without_tax'] = $this->getPriceExcludingTax();
+                }
+            }
+            return $this->min_price['without_tax'];
+        }
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getParent()
     {
         if ($this->isVariation()){
-            if (is_null($this->product_parent)) {
-                $this->product_parent = static::createFromId($this->getProduct()->get_parent_id()) ? : false;
+            if (is_null($this->parent)) {
+                $this->parent = static::createFromId($this->getProduct()->get_parent_id()) ? : false;
             }
-            return $this->product_parent ? : null;
+            return $this->parent ? : null;
         } else {
             return null;
         }
@@ -144,23 +249,11 @@ class QueryProduct extends ParamsBag implements QueryProductContract
     /**
      * @inheritdoc
      */
-    public function getQueryPost(): ?QueryPostContract
-    {
-        if (is_null($this->query_post)) :
-            $this->query_post = new QueryPost($this->getPost());
-        endif;
-
-        return $this->query_post instanceof QueryPostContract ? $this->query_post : null;
-    }
-
-    /**
-     * @inheritdoc
-     */
     public function getPost(): ?WP_Post
     {
-        if (is_null($this->wp_post)) :
+        if (is_null($this->wp_post)) {
             $this->wp_post = get_post($this->getId());
-        endif;
+        }
 
         return $this->wp_post instanceof WP_Post ? $this->wp_post : null;
     }
@@ -184,15 +277,45 @@ class QueryProduct extends ParamsBag implements QueryProductContract
     /**
      * @inheritdoc
      */
-    public function getVariations()
+    public function getProduct(): WC_Product
     {
-        if (is_null($this->variations)) :
-            $this->variations = $this->isVariable()
-                ? QueryProducts::createFromIds($this->getProduct()->get_children())
-                : [];
-        endif;
+        return $this->wc_product;
+    }
 
-        return $this->variations;
+    /**
+     * @inheritdoc
+     */
+    public function getQueryPost(): ?QueryPostContract
+    {
+        if (is_null($this->query_post)) {
+            $this->query_post = new QueryPost($this->getPost());
+        }
+
+        return $this->query_post instanceof QueryPostContract ? $this->query_post : null;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function hasVariablePrice(): bool
+    {
+        if ($this->isVariable()) {
+            return $this->getMinPrice() < $this->getPriceIncludingTax() ||
+                   $this->getMaxPrice() > $this->getPriceIncludingTax();
+        } elseif ($this->isVariation()) {
+            return $this->getPriceIncludingTax() < $this->getParent()->getPriceIncludingTax() ||
+                   $this->getPriceIncludingTax() > $this->getParent()->getPriceIncludingTax();
+        }
+
+        return false;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function isOnSale(): bool
+    {
+        return $this->getProduct()->is_on_sale();
     }
 
     /**

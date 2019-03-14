@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace tiFy\Plugins\Woocommerce\Contracts;
 
@@ -17,7 +17,7 @@ interface QueryProduct extends ParamsBag
      *
      * @return static
      */
-    public static function createFromGlobal() : ?QueryProduct;
+    public static function createFromGlobal(): ?QueryProduct;
 
     /**
      * Récupération d'une instance basée sur l'identifiant de qualification d'un produit.
@@ -26,7 +26,15 @@ interface QueryProduct extends ParamsBag
      *
      * @return static
      */
-    public static function createFromId($product_id) : ?QueryProduct;
+    public static function createFromId($product_id): ?QueryProduct;
+
+    /**
+     * Récupération de la liste des enfants associées au produit.
+     * {@internal Valable pour un produit variable uniquement.}
+     *
+     * @return null|QueryProducts|QueryProduct[]
+     */
+    public function getChildren();
 
     /**
      * Récupération de l'identifiant de qualification.
@@ -36,26 +44,30 @@ interface QueryProduct extends ParamsBag
     public function getId(): int;
 
     /**
-     * Récupération de l'instance du post tiFy associé.
+     * Récupération du prix maximum.
      *
-     * @return null|QueryPost
+     * @param boolean $with_tax Indicateur d'inclusion de la taxe.
+     *
+     * @return float
      */
-    public function getQueryPost(): ?QueryPost;
+    public function getMaxPrice($with_tax = true): float;
 
     /**
-     * Récupération de l'instance du produit associé.
+     * Récupération du prix minimum.
      *
-     * @return WC_Product|WC_Product_Simple|WC_Product_Variable|WC_Product_Variation
+     * @param boolean $with_tax Indicateur d'inclusion de la taxe.
+     *
+     * @return float
      */
-    public function getProduct(): WC_Product;
+    public function getMinPrice($with_tax = true): float;
 
     /**
      * Récupération de l'instance tiFy du produit parent.
-     * {@internal Opérant uniquement pour les variation de produit}
+     * {@internal Valable pour un produit variation uniquement.}
      *
-     * @return null|QueryProduct
+     * @return null|QueryProduct|QueryPost
      */
-    public function getProductParent(): ?QueryProduct;
+    public function getParent();
 
     /**
      * Récupération de l'instance du post Wordpress associé.
@@ -83,11 +95,32 @@ interface QueryProduct extends ParamsBag
     public function getPriceExcludingTax($args = []): float;
 
     /**
-     * Récupération de la liste des variations associée au produit.
+     * Récupération de l'instance du produit associé.
      *
-     * @return array|QueryProducts|QueryProduct[]
+     * @return WC_Product|WC_Product_Simple|WC_Product_Variable|WC_Product_Variation
      */
-    public function getVariations();
+    public function getProduct(): WC_Product;
+
+    /**
+     * Récupération de l'instance du post tiFy associé.
+     *
+     * @return null|QueryPost
+     */
+    public function getQueryPost(): ?QueryPost;
+
+    /**
+     * Vérification d'existance d'un prix variable pour le produit.
+     *
+     * @return boolean
+     */
+    public function hasVariablePrice(): bool;
+
+    /**
+     * Vérification d'existance d'un tarif préférentiel.
+     *
+     * @return boolean
+     */
+    public function isOnSale(): bool;
 
     /**
      * Vérifie si le produit associé est un produit simple.
