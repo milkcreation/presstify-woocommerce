@@ -13,12 +13,6 @@ use WC_Product_Variable;
 use WC_Product_Variation;
 use WP_Post;
 
-/**
- * Class QueryProduct
- * @package tiFy\Plugins\Woocommerce\Query
- *
- * @mixin QueryPost
- */
 class QueryProduct extends ParamsBag implements QueryProductContract
 {
     /**
@@ -111,7 +105,7 @@ class QueryProduct extends ParamsBag implements QueryProductContract
     {
         $this->wc_product = $wc_product;
 
-        $this->setAttrs($this->wc_product->get_data());
+        $this->set($this->wc_product->get_data())->parse();
     }
 
     /**
@@ -120,7 +114,7 @@ class QueryProduct extends ParamsBag implements QueryProductContract
      * @param string $name Nom de qualification de la methode.
      * @param array $args Liste des variables passées en argument à la méthode.
      *
-     * @return mixed
+     * @return null|QueryPostContract
      */
     public function __call($name, $args)
     {
