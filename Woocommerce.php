@@ -11,7 +11,7 @@ use tiFy\Plugins\Woocommerce\Contracts\Woocommerce as WoocommerceContract;
  * @author Jordy Manner <jordy@milkcreation.fr>
  * @author Julien Picard <julien@tigreblanc.fr>
  * @package tiFy\Plugins\Woocommerce
- * @version 2.0.5
+ * @version 2.0.6
  *
  * @see https://docs.woocommerce.com/wc-apidocs/index.html
  *
