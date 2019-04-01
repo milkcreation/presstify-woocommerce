@@ -94,7 +94,7 @@ class WoocommerceServiceProvider extends AppServiceProvider
      */
     public function boot()
     {
-        add_action('after_setup_tify', function () {
+        add_action('after_setup_theme', function () {
             $this->getContainer()->get('woocommerce');
 
             $providers = config('woocommerce.providers', []);

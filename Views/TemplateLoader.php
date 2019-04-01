@@ -2,7 +2,6 @@
 
 namespace tiFy\Plugins\Woocommerce\Views;
 
-use tiFy\Contracts\App\AppInterface;
 use tiFy\Kernel\Params\ParamsBag;
 use tiFy\Plugins\Woocommerce\Contracts\TemplateLoader as TemplateLoaderContract;
 use tiFy\Plugins\Woocommerce\WoocommerceResolverTrait;
@@ -26,7 +25,7 @@ class TemplateLoader extends ParamsBag implements TemplateLoaderContract
      *
      * @return void
      */
-    public function __construct(AppInterface $app, $attrs = [])
+    public function __construct($app, $attrs = [])
     {
         parent::__construct($attrs);
 
