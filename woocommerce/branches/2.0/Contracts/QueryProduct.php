@@ -3,7 +3,7 @@
 namespace tiFy\Plugins\Woocommerce\Contracts;
 
 use tiFy\Contracts\Support\ParamsBag;
-use tiFy\Contracts\Wp\QueryPost;
+use tiFy\Wordpress\Contracts\QueryPost;
 use WC_Product;
 use WC_Product_Simple;
 use WC_Product_Variable;

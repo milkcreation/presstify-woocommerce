@@ -5,14 +5,20 @@ namespace tiFy\Plugins\Woocommerce\Query;
 use tiFy\Plugins\Woocommerce\Contracts\QueryProducts as QueryProductsContract;
 use tiFy\Plugins\Woocommerce\Contracts\QueryProduct as QueryProductContract;
 use tiFy\Support\ParamsBag;
-use tiFy\Contracts\Wp\QueryPost as QueryPostContract;
-use tiFy\Wp\Query\QueryPost;
+use tiFy\Wordpress\Contracts\QueryPost as QueryPostContract;
+use tiFy\Wordpress\Query\QueryPost;
 use WC_Product;
 use WC_Product_Simple;
 use WC_Product_Variable;
 use WC_Product_Variation;
 use WP_Post;
 
+/**
+ * Class QueryProduct
+ * @package tiFy\Plugins\Woocommerce\Query
+ *
+ * @mixin QueryPost
+ */
 class QueryProduct extends ParamsBag implements QueryProductContract
 {
     /**
