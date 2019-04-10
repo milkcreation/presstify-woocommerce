@@ -14,6 +14,7 @@ echo field(
         'attrs'     => $this->get('args.attrs', []),
         'name'      => esc_attr($key),
         'value'     => $value,
+        'disabled'  => $this->get('args.disabled', false),
         'choices'   => $this->get('args.choices', []),
         'source'    => $this->get('args.sources', false),
         'multiple'  => $this->get('args.multiple', false),
