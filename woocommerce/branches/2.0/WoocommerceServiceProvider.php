@@ -2,7 +2,7 @@
 
 namespace tiFy\Plugins\Woocommerce;
 
-use tiFy\App\Container\AppServiceProvider;
+use tiFy\Container\ServiceProvider;
 use tiFy\Plugins\Woocommerce\Assets\Assets;
 use tiFy\Plugins\Woocommerce\Cart\Cart;
 use tiFy\Plugins\Woocommerce\Checkout\Checkout;
@@ -26,7 +26,7 @@ use tiFy\Plugins\Woocommerce\Views\TemplateLoader;
 use WC_Product;
 use WP_Query;
 
-class WoocommerceServiceProvider extends AppServiceProvider
+class WoocommerceServiceProvider extends ServiceProvider
 {
     /**
      * Liste des services par défaut.
