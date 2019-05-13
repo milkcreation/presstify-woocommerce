@@ -73,7 +73,7 @@ class QueryProduct extends ParamsBag implements QueryProductContract
     protected $variations;
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public static function createFromGlobal(): ?QueryProductContract
     {
@@ -87,7 +87,7 @@ class QueryProduct extends ParamsBag implements QueryProductContract
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public static function createFromId($product_id): ?QueryProductContract
     {
@@ -130,21 +130,21 @@ class QueryProduct extends ParamsBag implements QueryProductContract
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function getChildren()
     {
         if (is_null($this->children)) {
-            $this->children = $this->isVariable()
-                ? QueryProducts::createFromIds($this->getProduct()->get_children())
-                : [];
+            $this->children = [];
+            if ($this->isVariable() && ($child_ids = $this->getProduct()->get_children())) {
+                $this->children = QueryProducts::createFromIds($child_ids);
+            }
         }
-
         return $this->children ? : null;
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function getId(): int
     {
@@ -152,7 +152,7 @@ class QueryProduct extends ParamsBag implements QueryProductContract
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function getMaxPrice($with_tax = true): float
     {
@@ -192,7 +192,7 @@ class QueryProduct extends ParamsBag implements QueryProductContract
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function getMinPrice($with_tax = true): float
     {
@@ -232,7 +232,7 @@ class QueryProduct extends ParamsBag implements QueryProductContract
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function getParent()
     {
@@ -247,19 +247,18 @@ class QueryProduct extends ParamsBag implements QueryProductContract
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function getPost(): ?WP_Post
     {
         if (is_null($this->wp_post)) {
             $this->wp_post = get_post($this->getId());
         }
-
         return $this->wp_post instanceof WP_Post ? $this->wp_post : null;
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function getPriceIncludingTax($args = []): float
     {
@@ -267,7 +266,7 @@ class QueryProduct extends ParamsBag implements QueryProductContract
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function getPriceExcludingTax($args = []): float
     {
@@ -275,7 +274,7 @@ class QueryProduct extends ParamsBag implements QueryProductContract
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function getProduct(): WC_Product
     {
@@ -283,19 +282,18 @@ class QueryProduct extends ParamsBag implements QueryProductContract
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function getQueryPost(): ?QueryPostContract
     {
         if (is_null($this->query_post)) {
             $this->query_post = new QueryPost($this->getPost());
         }
-
         return $this->query_post instanceof QueryPostContract ? $this->query_post : null;
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function hasVariablePrice(): bool
     {
@@ -306,12 +304,11 @@ class QueryProduct extends ParamsBag implements QueryProductContract
             return $this->getPriceIncludingTax() < $this->getParent()->getPriceIncludingTax() ||
                    $this->getPriceIncludingTax() > $this->getParent()->getPriceIncludingTax();
         }
-
         return false;
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function isOnSale(): bool
     {
@@ -319,7 +316,7 @@ class QueryProduct extends ParamsBag implements QueryProductContract
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function isSimple(): bool
     {
@@ -327,7 +324,7 @@ class QueryProduct extends ParamsBag implements QueryProductContract
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function isVariable(): bool
     {
@@ -335,7 +332,7 @@ class QueryProduct extends ParamsBag implements QueryProductContract
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function isVariation(): bool
     {
