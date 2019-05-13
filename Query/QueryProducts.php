@@ -36,7 +36,7 @@ class QueryProducts extends Collection implements QueryProductsContract
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public static function createFromArgs($args = []): QueryProductsContract
     {
@@ -44,7 +44,7 @@ class QueryProducts extends Collection implements QueryProductsContract
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public static function createFromGlobals(): QueryProductsContract
     {
@@ -54,7 +54,7 @@ class QueryProducts extends Collection implements QueryProductsContract
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public static function createFromIds(array $ids): QueryProductsContract
     {
@@ -62,7 +62,7 @@ class QueryProducts extends Collection implements QueryProductsContract
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function getIds() : array
     {
@@ -70,7 +70,7 @@ class QueryProducts extends Collection implements QueryProductsContract
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      *
      * @param WC_Product $item Objet Product Wordpress.
      *
@@ -82,7 +82,7 @@ class QueryProducts extends Collection implements QueryProductsContract
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function WpQuery(): WP_Query
     {

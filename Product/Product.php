@@ -2,6 +2,7 @@
 
 namespace tiFy\Plugins\Woocommerce\Product;
 
+use tiFy\Support\Proxy\Asset;
 use tiFy\Plugins\Woocommerce\Contracts\Product as ProductContract;
 use tiFy\Plugins\Woocommerce\Contracts\QueryProduct;
 use tiFy\Plugins\Woocommerce\WoocommerceResolverTrait;
@@ -27,7 +28,7 @@ class Product implements ProductContract
     {
         add_action('wp', function () {
             if (is_product() && ($product = $this->get())) {
-                assets()->setDataJs('wc', ['product' => $this->getDatas($product)]);
+                Asset::setDataJs('wc', ['product' => $this->getDatas($product)]);
             }
         }, 99);
     }
