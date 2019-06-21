@@ -14,7 +14,7 @@ interface Mail
     public function formattingName($name);
 
     /**
-     * Debug de mail WooCommerce.
+     * Debug de mail Woocommerce.
      *
      * @see \WC_Emails
      *

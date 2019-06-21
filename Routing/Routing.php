@@ -6,7 +6,7 @@ use tiFy\Kernel\Params\ParamsBag;
 use tiFy\Plugins\Woocommerce\Contracts\Routing as RoutingContract;
 
 /**
- * Gestion des routes WooCommerce.
+ * Gestion des routes Woocommerce.
  *
  * @see Woocommerce/includes/wc-conditional-functions.php
  * @see https://docs.woocommerce.com/document/conditional-tags/
@@ -14,7 +14,7 @@ use tiFy\Plugins\Woocommerce\Contracts\Routing as RoutingContract;
 class Routing extends ParamsBag implements RoutingContract
 {
     /**
-     * Liste des routes WooCommerce existantes autorisées.
+     * Liste des routes Woocommerce existantes autorisées.
      * @see https://docs.woocommerce.com/document/conditional-tags/
      * @var array
      */
@@ -36,7 +36,7 @@ class Routing extends ParamsBag implements RoutingContract
     ];
 
     /**
-     * Liste des routes personnalisées greffées à WooCommerce.
+     * Liste des routes personnalisées greffées à Woocommerce.
      * @var array
      */
     protected $customWcRoutes = [];
@@ -63,7 +63,7 @@ class Routing extends ParamsBag implements RoutingContract
         $this->routes = array_merge($this->wcRoutes, $this->getCustomRoutes());
 
         $this->registerCustomRoutesAdmin();
-        $this->bindToWooCommerce();
+        $this->bindToWoocommerce();
     }
 
     /**
@@ -145,7 +145,7 @@ class Routing extends ParamsBag implements RoutingContract
     /**
      * {@inheritdoc}
      */
-    public function bindToWooCommerce()
+    public function bindToWoocommerce()
     {
         add_filter(
             'is_woocommerce',
@@ -181,7 +181,7 @@ class Routing extends ParamsBag implements RoutingContract
                             $_items[$index] = $item;
                             $_items['custom-wc-routes-start'] = [
                                 'title' => __('Pages personnalisées', 'tify'),
-                                'desc'  => __('Ces pages doivent être définies pour le bon fonctionnement de votre boutique WooCommerce.', 'tify'),
+                                'desc'  => __('Ces pages doivent être définies pour le bon fonctionnement de votre boutique Woocommerce.', 'tify'),
                                 'type'  => 'title',
                                 'id'    => 'advanced_custom_page_options'
                             ];

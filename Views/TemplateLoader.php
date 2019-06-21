@@ -49,7 +49,7 @@ class TemplateLoader extends ParamsBag implements TemplateLoaderContract
     }
 
     /**
-     * Chargement d'un template WooCommerce.
+     * Chargement d'un template Woocommerce.
      *
      * @param string $template Chemin absolu du fichier de template à charger.
      * @param array $args Attributs du template.
@@ -108,7 +108,7 @@ class TemplateLoader extends ParamsBag implements TemplateLoaderContract
     }
 
     /**
-     * Surcharge du moteur de template WooCommerce.
+     * Surcharge du moteur de template Woocommerce.
      *
      * @param string $located Chemin absolu du fichier de template à charger.
      * @param string $template_name Nom du template.
@@ -134,7 +134,7 @@ class TemplateLoader extends ParamsBag implements TemplateLoaderContract
     }
 
     /**
-     * Surcharge du moteur de template (partiel) WooCommerce.
+     * Surcharge du moteur de template (partiel) Woocommerce.
      *
      * @param string $template Chemin absolu du fichier de template partiel à charger.
      * @param string $slug Identifiant du fichier de template partiel.

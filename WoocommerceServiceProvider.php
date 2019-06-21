@@ -1,28 +1,36 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace tiFy\Plugins\Woocommerce;
 
 use tiFy\Container\ServiceProvider;
-use tiFy\Plugins\Woocommerce\Assets\Assets;
-use tiFy\Plugins\Woocommerce\Cart\Cart;
-use tiFy\Plugins\Woocommerce\Checkout\Checkout;
-use tiFy\Plugins\Woocommerce\Form\Form;
-use tiFy\Plugins\Woocommerce\Functions\Functions;
-use tiFy\Plugins\Woocommerce\Mail\Mail;
-use tiFy\Plugins\Woocommerce\Metabox\Product as MetaboxProduct;
-use tiFy\Plugins\Woocommerce\Multishop\Multishop;
-use tiFy\Plugins\Woocommerce\Multishop\Factory;
-use tiFy\Plugins\Woocommerce\Order\Order;
-use tiFy\Plugins\Woocommerce\Product\Product;
-use tiFy\Plugins\Woocommerce\Query\Query;
-use tiFy\Plugins\Woocommerce\Query\QueryProduct;
-use tiFy\Plugins\Woocommerce\Query\QueryProducts;
-use tiFy\Plugins\Woocommerce\Routing\Routing;
-use tiFy\Plugins\Woocommerce\Shipping\Shipping;
-use tiFy\Plugins\Woocommerce\Shortcodes\Shortcodes;
-use tiFy\Plugins\Woocommerce\Views\Template;
-use tiFy\Plugins\Woocommerce\Views\TemplateHooks;
-use tiFy\Plugins\Woocommerce\Views\TemplateLoader;
+use tiFy\Metabox\MetaboxManager;
+use tiFy\Plugins\Woocommerce\Contracts\{
+    Cart as CartContract,
+    Multistore as MultistoreContract,
+    ProductCat as ProductCatContract,
+    TemplateHooks as TemplateHooksContract,
+    Woocommerce as WoocommerceContract};
+use tiFy\Plugins\Woocommerce\{
+    Assets\Assets,
+    Cart\Cart,
+    Checkout\Checkout,
+    Form\Form,
+    Functions\Functions,
+    Mail\Mail,
+    Metabox\Product as MetaboxProduct,
+    Multistore\Multistore,
+    Order\Order,
+    Product\Product,
+    ProductCat\ProductCat,
+    Query\Query,
+    Query\QueryProduct,
+    Query\QueryProducts,
+    Routing\Routing,
+    Shipping\Shipping,
+    Shortcodes\Shortcodes,
+    Views\Template,
+    Views\TemplateHooks,
+    Views\TemplateLoader};
 use WC_Product;
 use WP_Query;
 
@@ -40,10 +48,10 @@ class WoocommerceServiceProvider extends ServiceProvider
         'functions'             => Functions::class,
         'mail'                  => Mail::class,
         'metabox.product'       => MetaboxProduct::class,
-        'multishop'             => Multishop::class,
-        'multishop.factory'     => Factory::class,
+        'multistore'            => Multistore::class,
         'order'                 => Order::class,
         'product'               => Product::class,
+        'product-cat'           => ProductCat::class,
         'query'                 => Query::class,
         'query.product'         => QueryProduct::class,
         'query.products'        => QueryProducts::class,
@@ -51,7 +59,7 @@ class WoocommerceServiceProvider extends ServiceProvider
         'shipping'              => Shipping::class,
         'shortcodes'            => Shortcodes::class,
         'views.template'        => Template::class,
-        'views.template_hooks'  => TemplateHooks::class,
+        'views.template-hooks'  => TemplateHooks::class,
         'views.template_loader' => TemplateLoader::class
     ];
 
@@ -77,6 +85,7 @@ class WoocommerceServiceProvider extends ServiceProvider
         'woocommerce.multishop',
         'woocommerce.multishop.factory',
         'woocommerce.product',
+        'woocommerce.product-cat',
         'woocommerce.order',
         'woocommerce.query',
         'woocommerce.query.product',
@@ -85,9 +94,15 @@ class WoocommerceServiceProvider extends ServiceProvider
         'woocommerce.shipping',
         'woocommerce.shortcodes',
         'woocommerce.views.template',
-        'woocommerce.views.template_hooks',
+        'woocommerce.views.template-hooks',
         'woocommerce.views.template_loader'
     ];
+
+    /**
+     * Instaance du gestionnaire de plugin.
+     * @var WoocommerceContract
+     */
+    protected $manager;
 
     /**
      * @inheritdoc
@@ -95,32 +110,34 @@ class WoocommerceServiceProvider extends ServiceProvider
     public function boot()
     {
         add_action('after_setup_theme', function () {
-            $this->getContainer()->get('woocommerce');
+            $this->manager = $this->getContainer()->get('woocommerce');
 
             $providers = config('woocommerce.providers', []);
             array_walk($providers, function ($v, $k) {
                 $this->customs[$k] = $v;
             });
+
             $this->getContainer()->get('woocommerce.assets');
             $this->getContainer()->get('woocommerce.cart');
             $this->getContainer()->get('woocommerce.checkout');
             $this->getContainer()->get('woocommerce.form');
             $this->getContainer()->get('woocommerce.mail');
             $this->getContainer()->get('woocommerce.metabox.product');
-            $this->getContainer()->get('woocommerce.multishop');
+            $this->getContainer()->get('woocommerce.multistore');
             $this->getContainer()->get('woocommerce.order');
             $this->getContainer()->get('woocommerce.product');
+            $this->getContainer()->get('woocommerce.product-cat');
             $this->getContainer()->get('woocommerce.query');
             $this->getContainer()->get('woocommerce.shipping');
             $this->getContainer()->get('woocommerce.shortcodes');
             $this->getContainer()->get('woocommerce.views.template');
-            $this->getContainer()->get('woocommerce.views.template_hooks');
+            $this->getContainer()->get('woocommerce.views.template-hooks');
             $this->getContainer()->get('woocommerce.views.template_loader');
         });
 
         add_action('init', function () {
             add_theme_support('woocommerce');
-        },1);
+        }, 1);
     }
 
     /**
@@ -136,12 +153,12 @@ class WoocommerceServiceProvider extends ServiceProvider
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
-    public function register()
+    public function register(): void
     {
         $this->getContainer()->share('woocommerce', function() {
-            return new Woocommerce();
+            return new Woocommerce($this->getContainer());
         });
 
         $this->registerAssets();
@@ -151,10 +168,10 @@ class WoocommerceServiceProvider extends ServiceProvider
         $this->registerFunctions();
         $this->registerMail();
         $this->registerMetaboxProduct();
-        $this->registerMultishop();
-        $this->registerMultishopFactory();
+        $this->registerMultistore();
         $this->registerOrder();
         $this->registerProduct();
+        $this->registerProductCat();
         $this->registerQuery();
         $this->registerRouting();
         $this->registerShipping();
@@ -171,7 +188,7 @@ class WoocommerceServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function registerAssets()
+    public function registerAssets(): void
     {
         $this->getContainer()->share('woocommerce.assets', function () {
             $attrs = config('woocommerce.assets', []);
@@ -186,12 +203,15 @@ class WoocommerceServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function registerCart()
+    public function registerCart(): void
     {
         $this->getContainer()->share('woocommerce.cart', function () {
             $concrete = $this->getConcrete('cart');
 
-            return new $concrete();
+            /** @var CartContract $instance */
+            $instance = new $concrete();
+
+            return $instance->setManager($this->manager);
         });
     }
 
@@ -200,7 +220,7 @@ class WoocommerceServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function registerCheckout()
+    public function registerCheckout(): void
     {
         $this->getContainer()->share('woocommerce.checkout', function () {
             $attrs = config('woocommerce.checkout', []);
@@ -215,7 +235,7 @@ class WoocommerceServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function registerForm()
+    public function registerForm(): void
     {
         $this->getContainer()->share('woocommerce.form', function () {
             $attrs = config('woocommerce.form', []);
@@ -230,7 +250,7 @@ class WoocommerceServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function registerFunctions()
+    public function registerFunctions(): void
     {
         $this->getContainer()->share('woocommerce.functions', function () {
              return new Functions();
@@ -242,7 +262,7 @@ class WoocommerceServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function registerMail()
+    public function registerMail(): void
     {
         $this->getContainer()->share('woocommerce.mail', function () {
             $concrete = $this->getConcrete('mail');
@@ -256,7 +276,7 @@ class WoocommerceServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function registerMetaboxProduct()
+    public function registerMetaboxProduct(): void
     {
         $this->getContainer()->share('woocommerce.metabox.product', function () {
             $concrete = $this->getConcrete('metabox.product');
@@ -270,23 +290,33 @@ class WoocommerceServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function registerMultishop()
+    public function registerMultistore(): void
     {
-        $this->getContainer()->share('woocommerce.multishop', function () {
-            $attrs = config('woocommerce.multishop', []);
-            $concrete = $this->getConcrete('multishop');
+        $this->getContainer()->share('woocommerce.multistore', function () {
+            $stores = config('woocommerce.multistore', []);
+            $concrete = $this->getConcrete('multistore');
 
-            return new $concrete($attrs);
+            /** @var MultistoreContract $instance */
+            $instance = new $concrete($this->manager);
+
+            /** @var MetaboxManager $metabox */
+            $metabox = $this->manager->getContainer()->get('metabox');
+
+            $metabox->add('WoocommerceMultistore-storeOptions', 'tify_options@options', [
+                'title' => __('Multi-boutique woocommerce', 'theme')
+            ]);
+
+            add_action('woocommerce_get_shop_page_id', function ($page_id) use ($instance) {
+                if (is_singular() && (in_array(get_the_ID(), $instance->getPageIds()))) {
+                    $page_id = get_the_ID();
+                }
+
+                return $page_id;
+            });
+
+            return $instance->setManager($this->manager)->set($stores);
         });
-    }
 
-    /**
-     * Déclaration du service de gestion d'une boutique dans l'environnement multiboutique.
-     *
-     * @return void
-     */
-    public function registerMultishopFactory()
-    {
         $this->getContainer()->add('woocommerce.multishop.factory', function ($shopId, $shopAttrs) {
             $concrete = $this->getConcrete('multishop.factory');
 
@@ -299,7 +329,7 @@ class WoocommerceServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function registerProduct()
+    public function registerProduct(): void
     {
         $this->getContainer()->share('woocommerce.product', function () {
             $concrete = $this->getConcrete('product');
@@ -309,11 +339,28 @@ class WoocommerceServiceProvider extends ServiceProvider
     }
 
     /**
+     * Déclaration du gestionnaire de catégories de produits.
+     *
+     * @return void
+     */
+    public function registerProductCat(): void
+    {
+        $this->getContainer()->share('woocommerce.product-cat', function () {
+            $concrete = $this->getConcrete('product-cat');
+
+            /** @var ProductCatContract $instance */
+            $instance = new $concrete();
+
+            return $instance->setManager($this->manager);
+        });
+    }
+
+    /**
      * Déclaration du service de gestion des commandes.
      *
      * @return void
      */
-    public function registerOrder()
+    public function registerOrder(): void
     {
         $this->getContainer()->share('woocommerce.order', function () {
             $concrete = $this->getConcrete('order');
@@ -327,7 +374,7 @@ class WoocommerceServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function registerQuery()
+    public function registerQuery(): void
     {
         $this->getContainer()->share('woocommerce.query', function () {
             $concrete = $this->getConcrete('query');
@@ -361,7 +408,7 @@ class WoocommerceServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function registerRouting()
+    public function registerRouting(): void
     {
         $this->getContainer()->share('woocommerce.routing', function () {
             $attrs = config('woocommerce.routing', []);
@@ -376,7 +423,7 @@ class WoocommerceServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function registerShipping()
+    public function registerShipping(): void
     {
         $this->getContainer()->share('woocommerce.shipping', function () {
             $concrete = $this->getConcrete('shipping');
@@ -390,7 +437,7 @@ class WoocommerceServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function registerShortcodes()
+    public function registerShortcodes(): void
     {
         $this->getContainer()->share('woocommerce.shortcodes', function () {
             $attrs = config('woocommerce.shortcodes', []);
@@ -401,11 +448,11 @@ class WoocommerceServiceProvider extends ServiceProvider
     }
 
     /**
-     * Déclaration du service de surcharge des éléments de template WooCommerce.
+     * Déclaration du service de surcharge des éléments de template Woocommerce.
      *
      * @return void
      */
-    public function registerViewer()
+    public function registerViewer(): void
     {
         $this->getContainer()->share('woocommerce.viewer', function () {
                 $cinfo = class_info($this);
@@ -422,11 +469,11 @@ class WoocommerceServiceProvider extends ServiceProvider
     }
 
     /**
-     * Déclaration du service de surcharge des éléments de template WooCommerce.
+     * Déclaration du service de surcharge des éléments de template Woocommerce.
      *
      * @return void
      */
-    public function registerViewsTemplate()
+    public function registerViewsTemplate(): void
     {
         $this->getContainer()->share('woocommerce.views.template', function () {
             $concrete = $this->getConcrete('views.template');
@@ -436,26 +483,28 @@ class WoocommerceServiceProvider extends ServiceProvider
     }
 
     /**
-     * Déclaration du service de gestion des hooks de template de WooCommerce.
+     * Déclaration du service de gestion des hooks de template de Woocommerce.
      *
      * @return void
      */
-    public function registerViewsTemplateHooks()
+    public function registerViewsTemplateHooks(): void
     {
-        $this->getContainer()->share('woocommerce.views.template_hooks', function () {
-            $attrs = config('woocommerce.template_hooks', []);
-            $concrete = $this->getConcrete('views.template_hooks');
+        $this->getContainer()->share('woocommerce.views.template-hooks', function () {
+            $concrete = $this->getConcrete('views.template-hooks');
 
-            return new $concrete($attrs);
+            /** @var TemplateHooksContract $instance */
+            $instance = new $concrete();
+
+            return $instance->set(config('woocommerce.template-hooks', []))->parse();
         });
     }
 
     /**
-     * Déclaration du service de gestion du chargement des templates WooCommerce.
+     * Déclaration du service de gestion du chargement des templates Woocommerce.
      *
      * @return void
      */
-    public function registerViewsTemplateLoader()
+    public function registerViewsTemplateLoader(): void
     {
         $this->getContainer()->share('woocommerce.views.template_loader', function () {
             $concrete = $this->getConcrete('views.template_loader');
