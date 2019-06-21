@@ -2,7 +2,7 @@
 /**
  * @Overrideable
  */
-namespace tiFy\Plugins\WooCommerce\PaymentGateway;
+namespace tiFy\Plugins\Woocommerce\PaymentGateway;
 
 class WC_Gateway_Cheque extends \WC_Gateway_Cheque
 {
