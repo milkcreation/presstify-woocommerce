@@ -36,7 +36,7 @@ class Assets extends ParamsBag implements AssetsContract
     protected $min = '';
 
     /**
-     * Liste des feuilles de styles WooCommerce.
+     * Liste des feuilles de styles Woocommerce.
      * @see wp-content/plugins/woocommerce/includes/class-wc-frontend-scripts.php
      * @var array
      */
@@ -47,7 +47,7 @@ class Assets extends ParamsBag implements AssetsContract
     ];
 
     /**
-     * Liste des scripts WooCommerce.
+     * Liste des scripts Woocommerce.
      * @see wp-content/plugins/woocommerce/includes/class-wc-frontend-scripts.php
      * @var array
      */
@@ -125,7 +125,7 @@ class Assets extends ParamsBag implements AssetsContract
     }
 
     /**
-     * Désactivation des styles WooCommerce.
+     * Désactivation des styles Woocommerce.
      *
      * @return void
      */
@@ -147,7 +147,7 @@ class Assets extends ParamsBag implements AssetsContract
     }
 
     /**
-     * Désactivation des scripts WooCommerce.
+     * Désactivation des scripts Woocommerce.
      *
      * @return void
      */

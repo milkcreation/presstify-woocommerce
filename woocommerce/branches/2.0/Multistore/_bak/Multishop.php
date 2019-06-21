@@ -5,9 +5,6 @@ namespace tiFy\Plugins\Woocommerce\Multishop;
 use tiFy\Kernel\Params\ParamsBag;
 use tiFy\Plugins\Woocommerce\Contracts\Multishop as MultishopContract;
 
-//use tiFy\Components;
-//use tiFy\Components\HookArchive\HookArchive;
-
 class Multishop extends ParamsBag implements MultishopContract
 {
     /**
@@ -21,25 +18,8 @@ class Multishop extends ParamsBag implements MultishopContract
      * @param array $shop
      *
      */
-    public function __construct($shops = [])
+    public function __construct()
     {
-        if (!is_array($shops)) :
-            return;
-        endif;
-
-        parent::__construct($shops);
-
-        // Declaration des boutiques
-        foreach ($this->all() as $shopId => $shopAttrs) :
-            $this->register($shopId, $shopAttrs);
-        endforeach;
-
-        return;
-        /*foreach ($shops as $shop_id => $shop_attrs) :
-            $this->register($shop_id, $shop_attrs);
-        endforeach;*/
-
-
         // Déclaration des accroches d'archives
         Components::register('HookArchive');
 
@@ -47,24 +27,6 @@ class Multishop extends ParamsBag implements MultishopContract
         $this->appAddAction('tify_options_register_node');
         $this->appAddAction('tify_hookarchive_register');
         $this->appAddAction('woocommerce_get_shop_page_id');
-    }
-
-    /**
-     * DECLENCHEURS
-     */
-    /**
-     * Déclaration de l'onglet principal d'édition des options
-     */
-    final public function tify_options_register_node()
-    {
-        if (self::has()) :
-            tify_options_register_node(
-                [
-                    'id'    => 'tiFyPluginsMultiShop-Options',
-                    'title' => __('Multi-Boutique', 'tify')
-                ]
-            );
-        endif;
     }
 
     /**
@@ -144,37 +106,6 @@ class Multishop extends ParamsBag implements MultishopContract
     {
         return self::getShops();
     }*/
-
-    /**
-     * Déclaration d'une boutique
-     *
-     * @param string $id
-     * @param array $attrs
-     *
-     * @return \tiFy\Plugins\Woocommerce\MultiShop\Factory
-     */
-    final public function register($id, $attrs)
-    {
-        return self::$Shops[$id] = app('woocommerce.multishop.factory', [$id, $attrs]);
-    }
-
-    /**
-     * Récupération des classes de rappel des boutiques
-     */
-    final public static function getShops()
-    {
-        return self::$Shops;
-    }
-
-    /**
-     * Récupération d'une classe de rappel d'une boutique
-     */
-    final public static function getShop($shop_id)
-    {
-        if (isset(self::$Shops[$shop_id])) {
-            return self::$Shops[$shop_id];
-        }
-    }
 
     /**
      * Définition de la boutique par défaut

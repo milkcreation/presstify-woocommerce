@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace tiFy\Plugins\Woocommerce\Views;
 
@@ -16,29 +16,24 @@ class Template implements TemplateContract
      */
     public function __construct()
     {
-        // Court-circuitage des attributs du fil d'Ariane
         add_filter('woocommerce_breadcrumb_defaults', [$this, 'woocommerce_breadcrumb_defaults']);
     }
 
     /**
-     * BREADCRUMB
-     */
-    /**
      * Court-circuitage des attributs du fil d'Ariane
      *
-     * @param array $args
-     * array(
-     * 'delimiter'   => '&nbsp;&#47;&nbsp;',
-     * 'wrap_before' => '<nav class="woocommerce-breadcrumb">',
-     * 'wrap_after'  => '</nav>',
-     * 'before'      => '',
-     * 'after'       => '',
-     * 'home'        => _x( 'Home', 'breadcrumb', 'woocommerce' ),
-     * )
+     * @param array $args {
+     *      @var $delimiter, '&nbsp;&#47;&nbsp;' par défaut.
+     *      @var $wrap_before, '<nav class="woocommerce-breadcrumb">' par défaut.
+     *      @var $wrap_after, '</nav>' par défaut.
+     *      @var $before, '' par défaut.
+     *      @var $after, '' par défaut.
+     *      @var $home, _x( 'Home', 'breadcrumb', 'woocommerce' ) par défaut.
+     * }
      *
      * @return array
      */
-    public function woocommerce_breadcrumb_defaults($args = [])
+    public function woocommerce_breadcrumb_defaults($args = []) : array
     {
         return $args;
     }

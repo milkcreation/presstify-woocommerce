@@ -20,7 +20,7 @@ use tiFy\View\ViewEngine;
 
 return [
     /**
-     * Gestion des ressources WooCommerce (styles et scripts).
+     * Gestion des ressources Woocommerce (styles et scripts).
      * false = désactivation du style/script.
      *
      * @var array
@@ -62,7 +62,7 @@ return [
         ]
     ],
     /**
-     * Gestion des formulaires WooCommerce.
+     * Gestion des formulaires Woocommerce.
      * Surcharge des formulaires existants (billing, shipping, checkout)
      * Ajout de champs personnalisés sur les formulaires billing et shipping.
      *
@@ -244,7 +244,7 @@ return [
         'Custom'            => true
     ],
     /**
-     * Déclaration et accrochage de routes personnalisées à WooCommerce.
+     * Déclaration et accrochage de routes personnalisées à Woocommerce.
      *
      * @var array
      */
@@ -257,7 +257,7 @@ return [
         ]
     ],
     /**
-     * Gestion des shortcodes WooCommerce.
+     * Gestion des shortcodes Woocommerce.
      * false = désactivation du shortcode.
      *
      * @var array
@@ -273,7 +273,7 @@ return [
      *
      * @var array
      */
-    'template_hooks'  => [
+    'template-hooks'  => [
         'woocommerce_before_shop_loop_item'       => [
             'woocommerce_template_loop_product_link_open'  => 1,
             'woocommerce_template_loop_product_link_close' => 2
@@ -314,8 +314,8 @@ return [
         'shipping'              => Shipping::class,
         'shortcodes'            => Shortcodes::class,
         'views.template'        => Template::class,
-        'views.template_hooks'  => TemplateHooks::class,
-        'views.template_loader' => TemplateLoader::class
+        'views.template-hooks'  => TemplateHooks::class,
+        'views.template-loader' => TemplateLoader::class
     ],
 
     /**

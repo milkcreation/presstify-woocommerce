@@ -68,7 +68,7 @@ endif;
 
 if (!function_exists('tify_wc_routing')) :
     /**
-     * Classe de rappel de traitement de gestion des routes WooCommerce.
+     * Classe de rappel de traitement de gestion des routes Woocommerce.
      *
      * @return Routing
      */
@@ -80,7 +80,7 @@ endif;
 
 if (!function_exists('tify_wc_do_shortcode')) :
     /**
-     * Execution d'un shortcode WooCommerce en dehors de la boucle.
+     * Execution d'un shortcode Woocommerce en dehors de la boucle.
      *
      * @param string $shortcode Nom du shortcode.
      * @param array $attrs Attributs du shortcode.

@@ -1,9 +1,11 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace tiFy\Plugins\Woocommerce\Views;
 
-use tiFy\Kernel\Params\ParamsBag;
+use tiFy\Support\ParamsBag;
 use tiFy\Plugins\Woocommerce\Contracts\TemplateHooks as TemplateHooksContract;
+use ReflectionException;
+use ReflectionFunction;
 
 /**
  * ACCROCHAGE / DECROCHAGE / RE-ORDONNANCEMENT DES ELEMENTS DE TEMPLATES
@@ -134,16 +136,43 @@ class TemplateHooks extends ParamsBag implements TemplateHooksContract
     /**
      * CONSTRUCTEUR.
      *
-     * @param array $hooks Listes des accroches d'éléments de template.
-     *
      * @return void
      */
-    public function __construct($hooks = [])
+    public function __construct()
     {
-        parent::__construct($hooks);
+        // Traitement des crochets définis dans la configuration.
+        add_action('init', function () {
+            foreach ($this->all() as $tag => $functions) {
+                if (!isset($this->hooks[$tag])) {
+                    $this->registerHook($tag);
+                }
 
-        $this->process($this->all());
-        $this->processDeferred();
+                if (!empty($functions)) {
+                    foreach ($functions as $function => $priority) {
+                        if (!isset($this->hooks[$tag][$function])) {
+                            $this->add($tag, $function, $priority);
+                        } elseif (!$priority) {
+                            $this->remove($tag, $function, $this->hooks[$tag][$function]);
+                        } elseif ($this->hooks[$tag][$function] !== (int)$priority) {
+                            $this->change($tag, $function, $priority);
+                        }
+                    };
+                }
+            }
+        });
+
+        // Traitement différé des crochets.
+        add_action('wp', function () {
+            if ($matches = preg_grep('/^woocommerce_/', get_class_methods($this))) {
+                foreach ($matches as $tag) {
+                    if (!isset($this->hooks[$tag])) {
+                        continue;
+                    }
+
+                    add_action($tag, [$this, $tag], -99);
+                }
+            }
+        }, 99);
     }
 
     /**
@@ -153,16 +182,14 @@ class TemplateHooks extends ParamsBag implements TemplateHooksContract
      * @param string $function Fonction attachée.
      * @param int $priority Priorité d'exécution de la fonction attachée.
      *
-     * @throws \ReflectionException
-     *
      * @return bool|null
      */
     public function add($tag, $function, $priority = 10)
     {
         // Bypass
-        if (!isset($this->hooks[$tag])) :
+        if (!isset($this->hooks[$tag])) {
             return null;
-        endif;
+        }
 
         $function_id = $this->getFunctionIdentifier($function);
 
@@ -178,20 +205,18 @@ class TemplateHooks extends ParamsBag implements TemplateHooksContract
      * @param string $function Fonction à ré-attacher.
      * @param int $priority Priorité d'exécution de la fonction attachée.
      *
-     * @throws \ReflectionException
-     *
      * @return null
      */
     public function change($tag, $function, $priority = 10)
     {
         // Bypass
-        if (!isset($this->hooks[$tag]) || !isset($this->hooks[$tag][$function])) :
+        if (!isset($this->hooks[$tag]) || !isset($this->hooks[$tag][$function])) {
             return null;
-        endif;
+        }
 
-        if ($this->remove($tag, $function, $this->hooks[$tag][$function])) :
+        if ($this->remove($tag, $function, $this->hooks[$tag][$function])) {
             $this->add($tag, $function, $priority);
-        endif;
+        }
 
         return null;
     }
@@ -201,90 +226,35 @@ class TemplateHooks extends ParamsBag implements TemplateHooksContract
      *
      * @param string $func
      *
-     * @throws \ReflectionException
-     *
      * @return string|null
      */
     protected function getFunctionIdentifier($func)
     {
-        if (is_string($func)) :
+        if (is_string($func)) {
             return $func;
-        endif;
+        }
 
         try {
-            $rf = new \ReflectionFunction($func);
-        } catch (\ReflectionException $exception) {
+            $rf = new ReflectionFunction($func);
+        } catch (ReflectionException $exception) {
             return null;
         }
 
-        return $rf->__toString();
-    }
-
-    /**
-     * Traitement des crochets définis dans la configuration.
-     *
-     * @param array $hooks Crochets.
-     *
-     * @return void
-     */
-    public function process($hooks)
-    {
-        add_action(
-            'init',
-            function () use ($hooks) {
-                foreach ((array)$hooks as $tag => $functions) :
-                    if (!isset($this->hooks[$tag])) :
-                        $this->registerHook($tag);
-                    endif;
-
-                    if (empty($functions)) :
-                        continue;
-                    endif;
-
-                    foreach ($functions as $function => $priority) :
-                        if (!isset($this->hooks[$tag][$function])) :
-                            $this->add($tag, $function, $priority);
-                        elseif (!$priority) :
-                            $this->remove($tag, $function, $this->hooks[$tag][$function]);
-                        elseif ($this->hooks[$tag][$function] !== (int)$priority) :
-                            $this->change($tag, $function, $priority);
-                        endif;
-                    endforeach;
-                endforeach;
-            }
-        );
-    }
-
-    /**
-     * Traitement différé des crochets.
-     *
-     * @return void
-     */
-    public function processDeferred()
-    {
-        add_action('wp', function () {
-            if ($matches = preg_grep('/^woocommerce_/', get_class_methods($this))) :
-                foreach ($matches as $tag) :
-                    if (!isset($this->hooks[$tag])) :
-                        continue;
-                    endif;
-
-                    add_action($tag, [$this, $tag], -99);
-                endforeach;
-            endif;
-        }, 99);
+        return (string)$rf;
     }
 
     /**
      * Déclaration d'un emplacement d'accroche personnalisé.
      *
+     * @param string $tag
+     *
      * @return void
      */
     public function registerHook($tag)
     {
-        if (!isset($this->hooks[$tag])) :
+        if (!isset($this->hooks[$tag])) {
             $this->hooks[$tag] = [];
-        endif;
+        }
     }
 
     /**
@@ -299,13 +269,13 @@ class TemplateHooks extends ParamsBag implements TemplateHooksContract
     public function remove($tag, $function, $priority = 10)
     {
         // Bypass
-        if (!isset($this->hooks[$tag])) :
+        if (!isset($this->hooks[$tag])) {
             return null;
-        endif;
+        }
 
-        if ($rm = remove_action($tag, $function, $priority)) :
+        if ($rm = remove_action($tag, $function, $priority)) {
             unset($this->hooks[$tag][$function]);
-        endif;
+        }
 
         return $rm;
     }
@@ -315,8 +285,6 @@ class TemplateHooks extends ParamsBag implements TemplateHooksContract
      */
     /**
      * Exemple de Contextualisation.
-     *
-     * @throws \ReflectionException
      *
      * @return void
      */

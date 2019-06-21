@@ -65,11 +65,11 @@ interface Routing extends ParamsBag
     public function isCustom($route);
 
     /**
-     * Branchement des routes personnalisées à l'environnement WooCommerce.
+     * Branchement des routes personnalisées à l'environnement Woocommerce.
      *
      * @return void
      */
-    public function bindToWooCommerce();
+    public function bindToWoocommerce();
 
     /**
      * Déclaration des interfaces d'administration pour les routes personnalisées.

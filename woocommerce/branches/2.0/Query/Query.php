@@ -1,16 +1,15 @@
 <?php
 
-/**
- * REQUETE DE RECUPERATION DES ELEMENTS DE PAGE
- * @see Woocommerce/includes/class-wc-query.php
- */
-
 namespace tiFy\Plugins\Woocommerce\Query;
 
 use tiFy\Plugins\Woocommerce\Contracts\Query as QueryContract;
 use tiFy\Plugins\Woocommerce\WoocommerceResolverTrait;
 use WP_Query;
 
+/**
+ * REQUETE DE RECUPERATION DES ELEMENTS DE PAGE
+ * @see Woocommerce/includes/class-wc-query.php
+ */
 class Query implements QueryContract
 {
     use WoocommerceResolverTrait;

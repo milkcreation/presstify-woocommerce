@@ -48,7 +48,7 @@ class Checkout extends ParamsBag implements CheckoutContract
     }
 
     /**
-     * Branchement du montant minimum de commande à l'environnement WooCommerce.
+     * Branchement du montant minimum de commande à l'environnement Woocommerce.
      *
      * @param array $minPurchase Montant minimum de commande.
      *
