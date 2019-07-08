@@ -2,11 +2,11 @@
 
 namespace tiFy\Plugins\Woocommerce\Query;
 
-use tiFy\Plugins\Woocommerce\Contracts\QueryProducts as QueryProductsContract;
-use tiFy\Plugins\Woocommerce\Contracts\QueryProduct as QueryProductContract;
-use tiFy\Support\ParamsBag;
-use tiFy\Wordpress\Contracts\QueryPost as QueryPostContract;
-use tiFy\Wordpress\Query\QueryPost;
+use tiFy\Plugins\Woocommerce\Contracts\{
+    QueryProducts as QueryProductsContract,
+    QueryProduct as QueryProductContract};
+use tiFy\Support\{Arr, ParamsBag};
+use tiFy\Wordpress\{Contracts\QueryPost as QueryPostContract, Query\QueryPost};
 use WC_Product;
 use WC_Product_Simple;
 use WC_Product_Variable;
@@ -21,6 +21,12 @@ use WP_Post;
  */
 class QueryProduct extends ParamsBag implements QueryProductContract
 {
+    /**
+     * Indicateur d'activaction du cache.
+     * @var boolean
+     */
+    protected $cacheable = true;
+
     /**
      * Objets QueryProducts des produits enfants.
      * {@internal Produit variable uniquement}
@@ -55,7 +61,7 @@ class QueryProduct extends ParamsBag implements QueryProductContract
 
     /**
      * Objet Product Woocommerce.
-     * @var WC_Product
+     * @var WC_Product|WC_Product_Simple|WC_Product_Variable|WC_Product_Variation
      */
     protected $wc_product;
 
@@ -132,6 +138,49 @@ class QueryProduct extends ParamsBag implements QueryProductContract
     /**
      * @inheritDoc
      */
+    public function cacheable(): bool
+    {
+        return $this->cacheable;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function cacheAdd($key, $value = null): QueryProductContract
+    {
+        $cache = $this->getMetaSingle('_cache', []) ?: [];
+        $keys = !is_array($key) ? [$key => $value] : $key;
+
+        $this->saveMeta('_cache', array_merge($cache, $keys));
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function cacheClear(string $key = null): QueryProductContract
+    {
+        if (is_null($key)) {
+            $this->saveMeta('_cache', []);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function cacheGet($key = null, $default = null)
+    {
+        $cache = $this->getMetaSingle('_cache', []);
+
+        return is_null($key) ? $cache : Arr::get($cache, $key, $default);
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function getChildren()
     {
         if (is_null($this->children)) {
@@ -140,7 +189,7 @@ class QueryProduct extends ParamsBag implements QueryProductContract
                 $this->children = QueryProducts::createFromIds($child_ids);
             }
         }
-        return $this->children ? : null;
+        return $this->children ?: null;
     }
 
     /**
@@ -157,7 +206,7 @@ class QueryProduct extends ParamsBag implements QueryProductContract
     public function getMaxPrice($with_tax = true): float
     {
         if ($with_tax) {
-            if ( ! isset($this->max_price['with_tax'])) {
+            if (!isset($this->max_price['with_tax'])) {
                 $this->max_price['with_tax'] = 0;
 
                 if ($this->isVariable()) {
@@ -173,7 +222,7 @@ class QueryProduct extends ParamsBag implements QueryProductContract
             }
             return $this->max_price['with_tax'];
         } else {
-            if ( ! isset($this->max_price['without_tax'])) {
+            if (!isset($this->max_price['without_tax'])) {
                 $this->max_price['without_tax'] = 0;
 
                 if ($this->isVariable()) {
@@ -197,7 +246,7 @@ class QueryProduct extends ParamsBag implements QueryProductContract
     public function getMinPrice($with_tax = true): float
     {
         if ($with_tax) {
-            if ( ! isset($this->min_price['with_tax'])) {
+            if (!isset($this->min_price['with_tax'])) {
                 $this->min_price['with_tax'] = 0;
 
                 if ($this->isVariable()) {
@@ -213,7 +262,7 @@ class QueryProduct extends ParamsBag implements QueryProductContract
             }
             return $this->min_price['with_tax'];
         } else {
-            if ( ! isset($this->min_price['without_tax'])) {
+            if (!isset($this->min_price['without_tax'])) {
                 $this->min_price['without_tax'] = 0;
 
                 if ($this->isVariable()) {
@@ -236,11 +285,11 @@ class QueryProduct extends ParamsBag implements QueryProductContract
      */
     public function getParent()
     {
-        if ($this->isVariation()){
+        if ($this->isVariation()) {
             if (is_null($this->parent)) {
-                $this->parent = static::createFromId($this->getProduct()->get_parent_id()) ? : false;
+                $this->parent = static::createFromId($this->getProduct()->get_parent_id()) ?: false;
             }
-            return $this->parent ? : null;
+            return $this->parent ?: null;
         } else {
             return null;
         }
@@ -274,7 +323,9 @@ class QueryProduct extends ParamsBag implements QueryProductContract
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
+     *
+     * @return WC_Product|WC_Product_Simple|WC_Product_Variable|WC_Product_Variation
      */
     public function getProduct(): WC_Product
     {
@@ -299,10 +350,10 @@ class QueryProduct extends ParamsBag implements QueryProductContract
     {
         if ($this->isVariable()) {
             return $this->getMinPrice() < $this->getPriceIncludingTax() ||
-                   $this->getMaxPrice() > $this->getPriceIncludingTax();
+                $this->getMaxPrice() > $this->getPriceIncludingTax();
         } elseif ($this->isVariation()) {
             return $this->getPriceIncludingTax() < $this->getParent()->getPriceIncludingTax() ||
-                   $this->getPriceIncludingTax() > $this->getParent()->getPriceIncludingTax();
+                $this->getPriceIncludingTax() > $this->getParent()->getPriceIncludingTax();
         }
         return false;
     }

@@ -29,6 +29,43 @@ interface QueryProduct extends ParamsBag
     public static function createFromId($product_id): ?QueryProduct;
 
     /**
+     * Indicateur d'activation de la mise en cache.
+     *
+     * @return boolean
+     */
+    public function cacheable(): bool;
+
+    /**
+     * Ajout de données de cache associées au produit.
+     *
+     * @param string|array Clé d'indice de la données de cache.
+     * @param mixed $value Valeur de retour par défaut
+     *
+     * @return QueryProduct
+     */
+    public function cacheAdd($key, $value = null): QueryProduct;
+
+    /**
+     * Suppression des données de cache associées au produit.
+     *
+     * @param string $key Clé d'indice de donnée mise en cache.
+     *
+     * @return QueryProduct
+     */
+    public function cacheClear(string $key = null): QueryProduct;
+
+    /**
+     * Récupération de donnée de cache associées au produit.
+     * {@internal Permet de récupérer de manière optimale des données relatives aux attributs de variation ...}
+     *
+     * @param string|null Clé d'indice de la données de cache. Si null, retourne la liste complète des données.
+     * @param mixed $default Valeur de retour par défaut
+     *
+     * @return mixed|array|string|boolean
+     */
+    public function cacheGet($key = null, $default = null);
+
+    /**
      * Récupération de la liste des enfants associées au produit.
      * {@internal Valable pour un produit variable uniquement.}
      *

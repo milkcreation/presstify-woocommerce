@@ -94,7 +94,7 @@ if (!function_exists('tify_wc_do_shortcode')) :
         /** @var Shortcodes $shortcodes */
         $shortcodes = app()->get('woocommerce.shortcodes');
 
-        return $shortcodes->do($shortcode, $attrs = []);
+        return $shortcodes->doing($shortcode, $attrs = []);
     }
 endif;
 
