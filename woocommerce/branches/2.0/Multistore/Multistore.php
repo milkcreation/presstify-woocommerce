@@ -20,7 +20,7 @@ class Multistore extends Collection implements MultistoreContracts
      * Instance des magasins déclarés.
      * @var StoreFactoryContract[]
      */
-    protected $items;
+    protected $items = [];
 
     /**
      * Liste des identifiants de qualification des pages associées aux magasins.
