@@ -1,5 +1,5 @@
 <?php
-namespace tiFy\Plugins\WooCommerce\PaymentGateway;
+namespace tiFy\Plugins\Woocommerce\PaymentGateway;
 
 class PaymentGateway extends \tiFy\App\Factory
 {    
@@ -35,10 +35,10 @@ class PaymentGateway extends \tiFy\App\Factory
             
             // Enregistrement des plateforme nons déclarées
             else :
-                if( class_exists( "\\tiFy\\Plugins\\WooCommerce\\PaymentGateway\\{$gateway}" ) ) :                    
-                    $gateway = self::getOverride( "\\tiFy\\Plugins\\WooCommerce\\PaymentGateway\\{$gateway}" );
-                elseif( class_exists( self::getOverrideNamespace() ."\\Plugins\\WooCommerce\\PaymentGateway\\{$gateway}" ) && is_subclass_of( self::getOverrideNamespace() ."\\Plugins\\WooCommerce\\PaymentGateway\\{$gateway}", $gateway ) ) :
-                    $gateway = self::getOverrideNamespace() ."\\Plugins\\WooCommerce\\PaymentGateway\\{$gateway}";
+                if( class_exists( "\\tiFy\\Plugins\\Woocommerce\\PaymentGateway\\{$gateway}" ) ) :
+                    $gateway = self::getOverride( "\\tiFy\\Plugins\\Woocommerce\\PaymentGateway\\{$gateway}" );
+                elseif( class_exists( self::getOverrideNamespace() ."\\Plugins\\Woocommerce\\PaymentGateway\\{$gateway}" ) && is_subclass_of( self::getOverrideNamespace() ."\\Plugins\\Woocommerce\\PaymentGateway\\{$gateway}", $gateway ) ) :
+                    $gateway = self::getOverrideNamespace() ."\\Plugins\\Woocommerce\\PaymentGateway\\{$gateway}";
                 endif;
                 
                 $_gateways[] = $gateway;
