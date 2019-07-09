@@ -146,6 +146,13 @@ interface QueryProduct extends ParamsBag
     public function getQueryPost(): ?QueryPost;
 
     /**
+     * Récupération de l'unité de gestion de stock (UGS aka SKU).
+     *
+     * @return string
+     */
+    public function getSku(): string;
+
+    /**
      * Vérification d'existance d'un prix variable pour le produit.
      *
      * @return boolean
