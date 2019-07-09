@@ -346,6 +346,14 @@ class QueryProduct extends ParamsBag implements QueryProductContract
     /**
      * @inheritDoc
      */
+    public function getSku(): string
+    {
+        return $this->wc_product->get_sku();
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function hasVariablePrice(): bool
     {
         if ($this->isVariable()) {

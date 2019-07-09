@@ -43,7 +43,7 @@ class StoreOptionsMetabox extends MetaboxWpOptionsController
      */
     public function manager(): Woocommerce
     {
-        return $this->stores()->getManager();
+        return $this->stores()->manager();
     }
 
     /**
