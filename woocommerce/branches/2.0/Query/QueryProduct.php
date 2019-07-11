@@ -379,7 +379,8 @@ class QueryProduct extends ParamsBag implements QueryProductContract
      */
     public function isSimple(): bool
     {
-        return $this->getProduct() instanceof WC_Product_Simple;
+        return ($this->getProduct() instanceof WC_Product_Simple) &&
+               ! ($this->getProduct() instanceof WC_Product_Variation);
     }
 
     /**

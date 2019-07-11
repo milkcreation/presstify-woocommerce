@@ -299,12 +299,16 @@ class WoocommerceServiceProvider extends ServiceProvider
             /** @var MultistoreContract $instance */
             $instance = new $concrete($this->manager);
 
-            /** @var MetaboxManager $metabox */
-            $metabox = $this->manager->getContainer()->get('metabox');
+            add_action('init', function () use ($instance) {
+                if ($instance->all()) {
+                    /** @var MetaboxManager $metabox */
+                    $metabox = $this->manager->getContainer()->get('metabox');
 
-            $metabox->add('WoocommerceMultistore-storeOptions', 'tify_options@options', [
-                'title' => __('Multi-boutique woocommerce', 'theme')
-            ]);
+                    $metabox->add('WoocommerceMultistore-storeOptions', 'tify_options@options', [
+                        'title' => __('Multi-boutique woocommerce', 'theme')
+                    ]);
+                }
+            });
 
             add_action('woocommerce_get_shop_page_id', function ($page_id) use ($instance) {
                 if (is_singular() && (in_array(get_the_ID(), $instance->getPageIds()))) {
