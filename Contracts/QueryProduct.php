@@ -55,6 +55,13 @@ interface QueryProduct extends ParamsBag
     public function cacheClear(string $key = null): QueryProduct;
 
     /**
+     * Génération du cache.
+     *
+     * @return QueryProduct
+     */
+    public function cacheCreate(): QueryProduct;
+
+    /**
      * Récupération de donnée de cache associées au produit.
      * {@internal Permet de récupérer de manière optimale des données relatives aux attributs de variation ...}
      *

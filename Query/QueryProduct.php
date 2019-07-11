@@ -28,6 +28,18 @@ class QueryProduct extends ParamsBag implements QueryProductContract
     protected $cacheable = true;
 
     /**
+     * Nombre de seconde jusqu'à expiration du cache.
+     * @var int
+     */
+    protected $cacheExpire = 60*60*24*3600*5;
+
+    /**
+     * Clé d'indice d'enregistrement du cache.
+     * @var string
+     */
+    protected $cacheKey = '_cache';
+
+    /**
      * Objets QueryProducts des produits enfants.
      * {@internal Produit variable uniquement}
      * @var null|QueryProductsContract|QueryProductsContract[]
@@ -148,10 +160,14 @@ class QueryProduct extends ParamsBag implements QueryProductContract
      */
     public function cacheAdd($key, $value = null): QueryProductContract
     {
-        $cache = $this->getMetaSingle('_cache', []) ?: [];
+        if (!$cache = $this->getMetaSingle('_cache', []) ?: []) {
+            $cache['expire'] = time()+ $this->cacheExpire;
+            $cache['created'] = time();
+        }
         $keys = !is_array($key) ? [$key => $value] : $key;
+        $cache['data'] = array_merge($cache['data'] ?? [], $keys);
 
-        $this->saveMeta('_cache', array_merge($cache, $keys));
+        $this->saveMeta($this->cacheKey, $cache);
 
         return $this;
     }
@@ -162,8 +178,18 @@ class QueryProduct extends ParamsBag implements QueryProductContract
     public function cacheClear(string $key = null): QueryProductContract
     {
         if (is_null($key)) {
-            $this->saveMeta('_cache', []);
+            $this->saveMeta($this->cacheKey, []);
         }
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function cacheCreate(): QueryProductContract
+    {
+        $this->cacheClear();
 
         return $this;
     }
@@ -173,9 +199,9 @@ class QueryProduct extends ParamsBag implements QueryProductContract
      */
     public function cacheGet($key = null, $default = null)
     {
-        $cache = $this->getMetaSingle('_cache', []);
+        $cache = $this->getMetaSingle($this->cacheKey, []);
 
-        return is_null($key) ? $cache : Arr::get($cache, $key, $default);
+        return is_null($key) ? $cache : Arr::get($cache, "data.{$key}", $default);
     }
 
     /**
