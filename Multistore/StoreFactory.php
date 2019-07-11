@@ -157,7 +157,7 @@ class StoreFactory extends ParamsBag implements StoreFactoryContract
                 /** @var MetaboxManager $metabox */
                 $metabox = $this->stores->manager()->getContainer()->get('metabox');
 
-                foreach($this->optionsMetaboxes as $name => $attrs) {
+                foreach ($this->optionsMetaboxes as $name => $attrs) {
                     $metabox->add($name, 'tify_options@options', $attrs);
                 }
             });
