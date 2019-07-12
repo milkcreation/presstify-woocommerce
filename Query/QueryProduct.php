@@ -31,7 +31,7 @@ class QueryProduct extends ParamsBag implements QueryProductContract
      * Nombre de seconde jusqu'à expiration du cache.
      * @var int
      */
-    protected $cacheExpire = 60*60*24*3600*5;
+    protected $cacheExpire = 3600*24*365*5;
 
     /**
      * Clé d'indice d'enregistrement du cache.
