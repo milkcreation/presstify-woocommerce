@@ -6,6 +6,24 @@
 <table class="form-table">
     <tbody>
     <tr>
+        <th>
+            <label for="tify_wc_multi_default--<?php echo $store->getName(); ?>">
+                <?php _e('Utiliser en tant que boutique par défaut', 'tify'); ?>
+            </label>
+        </th>
+        <td>
+            <?php echo field('checkbox', [
+                'attrs'   => [
+                    'id'    => "tify_wc_multi_default--{$store->getName()}",
+                    'style' => 'vertical-align:top',
+                ],
+                'checked' => $store->getName() === get_option('tify_wc_multi_default', ''),
+                'name'    => 'tify_wc_multi_default',
+                'value'   => $store->getName(),
+            ]); ?>
+        </td>
+    </tr>
+    <tr>
         <th><?php _e('Page d\'affichage de la boutique', 'tify'); ?></th>
         <td>
             <?php wp_dropdown_pages([
@@ -16,20 +34,7 @@
                 'show_count'        => 1,
                 'selected'          => get_option('tify_wc_' . $store->getName() . '_hook', 0),
                 'sort_order'        => 'ASC',
-                'sort_column'       => 'menu_order'
-            ]); ?>
-        </td>
-    </tr>
-    <tr>
-        <th><?php _e('Boutique par défaut', 'tify'); ?></th>
-        <td>
-            <?php echo field('checkbox', [
-                'attrs'   => [
-                    'style' => 'vertical-align:top'
-                ],
-                'checked' => $store->getName() === get_option('tify_wc_multi_default', ''),
-                'name'    => 'tify_wc_multi_default',
-                'value'   => $store->getName()
+                'sort_column'       => 'menu_order',
             ]); ?>
         </td>
     </tr>
@@ -44,7 +49,7 @@
                 'option_none_value' => 0,
                 'hide_empty'        => false,
                 'show_count'        => 1,
-                'selected'          => get_option('tify_wc_' . $store->getName() . '_cat', 0)
+                'selected'          => get_option('tify_wc_' . $store->getName() . '_cat', 0),
             ]); ?>
         </td>
     </tr>
@@ -58,7 +63,7 @@
                     'products'      => __('Afficher les produits', 'tify'),
                     'subcategories' => __('Afficher les catégories', 'tify'),
                     'both'          => __('Afficher les catégories et les produits', 'tify'),
-                ]
+                ],
             ]); ?>
         </td>
     </tr>

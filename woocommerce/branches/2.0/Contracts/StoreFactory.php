@@ -22,6 +22,15 @@ interface StoreFactory extends ParamsBag
     public function getName(): string;
 
     /**
+     * Récupération du mode d'affichage de la page de boutique.
+     *
+     * @param string $default Mode d'affichage par défaut.
+     *
+     * @return string products|subcategories|both
+     */
+    public function getDisplayMode(string $default = 'products'): string;
+
+    /**
      * Récupération de la page d'accroche associée.
      *
      * @return QueryPost|null

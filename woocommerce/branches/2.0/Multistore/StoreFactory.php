@@ -7,6 +7,7 @@ use tiFy\Plugins\Woocommerce\Contracts\{Multistore as MultistoreContract, StoreF
 use tiFy\Support\ParamsBag;
 use tiFy\Wordpress\Contracts\{QueryPost as QueryPostContract, QueryTerm as QueryTermContract};
 use tiFy\Wordpress\Query\{QueryPost, QueryTerm};
+use WP_Query;
 
 class StoreFactory extends ParamsBag implements StoreFactoryContract
 {
@@ -52,6 +53,14 @@ class StoreFactory extends ParamsBag implements StoreFactoryContract
         return [
             'title' => $this->getName()
         ];
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getDisplayMode(string $default = 'products'): string
+    {
+        return (string)get_option('tify_wc_'. $this->getName() .'_page_display', $default);
     }
 
     /**
@@ -160,6 +169,17 @@ class StoreFactory extends ParamsBag implements StoreFactoryContract
                 foreach ($this->optionsMetaboxes as $name => $attrs) {
                     $metabox->add($name, 'tify_options@options', $attrs);
                 }
+            });
+
+            add_filter('pre_option_woocommerce_shop_page_display', function ($value) {
+                return $this->isCurrent() ? $this->getDisplayMode() : $value;
+            });
+
+            add_filter('woocommerce_product_subcategories_args', function ($args) {
+                if ($this->isCurrent() && in_array($this->getDisplayMode(), ['both', 'subcategories'])) {
+                    $args['parent'] = $this->getProductCatId();
+                }
+                return $args;
             });
         }
 
