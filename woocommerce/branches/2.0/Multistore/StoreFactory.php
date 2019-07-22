@@ -7,7 +7,6 @@ use tiFy\Plugins\Woocommerce\Contracts\{Multistore as MultistoreContract, StoreF
 use tiFy\Support\ParamsBag;
 use tiFy\Wordpress\Contracts\{QueryPost as QueryPostContract, QueryTerm as QueryTermContract};
 use tiFy\Wordpress\Query\{QueryPost, QueryTerm};
-use WP_Query;
 
 class StoreFactory extends ParamsBag implements StoreFactoryContract
 {

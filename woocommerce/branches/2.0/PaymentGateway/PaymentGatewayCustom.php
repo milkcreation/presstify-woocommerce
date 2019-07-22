@@ -1,12 +1,15 @@
-<?php
-/**
- * @Overrideable
- */
+<?php declare(strict_types=1);
 
 namespace tiFy\Plugins\Woocommerce\PaymentGateway;
 
-class Custom extends \WC_Payment_Gateway
+use tiFy\Plugins\Woocommerce\Contracts\PaymentGatewayCustom as PaymentGatewayCustomContract;
+use tiFy\Plugins\Woocommerce\WoocommerceAwareTrait;
+use WC_Payment_Gateway;
+
+class PaymentGatewayCustom extends WC_Payment_Gateway implements PaymentGatewayCustomContract
 {
+    use WoocommerceAwareTrait;
+
     /**
      * CONSTRUCTEUR
      */

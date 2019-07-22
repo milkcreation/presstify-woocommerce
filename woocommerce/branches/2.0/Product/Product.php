@@ -3,9 +3,7 @@
 namespace tiFy\Plugins\Woocommerce\Product;
 
 use tiFy\Support\Proxy\Asset;
-use tiFy\Plugins\Woocommerce\Contracts\Product as ProductContract;
-use tiFy\Plugins\Woocommerce\Contracts\QueryProduct;
-use tiFy\Plugins\Woocommerce\WoocommerceResolverTrait;
+use tiFy\Plugins\Woocommerce\{Contracts\Product as ProductContract, Contracts\QueryProduct, WoocommerceResolverTrait};
 use WC_Product;
 use WP_Post;
 

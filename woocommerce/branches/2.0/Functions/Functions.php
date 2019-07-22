@@ -7,7 +7,7 @@ use tiFy\Plugins\Woocommerce\Contracts\Functions as FunctionsContract;
 class Functions implements FunctionsContract
 {
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function priceWrapDecimal($price, $args = [])
     {
@@ -26,7 +26,7 @@ class Functions implements FunctionsContract
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function cartContentsCount()
     {
