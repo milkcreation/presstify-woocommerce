@@ -1,14 +1,17 @@
 <?php declare(strict_types=1);
 
-namespace tiFy\Plugins\Woocommerce\Views;
+namespace tiFy\Plugins\Woocommerce\TemplateFilters;
 
-use tiFy\Plugins\Woocommerce\Contracts\Template as TemplateContract;
+use tiFy\Plugins\Woocommerce\{Contracts\TemplateFilters as TemplateFiltersContract, WoocommerceAwareTrait};
+use tiFy\Support\ParamsBag;
 
 /**
  * @see Woocommerce/includes/wc-template-functions.php
  */
-class Template implements TemplateContract
+class TemplateFilters extends ParamsBag implements TemplateFiltersContract
 {
+    use WoocommerceAwareTrait;
+
     /**
      * CONSTRUCTEUR.
      *
@@ -17,10 +20,27 @@ class Template implements TemplateContract
     public function __construct()
     {
         add_filter('woocommerce_breadcrumb_defaults', [$this, 'woocommerce_breadcrumb_defaults']);
+
+        $this->boot();
     }
 
     /**
-     * Court-circuitage des attributs du fil d'Ariane
+     * @inheritDoc
+     */
+    public function boot(): void {}
+
+    /**
+     * @inheritDoc
+     */
+    public function parse(): TemplateFiltersContract
+    {
+        parent::parse();
+
+        return $this;
+    }
+
+    /**
+     * Exemple de court-circuitage des attributs du fil d'Ariane.
      *
      * @param array $args {
      *      @var $delimiter, '&nbsp;&#47;&nbsp;' par défaut.
@@ -33,7 +53,7 @@ class Template implements TemplateContract
      *
      * @return array
      */
-    public function woocommerce_breadcrumb_defaults($args = []) : array
+    public function woocommerce_breadcrumb_defaults(array $args = []) : array
     {
         return $args;
     }

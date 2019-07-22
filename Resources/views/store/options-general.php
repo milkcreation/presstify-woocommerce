@@ -7,14 +7,14 @@
     <tbody>
     <tr>
         <th>
-            <label for="tify_wc_multi_default--<?php echo $store->getName(); ?>">
+            <label for="Woocommerce-storeDefault--<?php echo $store->getName(); ?>">
                 <?php _e('Utiliser en tant que boutique par défaut', 'tify'); ?>
             </label>
         </th>
         <td>
             <?php echo field('checkbox', [
                 'attrs'   => [
-                    'id'    => "tify_wc_multi_default--{$store->getName()}",
+                    'id'    => "Woocommerce-storeDefault--{$store->getName()}",
                     'style' => 'vertical-align:top',
                 ],
                 'checked' => $store->getName() === get_option('tify_wc_multi_default', ''),

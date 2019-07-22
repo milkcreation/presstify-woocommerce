@@ -2,9 +2,10 @@
 
 namespace tiFy\Plugins\Woocommerce\Contracts;
 
+use tiFy\Contracts\Support\ParamsBag;
 use WP_Query;
 
-interface Query extends WoocommerceAwareTrait
+interface Query extends ParamsBag, WoocommerceAwareTrait
 {
     /**
      * Initialisation de la classe.
@@ -85,4 +86,11 @@ interface Query extends WoocommerceAwareTrait
      * @return void
      */
     public function get_posts_shop(WP_Query &$wpQuery): void;
+
+    /**
+     * {@inheritDoc}
+     *
+     * @return static
+     */
+    public function parse(): Query;
 }

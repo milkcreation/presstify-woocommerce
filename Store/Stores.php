@@ -1,12 +1,12 @@
 <?php declare(strict_types=1);
 
-namespace tiFy\Plugins\Woocommerce\Multistore;
+namespace tiFy\Plugins\Woocommerce\Store;
 
-use tiFy\Plugins\Woocommerce\Contracts\{Multistore as MultistoreContracts, StoreFactory as StoreFactoryContract};
+use tiFy\Plugins\Woocommerce\Contracts\{Stores as StoresContracts, StoreFactory as StoreFactoryContract};
 use tiFy\Plugins\Woocommerce\WoocommerceAwareTrait;
 use tiFy\Support\Collection;
 
-class Multistore extends Collection implements MultistoreContracts
+class Stores extends Collection implements StoresContracts
 {
     use WoocommerceAwareTrait;
 
@@ -100,7 +100,7 @@ class Multistore extends Collection implements MultistoreContracts
     {
         if (!$item instanceof StoreFactoryContract) {
             $attrs = $item;
-            $item = $this->manager->resolve('multistore.factory');
+            $item = $this->manager->resolve('store-factory');
         } else {
             $attrs = [];
         }

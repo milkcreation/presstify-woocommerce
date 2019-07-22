@@ -4,7 +4,7 @@ namespace tiFy\Plugins\Woocommerce\Contracts;
 
 use tiFy\Contracts\Support\Collection;
 
-interface Multistore extends Collection, WoocommerceAwareTrait
+interface Stores extends Collection, WoocommerceAwareTrait
 {
     /**
      * {@inheritDoc}

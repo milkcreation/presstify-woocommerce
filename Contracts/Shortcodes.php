@@ -1,29 +1,41 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace tiFy\Plugins\Woocommerce\Contracts;
 
-use tiFy\Contracts\Kernel\ParamsBag;
+use tiFy\Contracts\Support\ParamsBag;
 
-interface Shortcodes extends ParamsBag
+interface Shortcodes extends ParamsBag, WoocommerceAwareTrait
 {
     /**
-     * Désactivation d'un shortcode.
-     *
-     * @param string $shortcode Nom du shortcode.
+     * Initialisation de la classe.
      *
      * @return void
      */
-    public function disable($shortcode);
+    public function boot(): void;
+
+    /**
+     * Désactivation d'un shortcode.
+     *
+     * @param string $tag Nom de qualification du shortcode.
+     *
+     * @return void
+     */
+    public function disable(string $tag): void;
 
     /**
      * Execution d'un shortcode Woocommerce en dehors de la boucle.
      *
-     * @param string $shortcode Nom du shortcode.
-     * @param array $attrs Attributs du shortcode.
+     * @param string $tag Nom de qualification du shortcode.
+     * @param array $attrs Liste des attributs de configuration.
      *
      * @see class-wc-shortcodes.php
      *
-     * @return mixed
+     * @return string
      */
-    public function doing($shortcode, $attrs = []);
+    public function doing(string $tag, array $attrs = []): ?string;
+
+    /**
+     * @inheritDoc
+     */
+    public function parse(): Shortcodes;
 }

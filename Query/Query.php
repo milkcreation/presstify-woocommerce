@@ -3,13 +3,14 @@
 namespace tiFy\Plugins\Woocommerce\Query;
 
 use tiFy\Plugins\Woocommerce\{Contracts\Query as QueryContract, WoocommerceAwareTrait};
+use tiFy\Support\ParamsBag;
 use WP_Query;
 
 /**
  * REQUETE DE RECUPERATION DES ELEMENTS DE PAGE
  * @see Woocommerce/includes/class-wc-query.php
  */
-class Query implements QueryContract
+class Query extends ParamsBag implements QueryContract
 {
     use WoocommerceAwareTrait;
 
@@ -80,4 +81,14 @@ class Query implements QueryContract
      * @inheritDoc
      */
     public function get_posts_shop(WP_Query &$wpQuery): void {}
+
+    /**
+     * @inheritDoc
+     */
+    public function parse(): QueryContract
+    {
+        parent::parse();
+
+        return $this;
+    }
 }

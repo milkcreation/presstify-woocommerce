@@ -2,10 +2,10 @@
 
 namespace tiFy\Plugins\Woocommerce\Order;
 
-use tiFy\Plugins\Woocommerce\Contracts\Order as OrderContract;
-use tiFy\Plugins\Woocommerce\WoocommerceAwareTrait;
+use tiFy\Plugins\Woocommerce\{Contracts\Order as OrderContract, WoocommerceAwareTrait};
+use tiFy\Support\ParamsBag;
 
-class Order implements OrderContract
+class Order extends ParamsBag implements OrderContract
 {
     use WoocommerceAwareTrait;
 
@@ -23,4 +23,14 @@ class Order implements OrderContract
      * @inheritDoc
      */
     public function boot(): void {}
+
+    /**
+     * @inheritDoc
+     */
+    public function parse(): OrderContract
+    {
+        parent::parse();
+
+        return $this;
+    }
 }
