@@ -8,4 +8,19 @@ use tiFy\Plugins\Woocommerce\WoocommerceAwareTrait;
 class Cart implements CartContract
 {
     use WoocommerceAwareTrait;
+
+    /**
+     * CONSTRUCTEUR.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->boot();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function boot(): void {}
 }

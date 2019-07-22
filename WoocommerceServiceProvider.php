@@ -6,12 +6,19 @@ use tiFy\Container\ServiceProvider;
 use tiFy\Metabox\MetaboxManager;
 use tiFy\Plugins\Woocommerce\Contracts\{
     Cart as CartContract,
+    Checkout as CheckoutContract,
+    Form as FormContract,
     Multistore as MultistoreContract,
+    Order as OrderContract,
+    PaymentGateways as PaymentGatewaysContract,
     ProductCat as ProductCatContract,
+    Query as QueryContract,
+    StoreFactory as StoreFactoryContract,
+    ScriptLoader as ScriptLoaderContract,
+    Shipping as ShippingContract,
     TemplateHooks as TemplateHooksContract,
     Woocommerce as WoocommerceContract};
 use tiFy\Plugins\Woocommerce\{
-    Assets\Assets,
     Cart\Cart,
     Checkout\Checkout,
     Form\Form,
@@ -19,13 +26,21 @@ use tiFy\Plugins\Woocommerce\{
     Mail\Mail,
     Metabox\Product as MetaboxProduct,
     Multistore\Multistore,
+    Multistore\StoreFactory,
     Order\Order,
+    PaymentGateway\PaymentGatewayBacs,
+    PaymentGateway\PaymentGatewayCheque,
+    PaymentGateway\PaymentGatewayCod,
+    PaymentGateway\PaymentGatewayCustom,
+    PaymentGateway\PaymentGatewayPaypal,
+    PaymentGateway\PaymentGateways,
     Product\Product,
     ProductCat\ProductCat,
     Query\Query,
     Query\QueryProduct,
     Query\QueryProducts,
     Routing\Routing,
+    ScriptLoader\ScriptLoader,
     Shipping\Shipping,
     Shortcodes\Shortcodes,
     Views\Template,
@@ -41,26 +56,33 @@ class WoocommerceServiceProvider extends ServiceProvider
      * @var array
      */
     protected $concrete = [
-        'assets'                => Assets::class,
-        'cart'                  => Cart::class,
-        'checkout'              => Checkout::class,
-        'form'                  => Form::class,
-        'functions'             => Functions::class,
-        'mail'                  => Mail::class,
-        'metabox.product'       => MetaboxProduct::class,
-        'multistore'            => Multistore::class,
-        'order'                 => Order::class,
-        'product'               => Product::class,
-        'product-cat'           => ProductCat::class,
-        'query'                 => Query::class,
-        'query.product'         => QueryProduct::class,
-        'query.products'        => QueryProducts::class,
-        'routing'               => Routing::class,
-        'shipping'              => Shipping::class,
-        'shortcodes'            => Shortcodes::class,
-        'views.template'        => Template::class,
-        'views.template-hooks'  => TemplateHooks::class,
-        'views.template_loader' => TemplateLoader::class
+        'cart'                   => Cart::class,
+        'checkout'               => Checkout::class,
+        'form'                   => Form::class,
+        'functions'              => Functions::class,
+        'mail'                   => Mail::class,
+        'metabox.product'        => MetaboxProduct::class,
+        'multistore'             => Multistore::class,
+        'multistore.factory'     => StoreFactory::class,
+        'order'                  => Order::class,
+        'payment-gateway.bacs'   => PaymentGatewayBacs::class,
+        'payment-gateway.cod'    => PaymentGatewayCod::class,
+        'payment-gateway.cheque' => PaymentGatewayCheque::class,
+        'payment-gateway.custom' => PaymentGatewayCustom::class,
+        'payment-gateway.paypal' => PaymentGatewayPaypal::class,
+        'payment-gateways'       => PaymentGateways::class,
+        'product'                => Product::class,
+        'product-cat'            => ProductCat::class,
+        'query'                  => Query::class,
+        'query.product'          => QueryProduct::class,
+        'query.products'         => QueryProducts::class,
+        'routing'                => Routing::class,
+        'script-loader'          => ScriptLoader::class,
+        'shipping'               => Shipping::class,
+        'shortcodes'             => Shortcodes::class,
+        'views.template'         => Template::class,
+        'views.template-hooks'   => TemplateHooks::class,
+        'views.template_loader'  => TemplateLoader::class,
     ];
 
     /**
@@ -75,15 +97,20 @@ class WoocommerceServiceProvider extends ServiceProvider
      */
     protected $provides = [
         'woocommerce',
-        'woocommerce.assets',
         'woocommerce.cart',
         'woocommerce.checkout',
         'woocommerce.form',
         'woocommerce.functions',
         'woocommerce.mail',
         'woocommerce.metabox.product',
-        'woocommerce.multishop',
-        'woocommerce.multishop.factory',
+        'woocommerce.multistore',
+        'woocommerce.multistore.factory',
+        'woocommerce.payment-gateway.bacs',
+        'woocommerce.payment-gateway.cheque',
+        'woocommerce.payment-gateway.cod',
+        'woocommerce.payment-gateway.custom',
+        'woocommerce.payment-gateway.paypal',
+        'woocommerce.payment-gateways',
         'woocommerce.product',
         'woocommerce.product-cat',
         'woocommerce.order',
@@ -91,11 +118,12 @@ class WoocommerceServiceProvider extends ServiceProvider
         'woocommerce.query.product',
         'woocommerce.query.products',
         'woocommerce.routing',
+        'woocommerce.script-loader',
         'woocommerce.shipping',
         'woocommerce.shortcodes',
         'woocommerce.views.template',
         'woocommerce.views.template-hooks',
-        'woocommerce.views.template_loader'
+        'woocommerce.views.template_loader',
     ];
 
     /**
@@ -117,7 +145,6 @@ class WoocommerceServiceProvider extends ServiceProvider
                 $this->customs[$k] = $v;
             });
 
-            $this->getContainer()->get('woocommerce.assets');
             $this->getContainer()->get('woocommerce.cart');
             $this->getContainer()->get('woocommerce.checkout');
             $this->getContainer()->get('woocommerce.form');
@@ -125,9 +152,11 @@ class WoocommerceServiceProvider extends ServiceProvider
             $this->getContainer()->get('woocommerce.metabox.product');
             $this->getContainer()->get('woocommerce.multistore');
             $this->getContainer()->get('woocommerce.order');
+            $this->getContainer()->get('woocommerce.payment-gateways');
             $this->getContainer()->get('woocommerce.product');
             $this->getContainer()->get('woocommerce.product-cat');
             $this->getContainer()->get('woocommerce.query');
+            $this->getContainer()->get('woocommerce.script-loader');
             $this->getContainer()->get('woocommerce.shipping');
             $this->getContainer()->get('woocommerce.shortcodes');
             $this->getContainer()->get('woocommerce.views.template');
@@ -145,7 +174,7 @@ class WoocommerceServiceProvider extends ServiceProvider
      *
      * @param string $alias Alias de qualification.
      *
-     * @return string
+     * @return string|object
      */
     public function getConcrete($alias)
     {
@@ -157,11 +186,10 @@ class WoocommerceServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->getContainer()->share('woocommerce', function() {
+        $this->getContainer()->share('woocommerce', function () {
             return new Woocommerce($this->getContainer());
         });
 
-        $this->registerAssets();
         $this->registerCart();
         $this->registerCheckout();
         $this->registerForm();
@@ -170,10 +198,12 @@ class WoocommerceServiceProvider extends ServiceProvider
         $this->registerMetaboxProduct();
         $this->registerMultistore();
         $this->registerOrder();
+        $this->registerPaymentGateway();
         $this->registerProduct();
         $this->registerProductCat();
         $this->registerQuery();
         $this->registerRouting();
+        $this->registerScriptLoader();
         $this->registerShipping();
         $this->registerShortcodes();
         $this->registerViewer();
@@ -181,21 +211,6 @@ class WoocommerceServiceProvider extends ServiceProvider
         $this->registerViewsTemplate();
         $this->registerViewsTemplateHooks();
         $this->registerViewsTemplateLoader();
-    }
-
-    /**
-     * Déclaration du service de chargement des ressources.
-     *
-     * @return void
-     */
-    public function registerAssets(): void
-    {
-        $this->getContainer()->share('woocommerce.assets', function () {
-            $attrs = config('woocommerce.assets', []);
-            $concrete = $this->getConcrete('assets');
-
-            return new $concrete($attrs);
-        });
     }
 
     /**
@@ -209,7 +224,7 @@ class WoocommerceServiceProvider extends ServiceProvider
             $concrete = $this->getConcrete('cart');
 
             /** @var CartContract $instance */
-            $instance = new $concrete();
+            $instance = $concrete instanceof CartContract ? $concrete : new $concrete();
 
             return $instance->setManager($this->manager);
         });
@@ -223,10 +238,12 @@ class WoocommerceServiceProvider extends ServiceProvider
     public function registerCheckout(): void
     {
         $this->getContainer()->share('woocommerce.checkout', function () {
-            $attrs = config('woocommerce.checkout', []);
             $concrete = $this->getConcrete('checkout');
 
-            return new $concrete($attrs);
+            /** @var CheckoutContract $instance */
+            $instance = $concrete instanceof CheckoutContract ? $concrete : new $concrete();
+
+            return $instance->setManager($this->manager)->set(config('woocommerce.checkout', []))->parse();
         });
     }
 
@@ -238,10 +255,12 @@ class WoocommerceServiceProvider extends ServiceProvider
     public function registerForm(): void
     {
         $this->getContainer()->share('woocommerce.form', function () {
-            $attrs = config('woocommerce.form', []);
             $concrete = $this->getConcrete('form');
 
-            return new $concrete($attrs);
+            /** @var FormContract $instance */
+            $instance = $concrete instanceof FormContract ? $concrete : new $concrete();
+
+            return $instance->setManager($this->manager)->set(config('woocommerce.form', []))->parse();
         });
     }
 
@@ -253,7 +272,7 @@ class WoocommerceServiceProvider extends ServiceProvider
     public function registerFunctions(): void
     {
         $this->getContainer()->share('woocommerce.functions', function () {
-             return new Functions();
+            return new Functions();
         });
     }
 
@@ -293,11 +312,10 @@ class WoocommerceServiceProvider extends ServiceProvider
     public function registerMultistore(): void
     {
         $this->getContainer()->share('woocommerce.multistore', function () {
-            $stores = config('woocommerce.multistore', []);
             $concrete = $this->getConcrete('multistore');
 
             /** @var MultistoreContract $instance */
-            $instance = new $concrete($this->manager);
+            $instance = $concrete instanceof MultistoreContract ? $concrete : new $concrete();
 
             add_action('init', function () use ($instance) {
                 if ($instance->all()) {
@@ -305,7 +323,7 @@ class WoocommerceServiceProvider extends ServiceProvider
                     $metabox = $this->manager->getContainer()->get('metabox');
 
                     $metabox->add('WoocommerceMultistore-storeOptions', 'tify_options@options', [
-                        'title' => __('Multi-boutique woocommerce', 'theme')
+                        'title' => __('Multi-boutique woocommerce', 'theme'),
                     ]);
                 }
             });
@@ -318,13 +336,76 @@ class WoocommerceServiceProvider extends ServiceProvider
                 return $page_id;
             });
 
-            return $instance->setManager($this->manager)->set($stores);
+            return $instance->setManager($this->manager)->set(config('woocommerce.multistore', []));
         });
 
-        $this->getContainer()->add('woocommerce.multishop.factory', function ($shopId, $shopAttrs) {
-            $concrete = $this->getConcrete('multishop.factory');
+        $this->getContainer()->add('woocommerce.multistore.factory', function () {
+            $concrete = $this->getConcrete('multistore.factory');
 
-            return new $concrete($shopId, $shopAttrs);
+            /** @var StoreFactoryContract $instance */
+            return $instance = $concrete instanceof StoreFactoryContract ? $concrete : new $concrete();
+        });
+    }
+
+    /**
+     * Déclaration du service de gestion des produits.
+     *
+     * @return void
+     */
+    public function registerPaymentGateway(): void
+    {
+        $this->getContainer()->share('woocommerce.payment-gateways', function () {
+            $concrete = $this->getConcrete('payment-gateways');
+
+            /** @var PaymentGatewaysContract $instance */
+            $instance = new $concrete(config('woocommerce.payment-gateways', []));
+
+            return $instance->setManager($this->manager);
+        });
+
+        $this->getContainer()->share('woocommerce.payment-gateway.bacs', function () {
+            $concrete = $this->getConcrete('payment-gateway.bacs');
+
+            /** @var PaymentGatewayBacs $instance */
+            $instance = new $concrete();
+
+            return $instance->setManager($this->manager);
+        });
+
+        $this->getContainer()->share('woocommerce.payment-gateway.cheque', function () {
+            $concrete = $this->getConcrete('payment-gateway.cheque');
+
+            /** @var PaymentGatewayCheque $instance */
+            $instance = new $concrete();
+
+            return $instance->setManager($this->manager);
+        });
+
+        $this->getContainer()->share('woocommerce.payment-gateway.cod', function () {
+            $concrete = $this->getConcrete('payment-gateway.cod');
+
+            /** @var PaymentGatewayCod $instance */
+            $instance = new $concrete();
+
+            return $instance->setManager($this->manager);
+        });
+
+        $this->getContainer()->share('woocommerce.payment-gateway.custom', function () {
+            $concrete = $this->getConcrete('payment-gateway.custom');
+
+            /** @var PaymentGatewayCustom $instance */
+            $instance = new $concrete();
+
+            return $instance->setManager($this->manager);
+        });
+
+        $this->getContainer()->share('woocommerce.payment-gateway.paypal', function () {
+            $concrete = $this->getConcrete('payment-gateway.paypal');
+
+            /** @var PaymentGatewayPaypal $instance */
+            $instance = new $concrete();
+
+            return $instance->setManager($this->manager);
         });
     }
 
@@ -353,7 +434,7 @@ class WoocommerceServiceProvider extends ServiceProvider
             $concrete = $this->getConcrete('product-cat');
 
             /** @var ProductCatContract $instance */
-            $instance = new $concrete();
+            $instance = $concrete instanceof ProductCatContract ? $concrete : new $concrete();
 
             return $instance->setManager($this->manager);
         });
@@ -369,7 +450,10 @@ class WoocommerceServiceProvider extends ServiceProvider
         $this->getContainer()->share('woocommerce.order', function () {
             $concrete = $this->getConcrete('order');
 
-            return new $concrete();
+            /** @var OrderContract $instance */
+            $instance = $concrete instanceof OrderContract ? $concrete : new $concrete();
+
+            return $instance->setManager($this->manager);
         });
     }
 
@@ -383,7 +467,10 @@ class WoocommerceServiceProvider extends ServiceProvider
         $this->getContainer()->share('woocommerce.query', function () {
             $concrete = $this->getConcrete('query');
 
-            return new $concrete();
+            /** @var QueryContract $instance */
+            $instance = $concrete instanceof QueryContract ? $concrete : new $concrete();
+
+            return $instance->setManager($this->manager);
         });
 
         $this->getContainer()->add('woocommerce.query.product', function ($wc_product = null) {
@@ -423,6 +510,23 @@ class WoocommerceServiceProvider extends ServiceProvider
     }
 
     /**
+     * Déclaration du service de chargement des scripts JS et Feuilles de styles CSS.
+     *
+     * @return void
+     */
+    public function registerScriptLoader(): void
+    {
+        $this->getContainer()->share('woocommerce.script-loader', function () {
+            $concrete = $this->getConcrete('script-loader');
+
+            /** @var ScriptLoaderContract $instance */
+            $instance = $concrete instanceof ScriptLoaderContract ? $concrete : new $concrete();
+
+            return $instance->setManager($this->manager);
+        });
+    }
+
+    /**
      * Déclaration du service de gestion de l'expédition.
      *
      * @return void
@@ -432,7 +536,10 @@ class WoocommerceServiceProvider extends ServiceProvider
         $this->getContainer()->share('woocommerce.shipping', function () {
             $concrete = $this->getConcrete('shipping');
 
-            return new $concrete();
+            /** @var ShippingContract $instance */
+            $instance = $concrete instanceof ShippingContract ? $concrete : new $concrete();
+
+            return $instance->setManager($this->manager);
         });
     }
 
@@ -459,16 +566,16 @@ class WoocommerceServiceProvider extends ServiceProvider
     public function registerViewer(): void
     {
         $this->getContainer()->share('woocommerce.viewer', function () {
-                $cinfo = class_info($this);
-                $default_dir = $cinfo->getDirname() . '/Resources/views';
-                $viewer = view()
-                    ->setDirectory(is_dir($default_dir) ? $default_dir : null)
-                    ->setOverrideDir((($override_dir = config('woocommerce.viewer.override_dir')) && is_dir($override_dir))
-                        ? $override_dir
-                        : (is_dir($default_dir) ? $default_dir : $cinfo->getDirname()));
+            $cinfo = class_info($this);
+            $default_dir = $cinfo->getDirname() . '/Resources/views';
+            $viewer = view()
+                ->setDirectory(is_dir($default_dir) ? $default_dir : null)
+                ->setOverrideDir((($override_dir = config('woocommerce.viewer.override_dir')) && is_dir($override_dir))
+                    ? $override_dir
+                    : (is_dir($default_dir) ? $default_dir : $cinfo->getDirname()));
 
-                return $viewer;
-            }
+            return $viewer;
+        }
         );
     }
 

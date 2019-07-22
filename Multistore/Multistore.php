@@ -94,13 +94,13 @@ class Multistore extends Collection implements MultistoreContracts
     }
 
     /**
-     * @inheritDoc.
+     * @inheritDoc
      */
     public function walk($item, $name = null)
     {
         if (!$item instanceof StoreFactoryContract) {
             $attrs = $item;
-            $item = new StoreFactory();
+            $item = $this->manager->resolve('multistore.factory');
         } else {
             $attrs = [];
         }
