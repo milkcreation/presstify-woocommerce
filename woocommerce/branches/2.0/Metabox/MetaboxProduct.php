@@ -1,15 +1,19 @@
-<?php
+<?php declare(strict_types=1);
+
+namespace tiFy\Plugins\Woocommerce\Metabox;
+
+use tiFy\Plugins\Woocommerce\{Contracts\MetaboxProduct as MetaboxProductContract, WoocommerceAwareTrait};
+use tiFy\Support\ParamsBag;
+use WP_Screen;
+
 /**
  * @see /wp-content/plugins/woocommerce/includes/admin/meta-boxes/class-wc-meta-box-product-data.php
  * @see http://www.remicorson.com/mastering-woocommerce-products-custom-fields/
  */
-
-namespace tiFy\Plugins\Woocommerce\Metabox;
-
-use tiFy\Plugins\Woocommerce\Contracts\Metabox as MetaboxContract;
-
-class Product implements MetaboxContract
+class MetaboxProduct extends ParamsBag implements MetaboxProductContract
 {
+    use WoocommerceAwareTrait;
+
     /**
      * CONSTRUCTEUR.
      *
@@ -17,7 +21,17 @@ class Product implements MetaboxContract
      */
     public function __construct()
     {
-        add_action('current_screen', [$this, 'current_screen']);
+        add_action('current_screen', function (WP_Screen $wp_screen) : void {
+            if ($wp_screen->id === 'product') {
+                foreach ($this->metadatas() as $meta => $single) {
+                    if (is_numeric($meta)) {
+                        $meta = (string)$single;
+                        $single = true;
+                    }
+                    post_type()->post_meta()->register('product', $meta, $single);
+                }
+            }
+        });
 
         // Données de produit
         /// Modifications des onglets 
@@ -48,129 +62,88 @@ class Product implements MetaboxContract
         add_action('woocommerce_product_options_sold_individually', [$this, 'woocommerce_product_options_sold_individually']);
         /// Ajout de champs additionnels
         add_action('woocommerce_product_options_inventory_product_data', [$this, 'woocommerce_product_options_inventory_product_data']);
+
+        $this->boot();
     }
 
     /**
-     * Affichage de l'écran courant.
-     *
-     * @return void
+     * @inheritDoc
      */
-    public function current_screen($current_screen)
-    {
-        // Bypass
-        if (!is_a($current_screen, 'WP_Screen'))
-            return;
-        if ($current_screen->id !== 'product')
-            return;
-
-        foreach ($this->metadatas() as $meta => $single) :
-            if (is_numeric($meta)) :
-                $meta = (string) $single;
-                $single = true;
-            endif;
-
-            post_type()->post_meta()->register($current_screen->id, $meta, $single);
-        endforeach;
-    }
+    public function boot(): void {}
 
     /**
-     * Déclaration des métadonnées à enregistrer.
-     *
-     * @return array
+     * @inheritDoc
      */
-    public function metadatas()
+    public function metadatas(): array
     {
         return [];
     }
 
     /**
-     * DONNEES PRODUIT.
+     * @inheritDoc
      */
+    public function parse(): MetaboxProductContract
+    {
+        parent::parse();
+
+        return $this;
+    }
+
     /**
-     * Modification des onglets.
-     *
-     * @param array $tabs Onglets existants.
-     *
-     * @return array
+     * @inheritDoc
      */
-    public function woocommerce_product_data_tabs($tabs)
+    public function woocommerce_product_data_tabs(array $tabs): array
     {
         return $tabs;
     }
 
     /**
-     * Ajout d'onglets personnalisés.
+     * @inheritDoc
      */
-    public function woocommerce_product_write_panel_tabs()
-    {
-    }
+    public function woocommerce_product_write_panel_tabs(): void {}
 
     /**
-     * Ajout de panneaux d'édition personnalisés.
+     * @inheritDoc
      */
-    public function woocommerce_product_data_panels()
-    {
-    }
+    public function woocommerce_product_data_panels(): void {}
 
     /**
-     * ONGLET GENERAL.
+     * @inheritDoc
      */
-    /**
-     * Ajout de champs - PRIX.
-     */
-    public function woocommerce_product_options_pricing()
-    {
-    }
+    public function woocommerce_product_options_pricing(): void {}
 
     /**
-     * Ajout de champs - TÉLÉCHARGEMENT.
+     * @inheritDoc
      */
-    public function woocommerce_product_options_downloads()
-    {
-    }
+    public function woocommerce_product_options_downloads(): void {}
 
     /**
-     * Ajout de champs - TAXE.
+     * @inheritDoc
      */
-    public function woocommerce_product_options_tax()
-    {
-    }
+    public function woocommerce_product_options_tax(): void {}
 
     /**
-     * Ajout de champs - ADDITIONNELS.
+     * @inheritDoc
      */
-    public function woocommerce_product_options_general_product_data()
-    {
-    }
+    public function woocommerce_product_options_general_product_data(): void {}
 
     /**
-     * ONGLET INVENTAIRE.
+     * @inheritDoc
      */
-    /**
-     * Ajout de champs - IDENTIFICATION PRODUIT.
-     */
-    public function woocommerce_product_options_sku()
-    {
-    }
+    public function woocommerce_product_options_sku(): void {}
 
     /**
-     * Ajout de champs - GESTION DE STOCK.
+     * @inheritDoc
      */
-    public function woocommerce_product_options_stock_status()
-    {
-    }
+    public function woocommerce_product_options_stock_status(): void {}
 
     /**
-     * Ajout de champs - VENTE INDIVIDUELLE.
+     * @inheritDoc
      */
-    public function woocommerce_product_options_sold_individually()
-    {
-    }
+    public function woocommerce_product_options_sold_individually(): void {}
 
     /**
-     * Ajout de champs - ADDITIONNELS.
+     * @inheritDoc
      */
-    public function woocommerce_product_options_inventory_product_data()
-    {
-    }
+    public function woocommerce_product_options_inventory_product_data(): void {}
 }

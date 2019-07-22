@@ -2,13 +2,17 @@
 
 namespace tiFy\Plugins\Woocommerce;
 
-use Psr\Container\ContainerInterface as Container;
-use tiFy\Contracts\View\ViewEngine;
+use tiFy\Contracts\{Container\Container, View\ViewEngine};
 use tiFy\Plugins\Woocommerce\Contracts\{
+    Cart,
+    Checkout,
     Form,
+    Order,
     Product,
+    ProductCat,
+    QueryProduct,
     Routing,
-    Multistore,
+    Stores,
     Shortcodes,
     Woocommerce as WoocommerceContract};
 
@@ -18,7 +22,7 @@ use tiFy\Plugins\Woocommerce\Contracts\{
  * @desc Extension PresstiFy de court-circuitage et de fonctionnalités complémentaires woocommerce.
  * @author Jordy Manner <jordy@milkcreation.fr>
  * @package tiFy\Plugins\Woocommerce
- * @version 2.0.17
+ * @version 2.0.18
  *
  * @see https://docs.woocommerce.com/wc-apidocs/index.html
  *
@@ -70,6 +74,22 @@ class Woocommerce implements WoocommerceContract
     /**
      * @inheritDoc
      */
+    public function cart(): ?Cart
+    {
+        return $this->resolve('cart');
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function checkout(): ?Checkout
+    {
+        return $this->resolve('checkout');
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function form(): ?Form
     {
         return $this->resolve('form');
@@ -86,12 +106,9 @@ class Woocommerce implements WoocommerceContract
     /**
      * @inheritDoc
      */
-    public function multistore(?string $name = null): ?object
+    public function order(): ?Order
     {
-        /** @var Multistore $multistore */
-        $multistore = $this->resolve('multistore');
-
-        return is_null($name) ? $multistore : $multistore->get($name);
+        return $this->resolve('order');
     }
 
     /**
@@ -105,7 +122,23 @@ class Woocommerce implements WoocommerceContract
     /**
      * @inheritDoc
      */
-    public function resolve($alias)
+    public function productCat(): ?ProductCat
+    {
+        return $this->resolve('product-cat');
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function queryProduct($product = null): ?QueryProduct
+    {
+        return $this->getContainer()->get('woocommerce.query.product', [$product]);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function resolve(string $alias)
     {
         return $this->getContainer() ? $this->getContainer()->get("woocommerce.{$alias}") : null;
     }
@@ -121,9 +154,20 @@ class Woocommerce implements WoocommerceContract
     /**
      * @inheritDoc
      */
-    public function shortcode(): ?Shortcodes
+    public function shortcodes(): ?Shortcodes
     {
         return $this->resolve('shortcodes');
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function store(?string $name = null): ?object
+    {
+        /** @var Stores $stores */
+        $stores = $this->resolve('stores');
+
+        return is_null($name) ? $stores : $stores->get($name);
     }
 
     /**

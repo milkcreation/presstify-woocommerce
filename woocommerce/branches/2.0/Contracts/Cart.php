@@ -2,7 +2,9 @@
 
 namespace tiFy\Plugins\Woocommerce\Contracts;
 
-interface Cart extends WoocommerceAwareTrait
+use tiFy\Contracts\Support\ParamsBag;
+
+interface Cart extends ParamsBag, WoocommerceAwareTrait
 {
     /**
      * Initialisation de la classe.
@@ -10,4 +12,11 @@ interface Cart extends WoocommerceAwareTrait
      * @return void
      */
     public function boot(): void;
+
+    /**
+     * {@inheritDoc}
+     *
+     * @return static
+     */
+    public function parse(): Cart;
 }

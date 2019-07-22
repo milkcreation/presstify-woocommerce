@@ -70,7 +70,7 @@ interface QueryProduct extends ParamsBag
      *
      * @return mixed|array|string|boolean
      */
-    public function cacheGet($key = null, $default = null);
+    public function cacheGet(?string $key = null, $default = null);
 
     /**
      * Récupération de la liste des enfants associées au produit.
@@ -81,11 +81,26 @@ interface QueryProduct extends ParamsBag
     public function getChildren();
 
     /**
+     * Récupération de la liste des données associées à un produit.
+     *
+     * @return array
+     */
+    public function getDatas(): array;
+
+
+    /**
      * Récupération de l'identifiant de qualification.
      *
      * @return int
      */
     public function getId(): int;
+
+    /**
+     * Récupération de la liste des données associées à un produit.
+     *
+     * @return array
+     */
+    public function getInfos(): array;
 
     /**
      * Récupération du prix maximum.
@@ -94,7 +109,7 @@ interface QueryProduct extends ParamsBag
      *
      * @return float
      */
-    public function getMaxPrice($with_tax = true): float;
+    public function getMaxPrice(bool $with_tax = true): float;
 
     /**
      * Récupération du prix minimum.
@@ -103,7 +118,7 @@ interface QueryProduct extends ParamsBag
      *
      * @return float
      */
-    public function getMinPrice($with_tax = true): float;
+    public function getMinPrice(bool $with_tax = true): float;
 
     /**
      * Récupération de l'instance tiFy du produit parent.
@@ -127,7 +142,7 @@ interface QueryProduct extends ParamsBag
      *
      * @return float
      */
-    public function getPriceIncludingTax($args = []): float;
+    public function getPriceIncludingTax(array $args = []): float;
 
     /**
      * Récupération du prix taxe exclue.
@@ -136,7 +151,7 @@ interface QueryProduct extends ParamsBag
      *
      * @return float
      */
-    public function getPriceExcludingTax($args = []): float;
+    public function getPriceExcludingTax(array $args = []): float;
 
     /**
      * Récupération de l'instance du produit associé.

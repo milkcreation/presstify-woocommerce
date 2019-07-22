@@ -197,7 +197,7 @@ class QueryProduct extends ParamsBag implements QueryProductContract
     /**
      * @inheritDoc
      */
-    public function cacheGet($key = null, $default = null)
+    public function cacheGet(?string $key = null, $default = null)
     {
         $cache = $this->getMetaSingle($this->cacheKey, []);
 
@@ -211,11 +211,34 @@ class QueryProduct extends ParamsBag implements QueryProductContract
     {
         if (is_null($this->children)) {
             $this->children = [];
-            if ($this->isVariable() && ($child_ids = $this->getProduct()->get_children())) {
+            if ($this->isVariable() && ($child_ids = $this->getWcProduct()->get_children())) {
                 $this->children = QueryProducts::createFromIds($child_ids);
             }
         }
         return $this->children ?: null;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getDatas(): array
+    {
+        $datas = [];
+
+        $datas['id'] = $this->getId();
+
+        if ($this->isVariable()) {
+            $datas['type']  = 'variable';
+            $datas['infos'] = [];
+            foreach ($this->getChildren() as $child) {
+                $datas['infos'][] = $child->getInfos();
+            }
+        } elseif ($this->isSimple()) {
+            $datas['type']  = 'simple';
+            $datas['infos'] = $this->getInfos();
+        }
+
+        return $datas;
     }
 
     /**
@@ -229,7 +252,55 @@ class QueryProduct extends ParamsBag implements QueryProductContract
     /**
      * @inheritDoc
      */
-    public function getMaxPrice($with_tax = true): float
+    public function getInfos(): array
+    {
+        $infos = [];
+
+        if ($this->isVariation()) {
+            $infos = [
+                'attributes'            => $this->getWcProduct()->get_variation_attributes(),
+                'variation_description' => wc_format_content($this->getWcProduct()->get_description()),
+                'variation_id'          => $this->getId(),
+                'variation_is_active'   => $this->getWcProduct()->variation_is_active(),
+                'variation_is_visible'  => $this->getWcProduct()->variation_is_visible(),
+            ];
+        }
+
+        return array_merge([
+            'availability_html'     => wc_get_stock_html($this->getWcProduct()),
+            'backorders_allowed'    => $this->getWcProduct()->backorders_allowed(),
+            'dimensions'            => $this->getWcProduct()->get_dimensions(false),
+            'dimensions_html'       => wc_format_dimensions($this->getWcProduct()->get_dimensions(false)),
+            'display_price'         => wc_get_price_to_display($this->getWcProduct()),
+            'display_regular_price' => wc_get_price_to_display($this->getWcProduct(), [
+                    'price' => $this->getWcProduct()->get_regular_price()
+                ]
+            ),
+            'image'                 => wc_get_product_attachment_props($this->getWcProduct()->get_image_id()),
+            'image_id'              => $this->getWcProduct()->get_image_id(),
+            'is_downloadable'       => $this->getWcProduct()->is_downloadable(),
+            'is_in_stock'           => $this->getWcProduct()->is_in_stock(),
+            'is_purchasable'        => $this->getWcProduct()->is_purchasable(),
+            'is_sold_individually'  => $this->getWcProduct()->is_sold_individually() ? 'yes' : 'no',
+            'is_virtual'            => $this->getWcProduct()->is_virtual(),
+            'max_qty'               => 0 < $this->getWcProduct()->get_max_purchase_quantity()
+                ? $this->getWcProduct()->get_max_purchase_quantity() : '',
+            'min_qty'               => $this->getWcProduct()->get_min_purchase_quantity(),
+            'price_html'            => '<span class="price">' . $this->getWcProduct()->get_price_html() . '</span>',
+            'sku'                   => $this->getWcProduct()->get_sku(),
+            'description'           => wc_format_content($this->getWcProduct()->get_description()),
+            'weight'                => $this->getWcProduct()->get_weight(),
+            'weight_html'           => wc_format_weight($this->getWcProduct()->get_weight()),
+            'currency'              => get_woocommerce_currency_symbol(),
+            'price_with_tax'        => $this->getPriceIncludingTax(),
+            'price_without_tax'     => $this->getPriceExcludingTax()
+        ], $infos);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getMaxPrice(bool $with_tax = true): float
     {
         if ($with_tax) {
             if (!isset($this->max_price['with_tax'])) {
@@ -269,7 +340,7 @@ class QueryProduct extends ParamsBag implements QueryProductContract
     /**
      * @inheritDoc
      */
-    public function getMinPrice($with_tax = true): float
+    public function getMinPrice(bool $with_tax = true): float
     {
         if ($with_tax) {
             if (!isset($this->min_price['with_tax'])) {
@@ -313,7 +384,7 @@ class QueryProduct extends ParamsBag implements QueryProductContract
     {
         if ($this->isVariation()) {
             if (is_null($this->parent)) {
-                $this->parent = static::createFromId($this->getProduct()->get_parent_id()) ?: false;
+                $this->parent = static::createFromId($this->getWcProduct()->get_parent_id()) ?: false;
             }
             return $this->parent ?: null;
         } else {
@@ -335,17 +406,27 @@ class QueryProduct extends ParamsBag implements QueryProductContract
     /**
      * @inheritDoc
      */
-    public function getPriceIncludingTax($args = []): float
+    public function getPriceIncludingTax(array $args = []): float
     {
-        return wc_get_price_including_tax($this->getProduct(), $args);
+        return wc_get_price_including_tax($this->getWcProduct(), $args);
     }
 
     /**
      * @inheritDoc
      */
-    public function getPriceExcludingTax($args = []): float
+    public function getPriceExcludingTax(array $args = []): float
     {
-        return wc_get_price_excluding_tax($this->getProduct(), $args);
+        return wc_get_price_excluding_tax($this->getWcProduct(), $args);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @deprecated
+     */
+    public function getProduct(): WC_Product
+    {
+        return $this->getWcProduct();
     }
 
     /**
@@ -353,7 +434,7 @@ class QueryProduct extends ParamsBag implements QueryProductContract
      *
      * @return WC_Product|WC_Product_Simple|WC_Product_Variable|WC_Product_Variation
      */
-    public function getProduct(): WC_Product
+    public function getWcProduct(): WC_Product
     {
         return $this->wc_product;
     }
@@ -397,7 +478,7 @@ class QueryProduct extends ParamsBag implements QueryProductContract
      */
     public function isOnSale(): bool
     {
-        return $this->getProduct()->is_on_sale();
+        return $this->getWcProduct()->is_on_sale();
     }
 
     /**
@@ -405,8 +486,8 @@ class QueryProduct extends ParamsBag implements QueryProductContract
      */
     public function isSimple(): bool
     {
-        return ($this->getProduct() instanceof WC_Product_Simple) &&
-               ! ($this->getProduct() instanceof WC_Product_Variation);
+        return ($this->getWcProduct() instanceof WC_Product_Simple) &&
+               ! ($this->getWcProduct() instanceof WC_Product_Variation);
     }
 
     /**
@@ -414,7 +495,7 @@ class QueryProduct extends ParamsBag implements QueryProductContract
      */
     public function isVariable(): bool
     {
-        return $this->getProduct() instanceof WC_Product_Variable;
+        return $this->getWcProduct() instanceof WC_Product_Variable;
     }
 
     /**
@@ -422,6 +503,6 @@ class QueryProduct extends ParamsBag implements QueryProductContract
      */
     public function isVariation(): bool
     {
-        return $this->getProduct() instanceof WC_Product_Variation;
+        return $this->getWcProduct() instanceof WC_Product_Variation;
     }
 }

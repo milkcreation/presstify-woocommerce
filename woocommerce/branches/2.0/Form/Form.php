@@ -285,4 +285,14 @@ class Form extends ParamsBag implements FormContract
 
         return $originalFields;
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function parse(): FormContract
+    {
+        parent::parse();
+
+        return $this;
+    }
 }

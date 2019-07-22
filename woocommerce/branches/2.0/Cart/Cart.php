@@ -4,8 +4,9 @@ namespace tiFy\Plugins\Woocommerce\Cart;
 
 use tiFy\Plugins\Woocommerce\Contracts\Cart as CartContract;
 use tiFy\Plugins\Woocommerce\WoocommerceAwareTrait;
+use tiFy\Support\ParamsBag;
 
-class Cart implements CartContract
+class Cart extends ParamsBag implements CartContract
 {
     use WoocommerceAwareTrait;
 
@@ -23,4 +24,14 @@ class Cart implements CartContract
      * @inheritDoc
      */
     public function boot(): void {}
+
+    /**
+     * @inheritDoc
+     */
+    public function parse(): CartContract
+    {
+        parent::parse();
+
+        return $this;
+    }
 }

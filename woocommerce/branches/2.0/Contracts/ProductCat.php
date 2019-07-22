@@ -2,7 +2,19 @@
 
 namespace tiFy\Plugins\Woocommerce\Contracts;
 
-interface ProductCat extends WoocommerceAwareTrait
-{
+use tiFy\Contracts\Support\ParamsBag;
 
+interface ProductCat extends ParamsBag, WoocommerceAwareTrait
+{
+    /**
+     * @inheritDoc
+     */
+    public function boot(): void;
+
+    /**
+     * {@inheritDoc}
+     *
+     * @return static
+     */
+    public function parse(): ProductCat;
 }

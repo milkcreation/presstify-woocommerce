@@ -6,7 +6,6 @@ use tiFy\Kernel\Params\ParamsBag;
 use tiFy\Plugins\Woocommerce\Contracts\TemplateLoader as TemplateLoaderContract;
 use tiFy\Plugins\Woocommerce\WoocommerceResolverTrait;
 use tiFy\View\ViewEngine;
-use WC;
 
 class TemplateLoader extends ParamsBag implements TemplateLoaderContract
 {

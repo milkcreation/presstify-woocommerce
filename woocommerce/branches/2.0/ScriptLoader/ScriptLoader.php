@@ -10,12 +10,6 @@ class ScriptLoader extends ParamsBag implements ScriptLoaderContract
     use WoocommerceAwareTrait;
 
     /**
-     * Préfixe des scripts minifiés.
-     * @var string
-     */
-    protected $min = '';
-
-    /**
      * Liste des styles déclarés par contexte.
      * @var array
      */
@@ -28,65 +22,23 @@ class ScriptLoader extends ParamsBag implements ScriptLoaderContract
     protected $scripts = [];
 
     /**
-     * Liste des scripts Woocommerce.
-     * @see wp-content/plugins/woocommerce/includes/class-wc-frontend-scripts.php
-     * @var array
-     */
-    protected $wcScripts = [
-        'wc-address-i18n'            => true,
-        'wc-add-payment-method'      => true,
-        'wc-cart'                    => true,
-        'wc-cart-fragments'          => true,
-        'wc-checkout'                => true,
-        'wc-country-select'          => true,
-        'wc-credit-card-form'        => true,
-        'wc-add-to-cart'             => true,
-        'wc-add-to-cart-variation'   => true,
-        'wc-geolocation'             => true,
-        'wc-lost-password'           => true,
-        'wc-password-strength-meter' => true,
-        'wc-single-product'          => true,
-        'woocommerce'                => true,
-    ];
-
-    /**
-     * Liste des feuilles de styles Woocommerce.
-     * @see wp-content/plugins/woocommerce/includes/class-wc-frontend-scripts.php
-     * @var array
-     */
-    protected $wcStyles = [
-        'woocommerce-layout'      => true,
-        // ! woocommerce-smallscreen est une dépendance de woocommerce-layout
-        'woocommerce-smallscreen' => true,
-        'woocommerce-general'     => true,
-    ];
-
-    /**
      * CONSTRUCTEUR.
-     *
-     * @param array $attrs Liste des attributs de configuration.
      *
      * @return void
      */
-    public function __construct(array $attrs = [])
+    public function __construct()
     {
-        $this->set($attrs)->parse();
-
-        $this->wcStyles = array_merge($this->wcStyles, $this->get('wc_enqueue_styles', []));
-        $this->wcScripts = array_merge($this->wcScripts, $this->get('wc_enqueue_scripts', []));
-        $this->min = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '' : '.min';
-
         // Déclaration des styles/scripts de l'application.
         add_action('init', function () {
             foreach ($this->manager->routing()->getRoutes() as $route) {
-                if (file_exists(get_stylesheet_directory() . "/dist/css/wc-{$route}" . $this->min . '.css')) {
+                if (file_exists(get_stylesheet_directory() . "/dist/css/wc-{$route}" . $this->get('min') . '.css')) {
                     wp_register_style('tify_wc_' . $route,
-                        get_stylesheet_directory_uri() . "/dist/css/wc-{$route}" . $this->min . '.css');
+                        get_stylesheet_directory_uri() . "/dist/css/wc-{$route}" . $this->get('min') . '.css');
                     $this->addStyle($route, 'tify_wc_' . $route);
                 }
-                if (file_exists(get_stylesheet_directory() . "/dist/js/wc-{$route}" . $this->min . ".js")) {
+                if (file_exists(get_stylesheet_directory() . "/dist/js/wc-{$route}" . $this->get('min') . ".js")) {
                     wp_register_script('tify_wc_' . $route,
-                        get_stylesheet_directory_uri() . "/dist/js/wc-{$route}" . $this->min . '.js');
+                        get_stylesheet_directory_uri() . "/dist/js/wc-{$route}" . $this->get('min') . '.js');
                     $this->addScript($route, 'tify_wc_' . $route);
                 }
             }
@@ -94,7 +46,7 @@ class ScriptLoader extends ParamsBag implements ScriptLoaderContract
 
         // Désactivation des styles natifs WooCommerce.
         add_filter('woocommerce_enqueue_styles', function (array $styles) {
-            foreach ($this->wcStyles as $handle => $active) {
+            foreach ($this->get('styles', []) as $handle => $active) {
                 if (!$active) {
                     unset($styles[$handle]);
                 }
@@ -104,7 +56,7 @@ class ScriptLoader extends ParamsBag implements ScriptLoaderContract
 
         // Désactivation des scripts natifs WooCommerce.
         add_action('wp_enqueue_scripts', function () {
-            foreach ($this->wcScripts as $handle => $active) {
+            foreach ($this->get('scripts', []) as $handle => $active) {
                 if (!$active) {
                     wp_dequeue_script($handle);
                 }
@@ -333,5 +285,41 @@ class ScriptLoader extends ParamsBag implements ScriptLoaderContract
     public function getStyles(string $tag): array
     {
         return $this->hasStyle($tag) ? array_unique($this->styles[$tag]) : [];
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function parse(): ScriptLoaderContract
+    {
+        parent::parse();
+
+        $this->set('styles', array_merge([
+            'wc-address-i18n'            => true,
+            'wc-add-payment-method'      => true,
+            'wc-cart'                    => true,
+            'wc-cart-fragments'          => true,
+            'wc-checkout'                => true,
+            'wc-country-select'          => true,
+            'wc-credit-card-form'        => true,
+            'wc-add-to-cart'             => true,
+            'wc-add-to-cart-variation'   => true,
+            'wc-geolocation'             => true,
+            'wc-lost-password'           => true,
+            'wc-password-strength-meter' => true,
+            'wc-single-product'          => true,
+            'woocommerce'                => true,
+        ], $this->get('styles', [])));
+
+        $this->set('scripts', array_merge([
+            'woocommerce-layout'      => true,
+            // ! woocommerce-smallscreen est une dépendance de woocommerce-layout
+            'woocommerce-smallscreen' => true,
+            'woocommerce-general'     => true,
+        ], $this->get('scripts', [])));
+
+        $this->set('min', $this->get('min', defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '' : '.min'));
+
+        return $this;
     }
 }

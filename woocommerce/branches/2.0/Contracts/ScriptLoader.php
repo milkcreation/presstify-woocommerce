@@ -190,4 +190,11 @@ interface ScriptLoader extends ParamsBag, WoocommerceAwareTrait
      * @return array
      */
     public function getStyles(string $tag): array;
+
+    /**
+     * {@inheritDoc}
+     *
+     * @return static
+     */
+    public function parse(): ScriptLoader;
 }

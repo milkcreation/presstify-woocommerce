@@ -1,9 +1,9 @@
 <?php declare(strict_types=1);
 
-namespace tiFy\Plugins\Woocommerce\Multistore;
+namespace tiFy\Plugins\Woocommerce\Store;
 
 use tiFy\Plugins\Woocommerce\Contracts\{
-    Multistore,
+    Stores,
     StoreFactory,
     Woocommerce};
 use tiFy\Metabox\MetaboxWpOptionsController;
@@ -20,10 +20,6 @@ class StoreOptionsMetabox extends MetaboxWpOptionsController
                 return $value;
             }
 
-            /*if($shop_id = tify_wc_multi_current_shop_id()) :
-                $value = get_option('tify_wc_'. $shop_id .'_page_display_cat', 'products');
-            endif;*/
-
             return $value;
         }, 10, 2);
     }
@@ -33,7 +29,7 @@ class StoreOptionsMetabox extends MetaboxWpOptionsController
      */
     public function content($args = null, $null1 = null, $null2 = null)
     {
-        return $this->manager()->viewer('multistore/store-options_general', $this->all());
+        return $this->manager()->viewer('store/options-general', $this->all());
     }
 
     /**
@@ -59,9 +55,9 @@ class StoreOptionsMetabox extends MetaboxWpOptionsController
     /**
      * Récupération du gestionnaire de magasins.
      *
-     * @return Multistore
+     * @return Stores
      */
-    public function stores(): Multistore
+    public function stores(): Stores
     {
         return $this->store()->stores();
     }

@@ -69,11 +69,11 @@ interface StoreFactory extends ParamsBag
      * Préparation du magasin.
      *
      * @param string $name Nom de qualification du magasin.
-     * @param Multistore $stores Instance du gestionnaire de magasins.
+     * @param Stores $stores Instance du gestionnaire de magasins.
      *
      * @return static
      */
-    public function prepare(string $name, Multistore $stores): StoreFactory;
+    public function prepare(string $name, Stores $stores): StoreFactory;
 
     /**
      * Définition de metaboxe de réglage des options.
@@ -88,7 +88,7 @@ interface StoreFactory extends ParamsBag
     /**
      * Récupération de l'instance des boutiques associées.
      *
-     * @return Multistore
+     * @return Stores
      */
-    public function stores(): Multistore;
+    public function stores(): Stores;
 }

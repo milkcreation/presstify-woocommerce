@@ -4,7 +4,7 @@ namespace tiFy\Plugins\Woocommerce\Contracts;
 
 use tiFy\Contracts\Support\ParamsBag;
 
-interface Order extends ParamsBag, WoocommerceAwareTrait
+interface TemplateFilters extends ParamsBag, WoocommerceAwareTrait
 {
     /**
      * Initialisation de la classe.
@@ -18,5 +18,5 @@ interface Order extends ParamsBag, WoocommerceAwareTrait
      *
      * @return static
      */
-    public function parse(): Order;
+    public function parse(): TemplateFilters;
 }

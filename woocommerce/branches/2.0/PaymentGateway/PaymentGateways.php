@@ -2,32 +2,24 @@
 
 namespace tiFy\Plugins\Woocommerce\PaymentGateway;
 
-use tiFy\Plugins\Woocommerce\Contracts\PaymentGateways as PaymentGatewaysContract;
-use tiFy\Plugins\Woocommerce\WoocommerceAwareTrait;
+use tiFy\Plugins\Woocommerce\{Contracts\PaymentGateways as PaymentGatewaysContract, WoocommerceAwareTrait};
+use tiFy\Support\ParamsBag;
 
-class PaymentGateways implements PaymentGatewaysContract
+class PaymentGateways extends ParamsBag implements PaymentGatewaysContract
 {
     use WoocommerceAwareTrait;
 
     /**
-     * Liste des plateformes déclarées
-     */
-    protected $gateways = [];
-    
-    /**
      * CONSTRUCTEUR.
      *
-     * @param array $gateways Liste des plateformes de paiement.
      * @return void
      */
-    public function __construct(array $gateways = [])
+    public function __construct()
     {
-        $this->gateways = $gateways;
-        
         add_filter('woocommerce_payment_gateways', function (array $gateways) {
             $_gateways = [];
 
-            foreach($this->gateways as $name => $active) {
+            foreach($this->all() as $name => $active) {
                 $key = array_search($name, $gateways);
 
                 if ($active === false) {
@@ -38,12 +30,29 @@ class PaymentGateways implements PaymentGatewaysContract
             }
 
             // Traitement des plateformes non déclarées dans la configuration
-            $gateways = array_diff($gateways, array_keys($this->gateways));
+            $gateways = array_diff($gateways, $this->keys());
             foreach($gateways as $gateway) {
                 array_push($_gateways, $gateway);
             }
 
             return $_gateways;
         });
+
+        $this->boot();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function boot(): void {}
+
+    /**
+     * @inheritDoc
+     */
+    public function parse(): PaymentGatewaysContract
+    {
+        parent::parse();
+
+        return $this;
     }
 }

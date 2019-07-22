@@ -2,7 +2,9 @@
 
 namespace tiFy\Plugins\Woocommerce\Contracts;
 
-interface Shipping extends WoocommerceAwareTrait
+use tiFy\Contracts\Support\ParamsBag;
+
+interface Shipping extends ParamsBag, WoocommerceAwareTrait
 {
     /**
      * Initialisation de la classe.
@@ -10,4 +12,9 @@ interface Shipping extends WoocommerceAwareTrait
      * @return void
      */
     public function boot(): void;
+
+    /**
+     * @inheritDoc
+     */
+    public function parse(): Shipping;
 }

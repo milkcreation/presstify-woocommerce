@@ -2,8 +2,15 @@
 
 namespace tiFy\Plugins\Woocommerce\Contracts;
 
-interface Product extends  WoocommerceResolverTrait
+interface Product extends WoocommerceAwareTrait
 {
+    /**
+     * Initialisation de la classe.
+     *
+     * @return void
+     */
+    public function boot(): void;
+
     /**
      * Récupération d'un produit.
      *
@@ -12,22 +19,4 @@ interface Product extends  WoocommerceResolverTrait
      * @return null|QueryProduct
      */
     public function get(?int $product_id = null): ?QueryProduct;
-
-    /**
-     * Récupération de la liste des données associées à un produit.
-     *
-     * @param QueryProduct $product
-     *
-     * @return array
-     */
-    public function getDatas(QueryProduct $product): array;
-
-    /**
-     * Récupération de la liste des données associées à un produit.
-     *
-     * @param QueryProduct $product
-     *
-     * @return array
-     */
-    public function getInfos(QueryProduct $product): array;
 }

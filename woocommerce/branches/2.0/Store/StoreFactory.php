@@ -1,9 +1,9 @@
 <?php declare(strict_types=1);
 
-namespace tiFy\Plugins\Woocommerce\Multistore;
+namespace tiFy\Plugins\Woocommerce\Store;
 
 use tiFy\Metabox\MetaboxManager;
-use tiFy\Plugins\Woocommerce\Contracts\{Multistore as MultistoreContract, StoreFactory as StoreFactoryContract};
+use tiFy\Plugins\Woocommerce\Contracts\{Stores as StoresContract, StoreFactory as StoreFactoryContract};
 use tiFy\Support\ParamsBag;
 use tiFy\Wordpress\Contracts\{QueryPost as QueryPostContract, QueryTerm as QueryTermContract};
 use tiFy\Wordpress\Query\{QueryPost, QueryTerm};
@@ -30,7 +30,7 @@ class StoreFactory extends ParamsBag implements StoreFactoryContract
 
     /**
      * Instance du gestionnaire de magasins.
-     * @var MultistoreContract
+     * @var StoresContract
      */
     protected $stores;
 
@@ -141,13 +141,13 @@ class StoreFactory extends ParamsBag implements StoreFactoryContract
     /**
      * @inheritDoc
      */
-    public function prepare(string $name, MultistoreContract $stores): StoreFactoryContract
+    public function prepare(string $name, StoresContract $stores): StoreFactoryContract
     {
         if (!$this->booted) {
             $this->name = $name;
             $this->stores = $stores;
 
-            $this->setOptionsMetabox('WoocommerceMultistore-storeOptions--' . $this->name . '_general', [
+            $this->setOptionsMetabox('Woocommerce-storeOptions--' . $this->name . '_general', [
                 'title'   => __('Options générales', 'tify'),
                 'position' => 1,
                 'content' => StoreOptionsMetabox::class
@@ -157,8 +157,8 @@ class StoreFactory extends ParamsBag implements StoreFactoryContract
             $this->booted = true;
 
             add_action('init', function () {
-                $this->setOptionsMetabox('WoocommerceMultistore-storeOptions--' . $this->name, [
-                    'parent' => 'WoocommerceMultistore-storeOptions',
+                $this->setOptionsMetabox('Woocommerce-storeOptions--' . $this->name, [
+                    'parent' => 'Woocommerce-storeOptions',
                     'title'  => $this->get('title')
                 ]);
 
@@ -191,7 +191,7 @@ class StoreFactory extends ParamsBag implements StoreFactoryContract
     public function setOptionsMetabox(string $name, array $attrs = []): StoreFactoryContract
     {
         $attrs = array_merge([
-            'parent'  => 'WoocommerceMultistore-storeOptions--' . $this->name,
+            'parent'  => 'Woocommerce-storeOptions--' . $this->name,
             'args'    => []
         ], $attrs);
         $attrs['args']['store'] = $this;
@@ -203,7 +203,7 @@ class StoreFactory extends ParamsBag implements StoreFactoryContract
     /**
      * @inheritDoc
      */
-    public function stores(): MultistoreContract
+    public function stores(): StoresContract
     {
         return $this->stores;
     }

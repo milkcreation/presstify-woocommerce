@@ -37,6 +37,8 @@ interface Form extends ParamsBag, WoocommerceAwareTrait
      * @param string $key
      * @param mixed $value
      *
+     * @return array
+     *
      * @see woocommerce_form_field()
      */
     public function form_fields_args(array $args, string $key, $value): array;
@@ -86,4 +88,11 @@ interface Form extends ParamsBag, WoocommerceAwareTrait
      * @return array
      */
     public function overwriteFormFields(string $formId, array $currentFields, array $newFields): array;
+
+    /**
+     * {@inheritDoc}
+     *
+     * @return static
+     */
+    public function parse(): Form;
 }

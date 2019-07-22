@@ -12,4 +12,11 @@ interface Checkout extends ParamsBag, WoocommerceAwareTrait
      * @return void
      */
     public function boot(): void;
+
+    /**
+     * {@inheritDoc}
+     *
+     * @return static
+     */
+    public function parse(): Checkout;
 }
