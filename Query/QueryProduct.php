@@ -5,7 +5,6 @@ namespace tiFy\Plugins\Woocommerce\Query;
 use tiFy\Plugins\Woocommerce\Contracts\{
     QueryProducts as QueryProductsContract,
     QueryProduct as QueryProductContract};
-use tiFy\Support\{Arr, ParamsBag};
 use tiFy\Wordpress\{Contracts\QueryPost as QueryPostContract, Query\QueryPost};
 use WC_Product;
 use WC_Product_Simple;
@@ -13,32 +12,8 @@ use WC_Product_Variable;
 use WC_Product_Variation;
 use WP_Post;
 
-/**
- * Class QueryProduct
- * @package tiFy\Plugins\Woocommerce\Query
- *
- * @mixin QueryPost
- */
-class QueryProduct extends ParamsBag implements QueryProductContract
+class QueryProduct extends QueryPost implements QueryProductContract
 {
-    /**
-     * Indicateur d'activaction du cache.
-     * @var boolean
-     */
-    protected $cacheable = true;
-
-    /**
-     * Nombre de seconde jusqu'à expiration du cache.
-     * @var int
-     */
-    protected $cacheExpire = 3600*24*365*5;
-
-    /**
-     * Clé d'indice d'enregistrement du cache.
-     * @var string
-     */
-    protected $cacheKey = '_cache';
-
     /**
      * Objets QueryProducts des produits enfants.
      * {@internal Produit variable uniquement}
@@ -59,17 +34,18 @@ class QueryProduct extends ParamsBag implements QueryProductContract
     protected $min_price;
 
     /**
-     * Objet tiFy du produit Parent.
+     * Instance du produit parent.
      * {@internal Variation uniquement}
-     * @var null|QueryProductContract
+     * @var QueryProductContract|false|null
      */
     protected $parent;
 
     /**
-     * Objet Post tiFy.
-     * @var null|QueryPostContract
+     * Liste des instances de variations associées au produit.
+     * {@internal Le produit doit être de type variable}
+     * @var null|array|QueryProductsContract|QueryProductContract[]
      */
-    protected $query_post;
+    protected $variations;
 
     /**
      * Objet Product Woocommerce.
@@ -84,16 +60,25 @@ class QueryProduct extends ParamsBag implements QueryProductContract
     protected $wp_post;
 
     /**
-     * Liste des instances de variations associées au produit.
-     * {@internal Le produit doit être de type variable}
-     * @var null|array|QueryProductsContract|QueryProductContract[]
+     * CONSTRUCTEUR.
+     *
+     * @param WC_Product $wc_product Objet Product Woocommerce.
+     *
+     * @return void
      */
-    protected $variations;
+    public function __construct(WC_Product $wc_product)
+    {
+        $this->wc_product = $wc_product;
+
+        parent::__construct(get_post($this->wc_product->get_id()));
+    }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
+     *
+     * @return QueryProductContract|null
      */
-    public static function createFromGlobal(): ?QueryProductContract
+    public static function createFromGlobal(): ?QueryPostContract
     {
         global $product, $post;
 
@@ -105,9 +90,11 @@ class QueryProduct extends ParamsBag implements QueryProductContract
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
+     *
+     * @return QueryProductContract|null
      */
-    public static function createFromId($product_id): ?QueryProductContract
+    public static function createFromId($product_id): ?QueryPostContract
     {
         return (
             $product_id &&
@@ -116,92 +103,6 @@ class QueryProduct extends ParamsBag implements QueryProductContract
             ($wp_product instanceof WC_Product)
         )
             ? new static($wp_product) : null;
-    }
-
-    /**
-     * CONSTRUCTEUR.
-     *
-     * @param WC_Product $wc_product Objet Product Woocommerce.
-     *
-     * @return void
-     */
-    public function __construct(WC_Product $wc_product)
-    {
-        $this->wc_product = $wc_product;
-
-        $this->set($this->wc_product->get_data())->parse();
-    }
-
-    /**
-     * Appel des méthodes du QueryPost associé.
-     *
-     * @param string $name Nom de qualification de la methode.
-     * @param array $args Liste des variables passées en argument à la méthode.
-     *
-     * @return null|QueryPostContract
-     */
-    public function __call($name, $args)
-    {
-        return method_exists($this->getQueryPost(), $name)
-            ? call_user_func_array([$this->getQueryPost(), $name], $args)
-            : null;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function cacheable(): bool
-    {
-        return $this->cacheable;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function cacheAdd($key, $value = null): QueryProductContract
-    {
-        if (!$cache = $this->getMetaSingle('_cache', []) ?: []) {
-            $cache['expire'] = time()+ $this->cacheExpire;
-            $cache['created'] = time();
-        }
-        $keys = !is_array($key) ? [$key => $value] : $key;
-        $cache['data'] = array_merge($cache['data'] ?? [], $keys);
-
-        $this->saveMeta($this->cacheKey, $cache);
-
-        return $this;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function cacheClear(string $key = null): QueryProductContract
-    {
-        if (is_null($key)) {
-            $this->saveMeta($this->cacheKey, []);
-        }
-
-        return $this;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function cacheCreate(): QueryProductContract
-    {
-        $this->cacheClear();
-
-        return $this;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function cacheGet(?string $key = null, $default = null)
-    {
-        $cache = $this->getMetaSingle($this->cacheKey, []);
-
-        return is_null($key) ? $cache : Arr::get($cache, "data.{$key}", $default);
     }
 
     /**
@@ -239,14 +140,6 @@ class QueryProduct extends ParamsBag implements QueryProductContract
         }
 
         return $datas;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getId(): int
-    {
-        return $this->wc_product->get_id();
     }
 
     /**
@@ -378,29 +271,19 @@ class QueryProduct extends ParamsBag implements QueryProductContract
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
+     *
+     * @return QueryProductContract|null
      */
-    public function getParent()
+    public function getParent(): ?QueryPostContract
     {
-        if ($this->isVariation()) {
-            if (is_null($this->parent)) {
-                $this->parent = static::createFromId($this->getWcProduct()->get_parent_id()) ?: false;
-            }
-            return $this->parent ?: null;
+        if (is_null($this->parent) && $this->isVariation()) {
+            return parent::getParent();
         } else {
-            return null;
+            $this->parent = false;
         }
-    }
 
-    /**
-     * @inheritDoc
-     */
-    public function getPost(): ?WP_Post
-    {
-        if (is_null($this->wp_post)) {
-            $this->wp_post = get_post($this->getId());
-        }
-        return $this->wp_post instanceof WP_Post ? $this->wp_post : null;
+        return $this->parent ?: null;
     }
 
     /**
@@ -422,32 +305,11 @@ class QueryProduct extends ParamsBag implements QueryProductContract
     /**
      * {@inheritDoc}
      *
-     * @deprecated
-     */
-    public function getProduct(): WC_Product
-    {
-        return $this->getWcProduct();
-    }
-
-    /**
-     * {@inheritDoc}
-     *
      * @return WC_Product|WC_Product_Simple|WC_Product_Variable|WC_Product_Variation
      */
     public function getWcProduct(): WC_Product
     {
         return $this->wc_product;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getQueryPost(): ?QueryPostContract
-    {
-        if (is_null($this->query_post)) {
-            $this->query_post = new QueryPost($this->getPost());
-        }
-        return $this->query_post instanceof QueryPostContract ? $this->query_post : null;
     }
 
     /**

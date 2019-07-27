@@ -29,7 +29,7 @@
 
     <?php if ($product->isSimple()) : ?>
     <div class="ProductPrices-stock">
-        <?php echo wc_get_stock_html($product->getProduct()); ?>
+        <?php echo wc_get_stock_html($product->getWcProduct()); ?>
     </div>
     <?php endif; ?>
 </div>

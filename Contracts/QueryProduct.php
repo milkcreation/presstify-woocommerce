@@ -2,75 +2,27 @@
 
 namespace tiFy\Plugins\Woocommerce\Contracts;
 
-use tiFy\Contracts\Support\ParamsBag;
 use tiFy\Wordpress\Contracts\QueryPost;
 use WC_Product;
 use WC_Product_Simple;
 use WC_Product_Variable;
 use WC_Product_Variation;
-use WP_Post;
 
-interface QueryProduct extends ParamsBag
+interface QueryProduct extends QueryPost
 {
     /**
-     * Récupération d'une instance basée sur le produit global courant.
+     * {@inheritDoc}
      *
-     * @return static
+     * @return static|null
      */
-    public static function createFromGlobal(): ?QueryProduct;
+    public static function createFromGlobal(): ?QueryPost;
 
     /**
-     * Récupération d'une instance basée sur l'identifiant de qualification d'un produit.
+     * {@inheritDoc}
      *
-     * @param int $product_id
-     *
-     * @return static
+     * @return static|null
      */
-    public static function createFromId($product_id): ?QueryProduct;
-
-    /**
-     * Indicateur d'activation de la mise en cache.
-     *
-     * @return boolean
-     */
-    public function cacheable(): bool;
-
-    /**
-     * Ajout de données de cache associées au produit.
-     *
-     * @param string|array Clé d'indice de la données de cache.
-     * @param mixed $value Valeur de retour par défaut
-     *
-     * @return QueryProduct
-     */
-    public function cacheAdd($key, $value = null): QueryProduct;
-
-    /**
-     * Suppression des données de cache associées au produit.
-     *
-     * @param string $key Clé d'indice de donnée mise en cache.
-     *
-     * @return QueryProduct
-     */
-    public function cacheClear(string $key = null): QueryProduct;
-
-    /**
-     * Génération du cache.
-     *
-     * @return QueryProduct
-     */
-    public function cacheCreate(): QueryProduct;
-
-    /**
-     * Récupération de donnée de cache associées au produit.
-     * {@internal Permet de récupérer de manière optimale des données relatives aux attributs de variation ...}
-     *
-     * @param string|null Clé d'indice de la données de cache. Si null, retourne la liste complète des données.
-     * @param mixed $default Valeur de retour par défaut
-     *
-     * @return mixed|array|string|boolean
-     */
-    public function cacheGet(?string $key = null, $default = null);
+    public static function createFromId($product_id): ?QueryPost;
 
     /**
      * Récupération de la liste des enfants associées au produit.
@@ -87,16 +39,8 @@ interface QueryProduct extends ParamsBag
      */
     public function getDatas(): array;
 
-
     /**
-     * Récupération de l'identifiant de qualification.
-     *
-     * @return int
-     */
-    public function getId(): int;
-
-    /**
-     * Récupération de la liste des données associées à un produit.
+     * Récupération de la liste des informations associées à un produit.
      *
      * @return array
      */
@@ -121,21 +65,6 @@ interface QueryProduct extends ParamsBag
     public function getMinPrice(bool $with_tax = true): float;
 
     /**
-     * Récupération de l'instance tiFy du produit parent.
-     * {@internal Valable pour un produit variation uniquement.}
-     *
-     * @return null|QueryProduct|QueryPost
-     */
-    public function getParent();
-
-    /**
-     * Récupération de l'instance du post Wordpress associé.
-     *
-     * @return null|WP_Post
-     */
-    public function getPost(): ?WP_Post;
-
-    /**
      * Récupération du prix taxe incluse.
      *
      * @param array $args Liste des arguments optionnels.
@@ -158,14 +87,7 @@ interface QueryProduct extends ParamsBag
      *
      * @return WC_Product|WC_Product_Simple|WC_Product_Variable|WC_Product_Variation
      */
-    public function getProduct(): WC_Product;
-
-    /**
-     * Récupération de l'instance du post tiFy associé.
-     *
-     * @return null|QueryPost
-     */
-    public function getQueryPost(): ?QueryPost;
+    public function getWcProduct(): WC_Product;
 
     /**
      * Récupération de l'unité de gestion de stock (UGS aka SKU).
