@@ -19,7 +19,7 @@ class Query extends \tiFy\App\Factory
      */
     public function __construct()
     {
-        parent::_construct();
+        parent::__construct();
 
         // Court-circuitage des requêtes de récupération de produit
         add_action('pre_get_posts', array($this, 'pre_get_posts'), 99);
