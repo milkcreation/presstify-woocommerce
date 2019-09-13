@@ -22,7 +22,7 @@ use tiFy\Plugins\Woocommerce\Contracts\{
  * @desc Extension PresstiFy de court-circuitage et de fonctionnalités complémentaires woocommerce.
  * @author Jordy Manner <jordy@milkcreation.fr>
  * @package tiFy\Plugins\Woocommerce
- * @version 2.0.19
+ * @version 2.0.20
  *
  * @see https://docs.woocommerce.com/wc-apidocs/index.html
  *
