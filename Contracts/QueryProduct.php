@@ -2,6 +2,7 @@
 
 namespace tiFy\Plugins\Woocommerce\Contracts;
 
+use tiFy\Contracts\Support\{Collection, ParamsBag};
 use tiFy\Wordpress\Contracts\QueryPost;
 use WC_Product;
 use WC_Product_Simple;
@@ -25,14 +26,6 @@ interface QueryProduct extends QueryPost
     public static function createFromId($product_id): ?QueryPost;
 
     /**
-     * Récupération de la liste des enfants associées au produit.
-     * {@internal Valable pour un produit variable uniquement.}
-     *
-     * @return null|QueryProducts|QueryProduct[]
-     */
-    public function getChildren();
-
-    /**
      * Récupération de la liste des données associées à un produit.
      *
      * @return array
@@ -40,11 +33,14 @@ interface QueryProduct extends QueryPost
     public function getDatas(): array;
 
     /**
-     * Récupération de la liste des informations associées à un produit.
+     * Récupération d'informations associées à un produit.
      *
-     * @return array
+     * @param string $key Clé d'indice de l'information à retrouver. Syntaxe à point permise.
+     * @param mixed $default Valeur de retour par défaut
+     *
+     * @return ParamsBag|mixed
      */
-    public function getInfos(): array;
+    public function getInfos(?string $key = null, $default = null);
 
     /**
      * Récupération du prix maximum.
@@ -53,7 +49,7 @@ interface QueryProduct extends QueryPost
      *
      * @return float
      */
-    public function getMaxPrice(bool $with_tax = true): float;
+    public function getMaxPrice(?bool $with_tax = null): float;
 
     /**
      * Récupération du prix minimum.
@@ -62,7 +58,7 @@ interface QueryProduct extends QueryPost
      *
      * @return float
      */
-    public function getMinPrice(bool $with_tax = true): float;
+    public function getMinPrice(?bool $with_tax = null): float;
 
     /**
      * Récupération du prix taxe incluse.
@@ -83,6 +79,57 @@ interface QueryProduct extends QueryPost
     public function getPriceExcludingTax(array $args = []): float;
 
     /**
+     * Récupération de l'unité de gestion de stock (UGS aka SKU).
+     *
+     * @return string
+     */
+    public function getSku(): string;
+
+    /**
+     * Récupération du prix d'une variation.
+     *
+     * @param bool $min
+     *
+     * @return float
+     */
+    public function getVariationPrice($min = true): float;
+
+    /**
+     * Récupération de la liste des variations de prix d'un produit variable.
+     *
+     * @return Collection|null
+     */
+    public function getVariationPrices(): ?Collection;
+
+    /**
+     * Récupération des instances de toutes les variations d'un produit variable.
+     *
+     * @return QueryProducts|QueryProduct[]|null
+     */
+    public function getVariations(): ?QueryProducts;
+
+    /**
+     * Récupération des instances de variations disponibles d'un produit variable.
+     *
+     * @return QueryProducts|QueryProduct[]|null
+     */
+    public function getVariationsAvailable(): ?QueryProducts;
+
+    /**
+     * Récupération de la liste des informations associées aux variations d'un produit variable.
+     *
+     * @return Collection|null
+     */
+    public function getVariationsAvailableInfos(): ?Collection;
+
+    /**
+     * {@inheritDoc}
+     *
+     * @return QueryProducts|QueryProduct[]|null
+     */
+    public function getVariationsVisible(): ?QueryProducts;
+
+    /**
      * Récupération de l'instance du produit associé.
      *
      * @return WC_Product|WC_Product_Simple|WC_Product_Variable|WC_Product_Variation
@@ -90,11 +137,12 @@ interface QueryProduct extends QueryPost
     public function getWcProduct(): WC_Product;
 
     /**
-     * Récupération de l'unité de gestion de stock (UGS aka SKU).
+     * Vérifie l'existance de variations pour un produit variable.
+     * {@internal Le produit doit être variable et le nombre de variation supérieur à 1.}
      *
-     * @return string
+     * @return false
      */
-    public function getSku(): string;
+    public function hasVariation(): bool;
 
     /**
      * Vérification d'existance d'un prix variable pour le produit.

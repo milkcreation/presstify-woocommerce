@@ -2,13 +2,14 @@
 
 namespace tiFy\Plugins\Woocommerce\Query;
 
-use tiFy\Plugins\Woocommerce\Contracts\QueryProducts as QueryProductsContract;
-use tiFy\Support\Collection;
+use tiFy\Plugins\Woocommerce\Contracts\{QueryProduct as QueryProductContract, QueryProducts as QueryProductsContract};
+use tiFy\Wordpress\Contracts\QueryPosts as QueryPostsContract;
+use tiFy\Wordpress\Query\QueryPosts;
 use WC_Product;
 use WP_Post;
 use WP_Query;
 
-class QueryProducts extends Collection implements QueryProductsContract
+class QueryProducts extends QueryPosts implements QueryProductsContract
 {
     /**
      * Instance de la requête Wordpress de récupération des posts.
@@ -19,34 +20,38 @@ class QueryProducts extends Collection implements QueryProductsContract
     /**
      * CONSTRUCTEUR.
      *
-     * @param WP_Query $wp_query Requête Wordpress de récupération de post.
+     * @param WP_Query|null $wp_query Requête Wordpress de récupération de post.
      *
      * @return void
      */
-    public function __construct(WP_Query $wp_query)
+    public function __construct(?WP_Query $wp_query = null)
     {
-        $this->wp_query = $wp_query;
+        parent::__construct();
 
-        $items = $wp_query->posts;
-        array_walk($items, function(WP_Post &$item){
-            $item = WC()->product_factory->get_product($item);
-        });
-
-        array_walk($items, [$this, 'walk']);
+        if ($this->wp_query = $wp_query) {
+            $items = $wp_query->posts;
+            array_walk($items, function (WP_Post &$item) {
+                $this->set(WC()->product_factory->get_product($item));
+            });
+        }
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
+     *
+     * @return QueryProductsContract
      */
-    public static function createFromArgs($args = []): QueryProductsContract
+    public static function createFromArgs($args = []): QueryPostsContract
     {
         return new static(new WP_Query($args));
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
+     *
+     * @return QueryProductsContract
      */
-    public static function createFromGlobals(): QueryProductsContract
+    public static function createFromGlobals(): QueryPostsContract
     {
         global $wp_query;
 
@@ -54,19 +59,18 @@ class QueryProducts extends Collection implements QueryProductsContract
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
+     *
+     * @return QueryProductsContract
      */
-    public static function createFromIds(array $ids): QueryProductsContract
+    public static function createFromIds(array $ids): QueryPostsContract
     {
-        return new static(new WP_Query(['post__in' => $ids, 'post_type' => ['product', 'product_variation'], 'posts_per_page' => -1]));
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getIds() : array
-    {
-        return $this->pluck('ID');
+        return new static(new WP_Query([
+            'post__in'       => $ids,
+            'post_type'      => ['product', 'product_variation'],
+            'post_status'    => ['publish', 'private'],
+            'posts_per_page' => -1,
+        ]));
     }
 
     /**
@@ -76,16 +80,12 @@ class QueryProducts extends Collection implements QueryProductsContract
      *
      * @return void
      */
-    public function walk($item, $key = null)
+    public function walk($item, $key = null): void
     {
-        $this->items[$key] = app()->get('woocommerce.query.product', [$item]);
-    }
+        if (!$item instanceof QueryProductContract) {
+            $item = app()->get('woocommerce.query.product', [$item]);
+        }
 
-    /**
-     * @inheritDoc
-     */
-    public function WpQuery(): WP_Query
-    {
-        return $this->wp_query;
+        $this->items[$key] = $item;
     }
 }
