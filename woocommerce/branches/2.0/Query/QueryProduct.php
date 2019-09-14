@@ -162,7 +162,7 @@ class QueryProduct extends QueryPost implements QueryProductContract
                     ];
                 }
 
-                $infos = (new ParamsBag())->set(array_merge([
+                $infos = array_merge([
                     'availability_html'     => wc_get_stock_html($this->getWcProduct()),
                     'backorders_allowed'    => $this->getWcProduct()->backorders_allowed(),
                     'currency'              => get_woocommerce_currency_symbol(),
@@ -191,12 +191,13 @@ class QueryProduct extends QueryPost implements QueryProductContract
                     'sku'                   => $this->getWcProduct()->get_sku(),
                     'weight'                => $this->getWcProduct()->get_weight(),
                     'weight_html'           => wc_format_weight($this->getWcProduct()->get_weight()),
-                ], $infos));
+                ], $infos);
 
-                $this->cacheAdd('infos', $this->infos = $infos);
+                $this->cacheAdd('infos', $infos);
             } else {
-                $this->infos = $this->cacheGet('infos', []);
+                $infos = $this->cacheGet('infos', []);
             }
+            $this->infos = (new ParamsBag())->set($infos);
         }
 
         return is_null($key) ? $this->infos : $this->infos->get($key, $default);
