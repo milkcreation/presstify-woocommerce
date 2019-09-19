@@ -14,10 +14,10 @@ use WC_Product_Variation;
 class QueryProduct extends QueryPost implements QueryProductContract
 {
     /**
-     * Liste des informations associées à un produit.
+     * Liste des attributs associées à un produit.
      * @var ParamsBagContract|null
      */
-    protected $infos;
+    protected $attributes;
 
     /**
      * Prix de vente maximum (avec et sans taxe).
@@ -105,50 +105,11 @@ class QueryProduct extends QueryPost implements QueryProductContract
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * @return QueryProductContract|null
-     */
-    public function getParent(): ?QueryPostContract
-    {
-        if (is_null($this->parent) && $this->isVariation()) {
-            return parent::getParent();
-        } else {
-            $this->parent = false;
-        }
-
-        return $this->parent ?: null;
-    }
-
-    /**
      * @inheritDoc
      */
-    public function getDatas(): array
+    public function getAttributes(?string $key = null, $default = null)
     {
-        $datas = [];
-
-        $datas['id'] = $this->getId();
-
-        if ($this->isVariable()) {
-            $datas['type'] = 'variable';
-            $datas['infos'] = [];
-            foreach ($this->getVariations() as $var) {
-                $datas['infos'][] = $var->getInfos()->all();
-            }
-        } elseif ($this->isSimple()) {
-            $datas['type'] = 'simple';
-            $datas['infos'] = $this->getInfos()->all();
-        }
-
-        return $datas;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getInfos(?string $key = null, $default = null)
-    {
-        if (!$this->infos instanceof ParamsBagContract) {
+        if (!$this->attributes instanceof ParamsBagContract) {
             if (!$this->cacheHas('infos')) {
                 $infos = [];
 
@@ -159,6 +120,13 @@ class QueryProduct extends QueryPost implements QueryProductContract
                         'variation_id'          => $this->getId(),
                         'variation_is_active'   => $this->getWcProduct()->variation_is_active(),
                         'variation_is_visible'  => $this->getWcProduct()->variation_is_visible(),
+                    ];
+                } elseif ($this->isVariable()) {
+                    $infos = [
+                        'available_variations'  => $this->getWcProduct()->get_available_variations(),
+                        'default_attributes'    => $this->getWcProduct()->get_default_attributes(),
+                        'variation_ids'         => $this->getWcProduct()->get_children(),
+                        'variation_attributes'  => $this->getWcProduct()->get_variation_attributes(),
                     ];
                 }
 
@@ -193,18 +161,44 @@ class QueryProduct extends QueryPost implements QueryProductContract
                     'weight_html'           => wc_format_weight($this->getWcProduct()->get_weight()),
                 ], $infos);
 
+                ksort($infos);
+
                 $this->cacheAdd('infos', $infos);
             } else {
                 $infos = $this->cacheGet('infos', []);
             }
-            $this->infos = (new ParamsBag())->set($infos);
+            $this->attributes = (new ParamsBag())->set($infos);
         }
 
-        return is_null($key) ? $this->infos : $this->infos->get($key, $default);
+        return is_null($key) ? $this->attributes : $this->attributes->get($key, $default);
     }
 
     /**
      * @inheritDoc
+     */
+    public function getDatas(): array
+    {
+        $datas = [];
+
+        $datas['id'] = $this->getId();
+
+        if ($this->isVariable()) {
+            $datas['type'] = 'variable';
+            $datas['infos'] = [];
+            foreach ($this->getVariations() as $var) {
+                $datas['infos'][] = $var->getInfos()->all();
+            }
+        } elseif ($this->isSimple()) {
+            $datas['type'] = 'simple';
+            $datas['infos'] = $this->getAttributes()->all();
+        }
+
+        return $datas;
+    }
+
+    /**
+     * @inheritDoc
+     * @todo Alléger le code en utilisant getVariationPrices.
      */
     public function getMaxPrice(?bool $with_tax = null): float
     {
@@ -257,6 +251,7 @@ class QueryProduct extends QueryPost implements QueryProductContract
 
     /**
      * @inheritDoc
+     * @todo Alléger le code en utilisant getVariationPrices.
      */
     public function getMinPrice(?bool $with_tax = null): float
     {
@@ -308,6 +303,22 @@ class QueryProduct extends QueryPost implements QueryProductContract
     }
 
     /**
+     * {@inheritDoc}
+     *
+     * @return QueryProductContract|null
+     */
+    public function getParent(): ?QueryPostContract
+    {
+        if (is_null($this->parent) && $this->isVariation()) {
+            return parent::getParent();
+        } else {
+            $this->parent = false;
+        }
+
+        return $this->parent ?: null;
+    }
+
+    /**
      * @inheritDoc
      */
     public function getPriceIncludingTax(array $args = []): float
@@ -328,7 +339,7 @@ class QueryProduct extends QueryPost implements QueryProductContract
      */
     public function getSku(): string
     {
-        return $this->wcProduct->get_sku();
+        return $this->getWcProduct()->get_sku();
     }
 
     /**
@@ -420,41 +431,6 @@ class QueryProduct extends QueryPost implements QueryProductContract
         }
 
         return $this->variationsAvailable ?: null;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getVariationsAvailableInfos(): ?CollectionContract
-    {
-        $aVars = [];
-        if ($this->isVariable()) {
-            foreach ($this->getVariationsAvailable() as $var) {
-                $aVars[] = $var->getInfos();
-            }
-
-            $aVars = array_values(array_filter($aVars));
-        }
-
-        return $aVars ? Collection::createFromItems($aVars) : null;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @return QueryProducts|QueryProduct[]|null
-     */
-    public function getVariationsVisible(): ?QueryProductsContract
-    {
-        $visible = [];
-        if ($vars = $this->getVariations()) {
-            $exists = $vars->collect()->filter(function (QueryProductContract $var) {
-                return $var->getInfos('variation_is_visible', false);
-            });
-            $visible = !!$exists->count() ? QueryProducts::createFromItems($exists->all()) : [];
-        }
-
-        return $visible ?: null;
     }
 
     /**
