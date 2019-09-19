@@ -26,7 +26,7 @@ class Product implements ProductContract
     {
         add_action('wp', function () {
             if (is_product() && ($product = $this->get())) {
-                Asset::setDataJs('wc', ['product' => $product->getDatas()]);
+                Asset::setDataJs('woocommerce', ['product' => $product->getDatas()]);
             }
         }, 99);
 

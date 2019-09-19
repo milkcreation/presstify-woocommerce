@@ -26,21 +26,21 @@ interface QueryProduct extends QueryPost
     public static function createFromId($product_id): ?QueryPost;
 
     /**
-     * Récupération de la liste des données associées à un produit.
-     *
-     * @return array
-     */
-    public function getDatas(): array;
-
-    /**
-     * Récupération d'informations associées à un produit.
+     * Récupération d'attributs associés à un produit.
      *
      * @param string $key Clé d'indice de l'information à retrouver. Syntaxe à point permise.
      * @param mixed $default Valeur de retour par défaut
      *
      * @return ParamsBag|mixed
      */
-    public function getInfos(?string $key = null, $default = null);
+    public function getAttributes(?string $key = null, $default = null);
+
+    /**
+     * Récupération de la liste des données associées à un produit.
+     *
+     * @return array
+     */
+    public function getDatas(): array;
 
     /**
      * Récupération du prix maximum.
@@ -59,6 +59,13 @@ interface QueryProduct extends QueryPost
      * @return float
      */
     public function getMinPrice(?bool $with_tax = null): float;
+
+    /**
+     * Récupération de l'instance du produit parent d'une variation.
+     *
+     * @return QueryProduct|null
+     */
+    public function getParent(): ?QueryPost;
 
     /**
      * Récupération du prix taxe incluse.
@@ -114,20 +121,6 @@ interface QueryProduct extends QueryPost
      * @return QueryProducts|QueryProduct[]|null
      */
     public function getVariationsAvailable(): ?QueryProducts;
-
-    /**
-     * Récupération de la liste des informations associées aux variations d'un produit variable.
-     *
-     * @return Collection|null
-     */
-    public function getVariationsAvailableInfos(): ?Collection;
-
-    /**
-     * {@inheritDoc}
-     *
-     * @return QueryProducts|QueryProduct[]|null
-     */
-    public function getVariationsVisible(): ?QueryProducts;
 
     /**
      * Récupération de l'instance du produit associé.

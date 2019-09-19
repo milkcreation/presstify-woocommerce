@@ -27,11 +27,10 @@ class QueryProducts extends QueryPosts implements QueryProductsContract
     public function __construct(?WP_Query $wp_query = null)
     {
         parent::__construct();
-
         if ($this->wp_query = $wp_query) {
             $items = $wp_query->posts;
-            array_walk($items, function (WP_Post &$item) {
-                $this->set(WC()->product_factory->get_product($item));
+            array_walk($items, function (WP_Post &$item, $key) {
+                $this->walk(WC()->product_factory->get_product($item), $key);
             });
         }
     }
