@@ -1,11 +1,11 @@
-/* globals tify */
-
+/* global tify */
 "use strict";
 
+import jQuery from 'jquery';
 import collect from 'collect.js';
 import Mustache from 'mustache';
 
-jQuery(document).ready(function ($) {
+jQuery(function ($) {
     let product = tify.wc && tify.wc.product ? tify.wc.product : undefined;
 
     if (product !== undefined) {
