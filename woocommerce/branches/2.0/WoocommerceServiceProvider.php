@@ -551,7 +551,7 @@ class WoocommerceServiceProvider extends ServiceProvider
                     $metabox = $this->manager->getContainer()->get('metabox');
 
                     $metabox->add('Woocommerce-storeOptions', 'tify_options@options', [
-                        'title' => __('boutiques woocommerce', 'theme'),
+                        'title' => __('Boutiques woocommerce', 'theme'),
                     ]);
                 }
             });
