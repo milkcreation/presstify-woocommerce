@@ -62,7 +62,7 @@ class QueryProducts extends QueryPosts implements QueryProductsContract
      *
      * @return QueryProductsContract
      */
-    public static function createFromIds(array $ids): QueryPostsContract
+    public static function createFromIds(array $ids, ...$args): QueryPostsContract
     {
         return new static(new WP_Query([
             'post__in'       => $ids,

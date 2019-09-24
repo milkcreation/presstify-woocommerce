@@ -25,5 +25,5 @@ interface QueryProducts extends QueryPosts
      *
      * @return static
      */
-    public static function createFromIds(array $ids): QueryPosts;
+    public static function createFromIds(array $ids, ...$args): QueryPosts;
 }
