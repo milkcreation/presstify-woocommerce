@@ -2,24 +2,17 @@
 
 namespace tiFy\Plugins\Woocommerce\Store;
 
-use tiFy\Plugins\Woocommerce\Contracts\{
-    Stores,
-    StoreFactory,
-    Woocommerce};
-use tiFy\Metabox\MetaboxWpOptionsController;
-
-class StoreOptionsMetabox extends MetaboxWpOptionsController
+class StoreOptionsMetabox extends AbstractStoreMetabox
 {
     /**
      * @inheritDoc
      */
-    public function boot()
+    public function boot(): void
     {
         add_filter('pre_option_woocommerce_shop_page_display', function ($value) {
             if (is_customize_preview()) {
                 return $value;
             }
-
             return $value;
         }, 10, 2);
     }
@@ -27,42 +20,16 @@ class StoreOptionsMetabox extends MetaboxWpOptionsController
     /**
      * @inheritDoc
      */
-    public function content($args = null, $null1 = null, $null2 = null)
+    public function content(): string
     {
-        return $this->manager()->viewer('store/options-general', $this->all());
+        return (string)$this->woocommerce()->viewer('store/options-general', $this->all());
     }
 
     /**
-     * Récupération du gestionnaire de plugin Woocommerce.
+     * @param $value
      *
-     * @return Woocommerce
+     * @return mixed
      */
-    public function manager(): Woocommerce
-    {
-        return $this->stores()->manager();
-    }
-
-    /**
-     * Récupération de l'instance du magasin associé.
-     *
-     * @return StoreFactory
-     */
-    public function store(): StoreFactory
-    {
-        return $this->get('store');
-    }
-
-    /**
-     * Récupération du gestionnaire de magasins.
-     *
-     * @return Stores
-     */
-    public function stores(): Stores
-    {
-        return $this->store()->stores();
-    }
-
-
     public function sanitize_tify_wc_page_display($value)
     {
         // Récupération de la catégorie affichée par la boutique
