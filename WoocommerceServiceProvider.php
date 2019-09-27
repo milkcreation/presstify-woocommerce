@@ -3,7 +3,6 @@
 namespace tiFy\Plugins\Woocommerce;
 
 use tiFy\Container\ServiceProvider;
-use tiFy\Metabox\MetaboxManager;
 use tiFy\Plugins\Woocommerce\{Cart\Cart,
     Checkout\Checkout,
     Form\Form,
@@ -55,6 +54,7 @@ use tiFy\Plugins\Woocommerce\Contracts\{Cart as CartContract,
     TemplateFilters as TemplateFiltersContract,
     TemplateHooks as TemplateHooksContract,
     Woocommerce as WoocommerceContract};
+use tiFy\Support\Proxy\Metabox;
 use WC_Product;
 use WP_Query;
 
@@ -545,16 +545,15 @@ class WoocommerceServiceProvider extends ServiceProvider
             /** @var StoresContract $instance */
             $instance = $concrete instanceof StoresContract ? $concrete : new $concrete();
 
-            add_action('init', function () use ($instance) {
-                if ($instance->all()) {
-                    /** @var MetaboxManager $metabox */
-                    $metabox = $this->manager->getContainer()->get('metabox');
-
-                    $metabox->add('Woocommerce-storeOptions', 'tify_options@options', [
+            add_action('admin_init', function () use ($instance) {
+                if ($instance->collect()->firstWhere('admin', '=', true)) {
+                    Metabox::add('WoocommerceStoreOptions', [
                         'title' => __('Boutiques woocommerce', 'theme'),
-                    ]);
+                    ])
+                        ->setScreen('tify_options@options')
+                        ->setContext('tab');
                 }
-            });
+            }, 999999);
 
             add_action('woocommerce_get_shop_page_id', function ($page_id) use ($instance) {
                 if (is_singular() && (in_array(get_the_ID(), $instance->getPageIds()))) {
