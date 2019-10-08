@@ -161,6 +161,29 @@ class StoreFactory extends ParamsBag implements StoreFactoryContract
                         'position' => 1,
                         'title'    => __('Options générales', 'tify'),
                     ]);
+
+                    register_setting('tify_options', "tify_wc_{$this->name}_hook");
+                    register_setting('tify_options', "tify_wc_{$this->name}_cat");
+                    register_setting('tify_options', "tify_wc_{$this->name}_page_display", [
+                        'sanitize_callback' => function ($value) {
+                            // Récupération de la catégorie affichée par la boutique
+                            $cat = (int)get_option('tify_wc_' . $this->getName() . '_cat', 0);
+
+                            // Récupération de la catégorie liée à l'affichage de la page
+                            if ($page_display_cat = (int)get_option("tify_wc_{$this->name}_page_display_cat",
+                                0)) {
+                                if ($cat !== $page_display_cat) {
+                                    delete_term_meta($page_display_cat, 'display_type');
+                                }
+                            }
+
+                            update_option("tify_wc_{$this->name}_page_display_cat", $cat);
+                            update_term_meta($cat, 'display_type', $value);
+
+                            return $value;
+                        }
+                    ]);
+                    register_setting('tify_options', 'tify_wc_multi_default');
                 }
             });
 
