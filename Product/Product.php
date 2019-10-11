@@ -79,8 +79,10 @@ class Product implements ProductContract
         if ($product->isVariable()) {
             $datas['type']  = 'variable';
             $datas['infos'] = [];
-            foreach ($product->getChildren() as $child) {
-                $datas['infos'][] = $this->getInfos($child);
+            if ($children = $product->getChildren()) {
+                foreach ($children as $child) {
+                    $datas['infos'][] = $this->getInfos($child);
+                }
             }
         } elseif ($product->isSimple()) {
             $datas['type']  = 'simple';
