@@ -237,11 +237,12 @@ class QueryProduct extends ParamsBag implements QueryProductContract
 
                 if ($this->isVariable()) {
                     $prices = [];
-                    foreach ($this->getChildren() as $child) {
-                        $prices[] = $child->getPriceIncludingTax();
+                    if ($children =$this->getChildren()) {
+                        foreach ($children as $child) {
+                            $prices[] = $child->getPriceIncludingTax();
+                        }
                     }
-
-                    $this->max_price['with_tax'] = max($prices);
+                    $this->max_price['with_tax'] = $prices ? max($prices): 0;
                 } else {
                     $this->max_price['with_tax'] = $this->getPriceIncludingTax();
                 }
@@ -253,11 +254,12 @@ class QueryProduct extends ParamsBag implements QueryProductContract
 
                 if ($this->isVariable()) {
                     $prices = [];
-                    foreach ($this->getChildren() as $child) {
-                        $prices[] = $child->getPriceExcludingTax();
+                    if ($children =$this->getChildren()) {
+                        foreach ($children as $child) {
+                            $prices[] = $child->getPriceExcludingTax();
+                        }
                     }
-
-                    $this->max_price['without_tax'] = max($prices);
+                    $this->max_price['without_tax'] = $prices ? max($prices): 0;
                 } else {
                     $this->max_price['without_tax'] = $this->getPriceExcludingTax();
                 }
@@ -277,11 +279,12 @@ class QueryProduct extends ParamsBag implements QueryProductContract
 
                 if ($this->isVariable()) {
                     $prices = [];
-                    foreach ($this->getChildren() as $child) {
-                        $prices[] = $child->getPriceIncludingTax();
+                    if ($children = $this->getChildren()) {
+                        foreach ($children as $child) {
+                            $prices[] = $child->getPriceIncludingTax();
+                        }
                     }
-
-                    $this->min_price['with_tax'] = min($prices);
+                    $this->min_price['with_tax'] = $prices ? min($prices): 0;
                 } else {
                     $this->min_price['with_tax'] = $this->getPriceIncludingTax();
                 }
@@ -293,11 +296,13 @@ class QueryProduct extends ParamsBag implements QueryProductContract
 
                 if ($this->isVariable()) {
                     $prices = [];
-                    foreach ($this->getChildren() as $child) {
-                        $prices[] = $child->getPriceExcludingTax();
+                    if ($children = $this->getChildren()) {
+                        foreach ($children as $child) {
+                            $prices[] = $child->getPriceExcludingTax();
+                        }
                     }
 
-                    $this->min_price['without_tax'] = min($prices);
+                    $this->min_price['without_tax'] = $prices ? min($prices) : 0;
                 } else {
                     $this->min_price['without_tax'] = $this->getPriceExcludingTax();
                 }
