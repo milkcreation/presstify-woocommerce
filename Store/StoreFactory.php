@@ -6,6 +6,7 @@ use tiFy\Plugins\Woocommerce\Contracts\{StoreFactory as StoreFactoryContract, St
 use tiFy\Support\{ParamsBag, Proxy\Metabox};
 use tiFy\Wordpress\Contracts\{QueryPost as QueryPostContract, QueryTerm as QueryTermContract};
 use tiFy\Wordpress\Query\{QueryPost, QueryTerm};
+use WP_Term;
 
 class StoreFactory extends ParamsBag implements StoreFactoryContract
 {
@@ -14,6 +15,12 @@ class StoreFactory extends ParamsBag implements StoreFactoryContract
      * @var boolean
      */
     protected $booted = false;
+
+    /**
+     * Indicateur de contexte d'affichage courant associé au magasin.
+     * @var boolean
+     */
+    protected $current = false;
 
     /**
      * Nom de qualification.
@@ -106,33 +113,34 @@ class StoreFactory extends ParamsBag implements StoreFactoryContract
     {
         if (is_singular() && (get_the_ID() == $this->getPageId())) {
             // > Page d'accroche associée.
-            return true;
+            $this->current = true;
         } elseif ($term_id = $this->getProductCatId()) {
             if (is_tax('product_cat', $term_id)) {
                 // > Page liste de la catégorie de produit associée.
-                return true;
+                $this->current = true;
             } elseif (
                 is_tax('product_cat') &&
                 term_is_ancestor_of($term_id, get_queried_object()->term_id, 'product_cat')
             ) {
                 // > Page liste d'une catégorie enfant de la catégorie de produit associée.
-                return true;
+                $this->current = true;
             } elseif (is_singular('product')) {
                 // Page d'un produit de la catégorie de produit associé.
                 $terms = wp_get_post_terms(get_the_ID(), 'product_cat', ['fields' => 'ids']);
                 if (is_wp_error($terms)) {
-                    return false;
+                    $this->current = false;
                 }
 
                 foreach ($terms as $term) {
                     if (term_is_ancestor_of($term_id, $term, 'product_cat')) {
-                        return true;
+                        $this->current = true;
+                        break;
                     }
                 }
             }
         }
 
-        return false;
+        return $this->current;
     }
 
     /**
@@ -197,7 +205,24 @@ class StoreFactory extends ParamsBag implements StoreFactoryContract
                 }
                 return $args;
             });
+
+            add_filter('term_link', function (string $termlink, WP_Term $term, string $taxonomy) {
+                if (($this->getProductCatId() === $term->term_id) && ($page = $this->getPage())) {
+                    return $page->getPermalink();
+                }
+                return $termlink;
+            }, 10, 3);
         }
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setCurrent(bool $current = true): StoreFactoryContract
+    {
+        $this->current = $current;
 
         return $this;
     }
