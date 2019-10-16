@@ -59,7 +59,7 @@ interface StoreFactory extends ParamsBag
     public function getProductCatId(): int;
 
     /**
-     * Vérifie si la page courante fait partie de la boutique.
+     * Vérifie si la page courante est associé au magasin.
      *
      * @return boolean
      */
@@ -74,6 +74,15 @@ interface StoreFactory extends ParamsBag
      * @return static
      */
     public function prepare(string $name, Stores $stores): StoreFactory;
+
+    /**
+     * Définition de l'association du magasin à la page d'affichage courante.
+     *
+     * @param boolean $current
+     *
+     * @return static
+     */
+    public function setCurrent(bool $current = true): StoreFactory;
 
     /**
      * Définition de metaboxe de réglage des options.
