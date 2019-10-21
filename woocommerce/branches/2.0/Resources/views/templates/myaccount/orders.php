@@ -77,9 +77,9 @@
 
                             <?php elseif ('order-again' === $column_id) : ?>
                                 <a href="#" class="WcTable-link WcTable-link--orderAgain"
-                                   title="<?php _e('Commander cette commande', 'theme'); ?>">
+                                   title="<?php _e('Commander cette commande', 'tify'); ?>">
                                     <?php
-                                    _e('Commander à nouveau', 'theme');
+                                    _e('Commander à nouveau', 'tify');
                                     ?>
                                 </a>
 
@@ -97,7 +97,7 @@
                     <a class="WcPagination-button WcPagination-button--prev Readmore Readmore--1"
                        href="<?php echo esc_url(wc_get_endpoint_url('orders', $current_page - 1)); ?>">
                         <span class="Readmore-inner Readmore-inner--1">
-                            <?php _e('Précédent', 'theme'); ?>
+                            <?php _e('Précédent', 'tify'); ?>
                         </span>
                     </a>
                 <?php endif; ?>
@@ -106,7 +106,7 @@
                     <a class="WcPagination-button WcPagination-button--next Readmore Readmore--1"
                        href="<?php echo esc_url(wc_get_endpoint_url('orders', $current_page + 1)); ?>">
                         <span class="Readmore-inner Readmore-inner--1">
-                            <?php _e('Suivant', 'theme'); ?>
+                            <?php _e('Suivant', 'tify'); ?>
                         </span>
                     </a>
                 <?php endif; ?>

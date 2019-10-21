@@ -14,7 +14,7 @@
 
         <div class="col-12 col-xl-6">
             <h2 class="Woocommerce-title">
-                <?php _e('Adresse de facturation', 'theme'); ?>
+                <?php _e('Adresse de facturation', 'tify'); ?>
             </h2>
 
             <address class="MyAccountOrderDetails-customerAddress">
@@ -38,7 +38,7 @@
         <div class="col-12 col-xl-6">
 
             <h2 class="Woocommerce-title">
-                <?php _e('Adresse de livraison', 'theme'); ?>
+                <?php _e('Adresse de livraison', 'tify'); ?>
             </h2>
 
             <address class="MyAccountOrderDetails-customerAddress">

@@ -58,8 +58,8 @@ class Router
                                         'order-date'    => __('Date', 'woocommerce'),
                                         'order-status'  => __('Status', 'woocommerce'),
                                         'order-total'   => __('Total', 'woocommerce'),
-                                        'order-again'   => __('Commander', 'theme'),
-                                        'order-actions' => __('Voir la commande', 'theme'),
+                                        'order-again'   => __('Commander', 'tify'),
+                                        'order-actions' => __('Voir la commande', 'tify'),
                                     ]
                                 );
 

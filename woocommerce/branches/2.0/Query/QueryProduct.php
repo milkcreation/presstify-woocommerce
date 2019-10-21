@@ -2,20 +2,22 @@
 
 namespace tiFy\Plugins\Woocommerce\Query;
 
-use tiFy\Contracts\Support\{Collection as CollectionContract, ParamsBag as ParamsBagContract};
-use tiFy\Plugins\Woocommerce\Contracts\{QueryProduct as QueryProductContract, QueryProducts as QueryProductsContract};
-use tiFy\Support\{Collection, ParamsBag};
-use tiFy\Wordpress\{Contracts\QueryPost as QueryPostContract, Query\QueryPost};
+use Illuminate\Support\Collection;
+use tiFy\Plugins\Woocommerce\Contracts\QueryProduct as QueryProductContract;
+use tiFy\Support\ParamsBag;
+use tiFy\Wordpress\{Contracts\Query\QueryPost as QueryPostContract, Query\QueryPost};
 use WC_Product;
 use WC_Product_Simple;
 use WC_Product_Variable;
 use WC_Product_Variation;
+use WP_Post;
+use WP_Query;
 
 class QueryProduct extends QueryPost implements QueryProductContract
 {
     /**
      * Liste des attributs associées à un produit.
-     * @var ParamsBagContract|null
+     * @var ParamsBag|null
      */
     protected $attributes;
 
@@ -41,14 +43,14 @@ class QueryProduct extends QueryPost implements QueryProductContract
     /**
      * Liste des instances de toutes les variations d'un produit variable.
      * {@internal Le produit doit être de type variable}
-     * @var QueryProductsContract|QueryProductContract[]|array|null
+     * @var QueryProductContract[]|array|null
      */
     protected $variations;
 
     /**
      * Liste des instances de variations disponibles d'un produit variable.
      * {@internal Produit variable uniquement}
-     * @var QueryProductsContract|QueryProductsContract[]|array|null
+     * @var array|null
      */
     protected $variationsAvailable;
 
@@ -105,11 +107,41 @@ class QueryProduct extends QueryPost implements QueryProductContract
     }
 
     /**
+     * {@inheritDoc}
+     *
+     * @return QueryProductContract[]|array
+     */
+    public static function query(WP_Query $wp_query): array
+    {
+        $items = $wp_query->posts;
+        array_walk($items, function (WP_Post &$item, $key) {
+            $item = WC()->product_factory->get_product($item);
+        });
+
+        return $items;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @return QueryProductContract[]|array
+     */
+    public static function createFromIds(array $ids, ...$args): array
+    {
+        return static::query(new WP_Query([
+            'post__in'       => $ids,
+            'post_type'      => ['product', 'product_variation'],
+            'post_status'    => ['publish', 'private'],
+            'posts_per_page' => -1,
+        ]));
+    }
+
+    /**
      * @inheritDoc
      */
     public function getAttributes(?string $key = null, $default = null)
     {
-        if (!$this->attributes instanceof ParamsBagContract) {
+        if (!$this->attributes instanceof ParamsBag) {
             if (!$this->cacheHas('infos')) {
                 $infos = [];
 
@@ -347,8 +379,8 @@ class QueryProduct extends QueryPost implements QueryProductContract
      */
     public function getVariationPrice($min = true): float
     {
-        if (($vPrices = $this->getVariationPrices()) && ($prices = $vPrices->get('price'))) {
-            return (float)($min ? current($prices) : end($prices));
+        if (($vPrices = $this->getVariationPrices()) && !empty($vPrices['price'])) {
+            return (float)($min ? current($vPrices['price']) : end($vPrices['price']));
         }
 
         return 0;
@@ -357,9 +389,10 @@ class QueryProduct extends QueryPost implements QueryProductContract
     /**
      * @inheritDoc
      */
-    public function getVariationPrices(): ?CollectionContract
+    public function getVariationPrices(): array
     {
         $prices = [];
+
         if ($this->isVariable()) {
             if (!$this->cacheHas('variation_prices')) {
                 $this->cacheAdd('variation_prices', $prices = $this->getWcProduct()->get_variation_prices());
@@ -367,45 +400,46 @@ class QueryProduct extends QueryPost implements QueryProductContract
                 $prices = $this->cacheGet('variation_prices', []);
             }
         }
-        return $prices ? Collection::createFromItems($prices) : null;
+
+        return $prices;
     }
 
     /**
      * {@inheritDoc}
      *
-     * @return QueryProductsContract|QueryProductContract[]|null
+     * @return QueryProductContract[]|array
      */
-    public function getVariations(): ?QueryProductsContract
+    public function getVariations(): array
     {
         if (is_null($this->variations)) {
             $this->variations = [];
             if ($this->isVariable() && ($ids = $this->getWcProduct()->get_children())) {
-                $vars = QueryProducts::createFromArgs([
+                $vars = static::queryFromArgs([
                     'post__in'       => $ids,
                     'post_type'      => 'product_variation',
                     'post_status'    => ['publish', 'private'],
                     'posts_per_page' => -1,
                 ]);
-                $this->variations = $vars->count() ? $vars : [];
+                $this->variations = $vars;
             }
         }
 
-        return $this->variations ?: null;
+        return $this->variations ?: [];
     }
 
     /**
      * {@inheritDoc}
      *
-     * @return QueryProductsContract|QueryProductContract[]|null
+     * @return QueryProductContract[]|array
      */
-    public function getVariationsAvailable(): ?QueryProductsContract
+    public function getVariationsAvailable(): array
     {
         if (is_null($this->variationsAvailable)) {
             if ($this->isVariable()) {
                 if (!$vars = $this->getVariations()) {
                     $this->variationsAvailable = [];
                 } else {
-                    $exists = $vars->collect()->filter(function (QueryProductContract $var) {
+                    $exists = (new Collection($vars))->filter(function (QueryProductContract $var) {
                         $prod = $var->getWcProduct();
 
                         if (
@@ -422,15 +456,14 @@ class QueryProduct extends QueryPost implements QueryProductContract
                         return true;
                     });
 
-                    $this->variationsAvailable = !!$exists->count()
-                        ? QueryProducts::createFromItems($exists->all()) : [];
+                    $this->variationsAvailable = $exists->count() ? $exists->all() : [];
                 }
             } else {
                 $this->variationsAvailable = [];
             }
         }
 
-        return $this->variationsAvailable ?: null;
+        return $this->variationsAvailable ?: [];
     }
 
     /**
@@ -449,7 +482,7 @@ class QueryProduct extends QueryPost implements QueryProductContract
     public function hasVariation(): bool
     {
         if ($this->isVariable() && ($vars = $this->getVariations())) {
-            return $vars->count() > 1;
+            return count($vars) > 1;
         }
 
         return false;

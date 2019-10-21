@@ -40,7 +40,7 @@ class ProductCat extends MetaboxWpPostController
      */
     public function header($post = null, $args = null, $null = null)
     {
-        return $this->item->getTitle() ?: __('Catégories du produit', 'theme');
+        return $this->item->getTitle() ?: __('Catégories du produit', 'tify');
     }
 
     /**

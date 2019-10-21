@@ -18,12 +18,12 @@ $this->skeletonBlocks();
 
         <div class="MyAccountPassword-lostNotice">
             <?php _e('Vous avez perdu votre mot de passe ? Entrez votre identifiant ou adresse e-mail. 
-            Vous allez recevoir un lien par e-mail pour le réinitialiser.', 'theme'); ?>
+            Vous allez recevoir un lien par e-mail pour le réinitialiser.', 'tify'); ?>
         </div>
 
         <div class="woocommerce-InputWrapper woocommerce-InputWrapper--100">
             <label for="user_login" class="woocommerce-Label">
-                <?php _e( 'Identifiant ou e-mail *', 'theme' ); ?>
+                <?php _e( 'Identifiant ou e-mail *', 'tify'); ?>
             </label>
             <input class="woocommerce-Input woocommerce-Input--text" type="text"
                    name="user_login" id="user_login" autocomplete="username" />
@@ -33,7 +33,7 @@ $this->skeletonBlocks();
             <button type="submit" class="MyAccountPassword-lostLink Readmore Readmore--3"
                     value="<?php esc_attr_e( 'Reset password', 'woocommerce' ); ?>">
                 <span class="Readmore-inner Readmore-inner--3">
-                    <?php _e( 'Réinitialiser le mot de passe', 'theme' ); ?>
+                    <?php _e( 'Réinitialiser le mot de passe', 'tify'); ?>
                 </span>
             </button>
         </p>

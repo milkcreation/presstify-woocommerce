@@ -548,7 +548,7 @@ class WoocommerceServiceProvider extends ServiceProvider
             add_action('admin_init', function () use ($instance) {
                 if ($instance->collect()->firstWhere('admin', '=', true)) {
                     Metabox::add('WoocommerceStoreOptions', [
-                        'title' => __('Boutiques woocommerce', 'theme'),
+                        'title' => __('Boutiques woocommerce', 'tify'),
                     ])
                         ->setScreen('tify_options@options')
                         ->setContext('tab');

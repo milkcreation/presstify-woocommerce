@@ -15,7 +15,7 @@ $this->setContentGridCol('p-0');*/
 
 <section class="MyAccountRegister">
     <h3 class="Woocommerce-title">
-        <?php _e('Création de compte', 'theme'); ?>
+        <?php _e('Création de compte', 'tify'); ?>
     </h3>
 
     <div class="row justify-content-between">

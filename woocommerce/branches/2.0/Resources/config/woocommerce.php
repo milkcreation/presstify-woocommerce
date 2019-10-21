@@ -48,7 +48,7 @@ return [
                 'priority' => 55,
                 'admin'    => [
                     'billing'  => [
-                        'label'       => __('Adresse ligne 3', 'theme'),
+                        'label'       => __('Adresse ligne 3', 'tify'),
                         'description' => 'Ceci est la description du champ "ligne adresse 3"',
                         'before'      => 'city',
                     ],
@@ -227,9 +227,9 @@ return [
     'routing'         => [
         'shop_homepage' => [
             'admin' => [
-                'title' => __('Page d\'accueil de la boutique', 'theme'),
+                'title' => __('Page d\'accueil de la boutique', 'tify'),
                 'desc'  => __('Ceci détermine la page d\'accueil de votre boutique - c\'est l\'emplacement du diaporama, des catégories de produits et des mises en avant de nouveautés, promotions et marques.',
-                    'theme'),
+                    'tify'),
             ],
         ],
     ],
@@ -285,10 +285,10 @@ return [
      */
     'store'           => [
         'hifi'     => [
-            'title' => __('Image et son', 'theme'),
+            'title' => __('Image et son', 'tify'),
         ],
         'security' => [
-            'title' => __('Securité', 'theme'),
+            'title' => __('Securité', 'tify'),
         ],
     ],
 

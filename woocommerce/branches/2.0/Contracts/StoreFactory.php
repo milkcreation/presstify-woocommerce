@@ -3,7 +3,7 @@
 namespace tiFy\Plugins\Woocommerce\Contracts;
 
 use tiFy\Contracts\Support\ParamsBag;
-use tiFy\Wordpress\Contracts\{QueryPost, QueryTerm};
+use tiFy\Wordpress\Contracts\{Query\QueryPost, Query\QueryTerm};
 
 interface StoreFactory extends ParamsBag
 {
