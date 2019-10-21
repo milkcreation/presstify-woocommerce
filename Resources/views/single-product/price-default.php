@@ -9,7 +9,7 @@
 <div class="ProductPrices-total">
     <?php if ($product->isOnSale()) : ?>
         <div class="ProductPrices-title">
-            <?php _e('A partir de', 'theme'); ?>
+            <?php _e('A partir de', 'tify'); ?>
         </div>
     <?php endif; ?>
 
@@ -17,14 +17,14 @@
         <span class="ProductPrices-priceValue">
             <?php echo $product->getPriceIncludingTax() . get_woocommerce_currency_symbol(); ?>
         </span>
-        <span class="ProductPrices-priceSuffix"><?php _e('TTC', 'theme'); ?></span>
+        <span class="ProductPrices-priceSuffix"><?php _e('TTC', 'tify'); ?></span>
     </div>
 
     <div class="ProductPrices-price ProductPrices-price--without_tax">
         <span class="ProductPrices-priceValue">
             <?php echo $product->getPriceExcludingTax() . get_woocommerce_currency_symbol(); ?>
         </span>
-        <span class="ProductPrices-priceSuffix"><?php _e('HT', 'theme'); ?></span>
+        <span class="ProductPrices-priceSuffix"><?php _e('HT', 'tify'); ?></span>
     </div>
 
     <?php if ($product->isSimple()) : ?>

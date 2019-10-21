@@ -4,7 +4,7 @@ namespace tiFy\Plugins\Woocommerce\Store;
 
 use tiFy\Plugins\Woocommerce\Contracts\{StoreFactory as StoreFactoryContract, Stores as StoresContract};
 use tiFy\Support\{ParamsBag, Proxy\Metabox};
-use tiFy\Wordpress\Contracts\{QueryPost as QueryPostContract, QueryTerm as QueryTermContract};
+use tiFy\Wordpress\Contracts\{Query\QueryPost as QueryPostContract, Query\QueryTerm as QueryTermContract};
 use tiFy\Wordpress\Query\{QueryPost, QueryTerm};
 use WP_Term;
 

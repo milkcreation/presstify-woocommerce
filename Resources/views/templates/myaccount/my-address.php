@@ -37,14 +37,14 @@ $this->layout('wc.myaccount::my-account');
                     $address = wc_get_account_formatted_address($name);
                     echo $address
                         ? wp_kses_post($address)
-                        : __('Vous n\'avez pas encore renseigné cette adresse.', 'theme');
+                        : __('Vous n\'avez pas encore renseigné cette adresse.', 'tify');
                     ?>
                 </address>
 
                 <a href="<?php echo esc_url(wc_get_endpoint_url('edit-address', $name)); ?>"
                    class="MyAccountAddress-detailsLink Readmore Readmore--1">
                     <span class="Readmore-inner Readmore-inner--1">
-                        <?php _e('Modifier l\'adresse', 'theme'); ?>
+                        <?php _e('Modifier l\'adresse', 'tify'); ?>
                     </span>
                 </a>
 

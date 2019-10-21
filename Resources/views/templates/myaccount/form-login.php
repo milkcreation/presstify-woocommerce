@@ -24,7 +24,7 @@ do_action('woocommerce_before_customer_login_form'); ?>
             <?php /*
                 <div class="MyAccountAuthenticate-register">
 
-                    <h2 class="Woocommerce-title"><?php _e('Inscrivez-vous', 'theme'); ?></h2>
+                    <h2 class="Woocommerce-title"><?php _e('Inscrivez-vous', 'tify'); ?></h2>
 
                     <form method="post" class="MyAccountAuthenticate-registerForm clearfix">
 
@@ -32,7 +32,7 @@ do_action('woocommerce_before_customer_login_form'); ?>
 
                             <div class="woocommerce-InputWrapper woocommerce-InputWrapper--100">
                                 <label for="reg_username" class="Woocommerce-label">
-                                    <?php _e('Nom d\'utilisateur *', 'theme'); ?>
+                                    <?php _e('Nom d\'utilisateur *', 'tify'); ?>
                                 </label>
                                 <input type="text" class="woocommerce-Input woocommerce-Input--text" name="username"
                                        id="reg_username" autocomplete="username"
@@ -44,7 +44,7 @@ do_action('woocommerce_before_customer_login_form'); ?>
 
                         <div class="woocommerce-InputWrapper woocommerce-InputWrapper--100">
                             <label for="reg_email" class="Woocommerce-label">
-                                <?php _e('Adresse e-mail *', 'theme'); ?>
+                                <?php _e('Adresse e-mail *', 'tify'); ?>
                             </label>
                             <input type="email" class="woocommerce-Input woocommerce-Input--text"
                                    name="email" id="reg_email" autocomplete="email"
@@ -56,7 +56,7 @@ do_action('woocommerce_before_customer_login_form'); ?>
 
                             <div class="woocommerce-InputWrapper woocommerce-InputWrapper--100">
                                 <label for="reg_password" class="Woocommerce-label">
-                                    <?php _e('Mot de passe *', 'theme'); ?>
+                                    <?php _e('Mot de passe *', 'tify'); ?>
                                 </label>
                                 <input type="password" class="woocommerce-Input woocommerce-Input--text"
                                        name="password" id="reg_password" autocomplete="new-password"/>
@@ -71,7 +71,7 @@ do_action('woocommerce_before_customer_login_form'); ?>
                             <button type="submit" class="MyAccountAuthenticate-registerLink Readmore Readmore--3"
                                     name="register" value="<?php esc_attr_e('Register', 'woocommerce'); ?>">
                                 <span class="Readmore-inner Readmore-inner--3">
-                                    <?php _e('Inscription', 'theme'); ?>
+                                    <?php _e('Inscription', 'tify'); ?>
                                 </span>
                             </button>
                         </div>
@@ -88,13 +88,13 @@ do_action('woocommerce_before_customer_login_form'); ?>
 
             <div class="MyAccountAuthenticate-login">
 
-                <h2 class="Woocommerce-title"><?php _e('Connectez vous', 'theme') ?></h2>
+                <h2 class="Woocommerce-title"><?php _e('Connectez vous', 'tify') ?></h2>
 
                 <form class="MyAccountAuthenticate-form clearfix" method="post">
 
                     <div class="woocommerce-InputWrapper woocommerce-InputWrapper--100">
                         <label for="username" class="woocommerce-Label">
-                            <?php _e('Identifiant ou adresse de messagerie *', 'theme'); ?>
+                            <?php _e('Identifiant ou adresse de messagerie *', 'tify'); ?>
                         </label>
                         <input type="text" class="woocommerce-Input woocommerce-Input--text"
                                name="username" id="username" autocomplete="username"
@@ -104,7 +104,7 @@ do_action('woocommerce_before_customer_login_form'); ?>
 
                     <div class="woocommerce-InputWrapper woocommerce-InputWrapper--100">
                         <label for="password" class="woocommerce-Label">
-                            <?php _e('Mot de passe *', 'theme'); ?>
+                            <?php _e('Mot de passe *', 'tify'); ?>
                         </label>
                         <input class="woocommerce-Input woocommerce-Input--text" type="password"
                                name="password" id="password" autocomplete="current-password"/>
@@ -119,14 +119,14 @@ do_action('woocommerce_before_customer_login_form'); ?>
                                    name="rememberme" type="checkbox" id="rememberme" value="forever"/>
                             <label for="rememberme" class="CheckboxLabel">
                                 <span class="CheckboxLabel-text">
-                                    <?php _e('Mémoriser', 'theme'); ?>
+                                    <?php _e('Mémoriser', 'tify'); ?>
                                 </span>
                             </label>
                         </div>
                         <div class="MyAccountAuthenticate-passwordLost">
                             <a href="<?php echo esc_url(wp_lostpassword_url()); ?>"
                                class="MyAccountAuthenticate-passwordLostLink">
-                                <?php _e('Mot de passe perdu?', 'theme'); ?>
+                                <?php _e('Mot de passe perdu?', 'tify'); ?>
                             </a>
                         </div>
                     </div>
@@ -134,7 +134,7 @@ do_action('woocommerce_before_customer_login_form'); ?>
                     <button type="submit" class="MyAccountAuthenticate-button Readmore Readmore--3" name="login"
                             value="<?php esc_attr_e('Log in', 'woocommerce'); ?>">
                         <span class="Readmore-inner Readmore-inner--3">
-                            <?php _e('Connexion', 'theme'); ?>
+                            <?php _e('Connexion', 'tify'); ?>
                         </span>
                     </button>
 

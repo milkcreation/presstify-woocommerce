@@ -14,7 +14,7 @@
     <p class="MyAccountDashboard-title">
         <?php
         printf(
-            __('Bonjour <strong>%1$s</strong> <br>(Vous n\'êtes pas %1$s? <a href="%2$s">Déconnexion</a>)', 'theme'),
+            __('Bonjour <strong>%1$s</strong> <br>(Vous n\'êtes pas %1$s? <a href="%2$s">Déconnexion</a>)', 'tify'),
             esc_html($current_user->display_name),
             esc_url(wc_logout_url(wc_get_page_permalink('myaccount')))
         );
@@ -25,25 +25,25 @@
         <ul class="row">
             <li class="col-12 col-sm-6 col-lg-4 col-xl-3">
                 <div class="Dashboard-itemInner">
-                    <?php _e('Consulter mes commandes', 'theme'); ?>
+                    <?php _e('Consulter mes commandes', 'tify'); ?>
                     <a href="<?php echo esc_url(wc_get_endpoint_url('orders')); ?>" class="Dashboard-itemLink"
-                       title="<?php _e('Consulter mes commandes', 'theme') ?>"></a>
+                       title="<?php _e('Consulter mes commandes', 'tify') ?>"></a>
                 </div>
             </li>
 
             <li class="col-12 col-sm-6 col-lg-4 col-xl-3">
                 <div class="Dashboard-itemInner">
-                    <?php _e('Consulter mes adresses', 'theme'); ?>
+                    <?php _e('Consulter mes adresses', 'tify'); ?>
                     <a href="<?php echo esc_url(wc_get_endpoint_url('edit-address')); ?>" class="Dashboard-itemLink"
-                       title="<?php _e('Consulter mes adresses', 'theme'); ?>"></a>
+                       title="<?php _e('Consulter mes adresses', 'tify'); ?>"></a>
                 </div>
             </li>
 
             <li class="col-12 col-sm-6 col-lg-4 col-xl-3">
                 <div class="Dashboard-itemInner">
-                    <?php _e('Consulter le détail de mon compte', 'theme'); ?>
+                    <?php _e('Consulter le détail de mon compte', 'tify'); ?>
                     <a href="<?php echo esc_url(wc_get_endpoint_url('edit-account')); ?>" class="Dashboard-itemLink"
-                       title="<?php _e('Consulter le détail de mon compte', 'theme'); ?>"></a>
+                       title="<?php _e('Consulter le détail de mon compte', 'tify'); ?>"></a>
                 </div>
             </li>
         </ul>

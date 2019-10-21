@@ -18,14 +18,14 @@
         'text',
         [
             'attrs' => [
-                'placeholder' => __('url du produit', 'theme'),
+                'placeholder' => __('url du produit', 'tify'),
                 'class'       => 'widefat PostTerms-url',
                 'readonly'
             ]
         ]
     );
     ?>
-    <h3 class="section_title"><?php _e('Choix de la catégorie principale (utilisée pour l\'url)', 'theme'); ?></h3>
+    <h3 class="section_title"><?php _e('Choix de la catégorie principale (utilisée pour l\'url)', 'tify'); ?></h3>
     <ul class="PostTerms-items PostTerms-items--main">
         <li class="PostTerms-item--none">
             <label>
@@ -36,7 +36,7 @@
                         'name'    => '_main_post_term',
                         'value'   => 0,
                         'checked' => !$selected,
-                        'after'   => __('Aucune', 'theme')
+                        'after'   => __('Aucune', 'tify')
                     ]
                 )
                 ?>
@@ -53,7 +53,7 @@
         );
         ?>
     </ul>
-    <h3 class="section_title"><?php _e('Choix des catégories associées au produit', 'theme'); ?></h3>
+    <h3 class="section_title"><?php _e('Choix des catégories associées au produit', 'tify'); ?></h3>
     <ul class="PostTerms-items PostTerms-items--all">
         <?php
         wp_terms_checklist(

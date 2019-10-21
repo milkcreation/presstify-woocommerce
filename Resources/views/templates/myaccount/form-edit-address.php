@@ -34,7 +34,7 @@ $this->layout('wc.myaccount::my-account');
                     <button type="submit" class="MyAccountAddress-editLink Readmore Readmore--1" name="save_address"
                             value="<?php esc_attr_e('Save address', 'woocommerce'); ?>">
                         <span class="Readmore-inner Readmore-inner--1">
-                            <?php _e('Valider les changements', 'theme'); ?>
+                            <?php _e('Valider les changements', 'tify'); ?>
                         </span>
                     </button>
                 </div>

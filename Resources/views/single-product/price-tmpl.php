@@ -14,7 +14,7 @@
                 {{{ totalttc }}}{{{ currency_symbol }}}<sup>*</sup>
             </span>
             <span class="ProductPrices-priceSuffix">
-                <?php _e('TTC', 'theme'); ?>
+                <?php _e('TTC', 'tify'); ?>
             </span>
         </div>
 
@@ -26,7 +26,7 @@
             {{{ totalht }}}{{{ currency_symbol }}}<sup>*</sup>
             </span>
             <span class="ProductPrices-priceSuffix">
-                <?php _e('HT', 'theme'); ?>
+                <?php _e('HT', 'tify'); ?>
             </span>
         </div>
         {{/totalht}}
@@ -41,7 +41,7 @@
     {{#unavailable}}
         <?php echo partial('notice', [
                 'type'    => 'warning',
-                'content' => __('Le produit n\'est pas disponible dans cette configuration.', 'theme')
+                'content' => __('Le produit n\'est pas disponible dans cette configuration.', 'tify')
             ]);
         ?>
     {{/unavailable}}

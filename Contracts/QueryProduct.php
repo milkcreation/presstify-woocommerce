@@ -2,8 +2,8 @@
 
 namespace tiFy\Plugins\Woocommerce\Contracts;
 
-use tiFy\Contracts\Support\{Collection, ParamsBag};
-use tiFy\Wordpress\Contracts\QueryPost;
+use tiFy\Contracts\Support\ParamsBag;
+use tiFy\Wordpress\Contracts\Query\QueryPost;
 use WC_Product;
 use WC_Product_Simple;
 use WC_Product_Variable;
@@ -104,23 +104,23 @@ interface QueryProduct extends QueryPost
     /**
      * Récupération de la liste des variations de prix d'un produit variable.
      *
-     * @return Collection|null
+     * @return array
      */
-    public function getVariationPrices(): ?Collection;
+    public function getVariationPrices(): array;
 
     /**
      * Récupération des instances de toutes les variations d'un produit variable.
      *
-     * @return QueryProducts|QueryProduct[]|null
+     * @return QueryProduct[]|array
      */
-    public function getVariations(): ?QueryProducts;
+    public function getVariations(): array;
 
     /**
      * Récupération des instances de variations disponibles d'un produit variable.
      *
-     * @return QueryProducts|QueryProduct[]|null
+     * @return QueryProduct[]|array
      */
-    public function getVariationsAvailable(): ?QueryProducts;
+    public function getVariationsAvailable(): array;
 
     /**
      * Récupération de l'instance du produit associé.
