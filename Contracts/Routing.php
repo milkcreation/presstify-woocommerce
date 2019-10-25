@@ -2,14 +2,14 @@
 
 namespace tiFy\Plugins\Woocommerce\Contracts;
 
-use tiFy\Contracts\Kernel\ParamsBag;
+use tiFy\Contracts\Support\ParamsBag;
 
 interface Routing extends ParamsBag
 {
     /**
      * Ajout d'une route personnalisée.
      *
-     * @param string $route Nom de la route.
+     * @param string $routeName Nom de la route.
      * @param array $routeAttrs Attributs de la route personnalisée.
      *
      * @return array|bool

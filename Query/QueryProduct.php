@@ -115,7 +115,7 @@ class QueryProduct extends QueryPost implements QueryProductContract
     {
         $items = $wp_query->posts;
         array_walk($items, function (WP_Post &$item, $key) {
-            $item = WC()->product_factory->get_product($item);
+            $item = new static(WC()->product_factory->get_product($item));
         });
 
         return $items;
@@ -126,7 +126,7 @@ class QueryProduct extends QueryPost implements QueryProductContract
      *
      * @return QueryProductContract[]|array
      */
-    public static function createFromIds(array $ids, ...$args): array
+    public static function queryFromIds(array $ids): array
     {
         return static::query(new WP_Query([
             'post__in'       => $ids,
