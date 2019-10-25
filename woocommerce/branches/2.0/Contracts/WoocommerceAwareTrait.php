@@ -14,6 +14,8 @@ interface WoocommerceAwareTrait
     /**
      * Définition de l'instance du gestionnaire du plugin.
      *
+     * @param Woocommerce $manager
+     *
      * @return static
      */
     public function setManager(Woocommerce $manager): WoocommerceAwareTrait;

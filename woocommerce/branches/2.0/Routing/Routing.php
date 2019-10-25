@@ -2,12 +2,10 @@
 
 namespace tiFy\Plugins\Woocommerce\Routing;
 
-use tiFy\Kernel\Params\ParamsBag;
 use tiFy\Plugins\Woocommerce\Contracts\Routing as RoutingContract;
+use tiFy\Support\ParamsBag;
 
 /**
- * Gestion des routes Woocommerce.
- *
  * @see Woocommerce/includes/wc-conditional-functions.php
  * @see https://docs.woocommerce.com/document/conditional-tags/
  */
@@ -54,11 +52,11 @@ class Routing extends ParamsBag implements RoutingContract
      */
     public function __construct($customWcRoutes = [])
     {
-        parent::__construct($customWcRoutes);
+        $this->set($customWcRoutes)->parse();
 
-        foreach ($this->all() as $customWcRouteName => $customWcRouteAttrs) :
+        foreach ($this->all() as $customWcRouteName => $customWcRouteAttrs) {
             $this->addCustom($customWcRouteName, $customWcRouteAttrs);
-        endforeach;
+        }
 
         $this->routes = array_merge($this->wcRoutes, $this->getCustomRoutes());
 

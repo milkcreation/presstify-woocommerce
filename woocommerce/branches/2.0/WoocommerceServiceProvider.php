@@ -3,7 +3,8 @@
 namespace tiFy\Plugins\Woocommerce;
 
 use tiFy\Container\ServiceProvider;
-use tiFy\Plugins\Woocommerce\{Cart\Cart,
+use tiFy\Plugins\Woocommerce\{
+    Cart\Cart,
     Checkout\Checkout,
     Form\Form,
     Functions\Functions,
@@ -20,7 +21,6 @@ use tiFy\Plugins\Woocommerce\{Cart\Cart,
     ProductCat\ProductCat,
     Query\Query,
     Query\QueryProduct,
-    Query\QueryProducts,
     Routing\Routing,
     ScriptLoader\ScriptLoader,
     Shipping\Shipping,
@@ -29,7 +29,8 @@ use tiFy\Plugins\Woocommerce\{Cart\Cart,
     Store\Stores,
     TemplateFilters\TemplateFilters,
     TemplateHooks\TemplateHooks,
-    Views\TemplateLoader};
+    TemplateLoader\TemplateLoader
+};
 use tiFy\Plugins\Woocommerce\Contracts\{Cart as CartContract,
     Checkout as CheckoutContract,
     Form as FormContract,
@@ -45,7 +46,6 @@ use tiFy\Plugins\Woocommerce\Contracts\{Cart as CartContract,
     ProductCat as ProductCatContract,
     Query as QueryContract,
     QueryProduct as QueryProductContract,
-    QueryProducts as QueryProductsContract,
     ScriptLoader as ScriptLoaderContract,
     Shipping as ShippingContract,
     Shortcodes as ShortcodesContract,
@@ -53,10 +53,11 @@ use tiFy\Plugins\Woocommerce\Contracts\{Cart as CartContract,
     Stores as StoresContract,
     TemplateFilters as TemplateFiltersContract,
     TemplateHooks as TemplateHooksContract,
-    Woocommerce as WoocommerceContract};
+    TemplateLoader as TemplateLoaderContract,
+    Woocommerce as WoocommerceContract
+};
 use tiFy\Support\Proxy\Metabox;
 use WC_Product;
-use WP_Query;
 
 class WoocommerceServiceProvider extends ServiceProvider
 {
@@ -82,7 +83,6 @@ class WoocommerceServiceProvider extends ServiceProvider
         'product-cat'            => ProductCat::class,
         'query'                  => Query::class,
         'query.product'          => QueryProduct::class,
-        'query.products'         => QueryProducts::class,
         'routing'                => Routing::class,
         'script-loader'          => ScriptLoader::class,
         'shipping'               => Shipping::class,
@@ -457,13 +457,6 @@ class WoocommerceServiceProvider extends ServiceProvider
             }
             return null;
         });
-
-        $this->getContainer()->add('woocommerce.query.products', function ($wp_query = null): ?QueryProductsContract {
-            /** @var QueryProductsContract $concrete */
-            $concrete = $this->getConcrete('query.products');
-
-            return $wp_query instanceof WP_Query ? new $concrete($wp_query) : $concrete::createFromGlobals();
-        });
     }
 
     /**
@@ -636,10 +629,13 @@ class WoocommerceServiceProvider extends ServiceProvider
      */
     public function registerViewsTemplateLoader(): void
     {
-        $this->getContainer()->share('woocommerce.views.template-loader', function () {
+        $this->getContainer()->share('woocommerce.views.template-loader', function (): TemplateLoaderContract {
             $concrete = $this->getConcrete('views.template-loader');
 
-            return new $concrete(app(), config('woocommerce.template-loader', []));
+            /** @var TemplateLoaderContract $instance */
+            $instance = $concrete instanceof TemplateLoaderContract ? $concrete : new $concrete();
+
+            return $instance->setManager($this->manager)->set(config('woocommerce.template-loader', []));
         });
     }
 }
