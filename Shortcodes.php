@@ -70,8 +70,27 @@ class Shortcodes extends \tiFy\App\Factory
      * Execution d'un shortcode en dehors de la boucle
      * @see class-wc-shortcodes.php
      */
-    public static function doing( $shortcode, $attrs = array() )
+    public static function doing($tag, $attrs = [])
     {
+        if (!preg_match('/^woocommerce_(.*)/', $tag)) {
+            $tag = 'woocommerce_' . $tag;
+        }
+
+        if (in_array($tag, array_keys(self::$Shortcodes))) {
+            $map = [
+                'woocommerce_order_tracking' => 'WC_Shortcodes::order_tracking',
+                'woocommerce_cart'           => 'WC_Shortcodes::cart',
+                'woocommerce_checkout'       => 'WC_Shortcodes::checkout',
+                'woocommerce_my_account'     => 'WC_Shortcodes::my_account',
+            ];
+
+            if (isset($map[$tag])) {
+                return call_user_func($map[$tag], $attrs);
+            }
+        }
+
+        return null;
+
         if( preg_match( '/^woocommerce_(.*)/', $shortcode, $matches ) ) :
         else :
            $shortcode = 'woocommerce_'. $shortcode;
