@@ -3,7 +3,6 @@
 namespace tiFy\Plugins\Woocommerce\Contracts;
 
 use tiFy\Contracts\Support\ParamsBag;
-use tiFy\View\ViewEngine;
 
 interface TemplateLoader extends ParamsBag, WoocommerceAwareTrait
 {
@@ -16,11 +15,4 @@ interface TemplateLoader extends ParamsBag, WoocommerceAwareTrait
      * @return void
      */
     public function loadWcTemplate(string $template = '', array $args = []): void;
-
-    /**
-     * Récupération du moteur de gabarit d'affichage.
-     *
-     * @return ViewEngine
-     */
-    public function viewer(): ViewEngine;
 }
