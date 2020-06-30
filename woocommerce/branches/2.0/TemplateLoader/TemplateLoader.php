@@ -3,8 +3,7 @@
 namespace tiFy\Plugins\Woocommerce\TemplateLoader;
 
 use tiFy\Plugins\Woocommerce\{Contracts\TemplateLoader as TemplateLoaderContract, WoocommerceAwareTrait};
-use tiFy\Support\ParamsBag;
-use tiFy\View\ViewEngine;
+use tiFy\Support\{ParamsBag, Proxy\View};
 
 class TemplateLoader extends ParamsBag implements TemplateLoaderContract
 {
@@ -24,8 +23,8 @@ class TemplateLoader extends ParamsBag implements TemplateLoaderContract
     public function __construct()
     {
         add_action('init', function () {
-            $this->viewer()->addFolder('wctheme', get_stylesheet_directory() . self::DS . WC()->template_path());
-            $this->viewer()->addFolder('wcplugin', WC()->plugin_path() . '/templates' . self::DS);
+            View::addFolder('wctheme', get_stylesheet_directory() . self::DS . WC()->template_path());
+            View::addFolder('wcplugin', WC()->plugin_path() . '/templates' . self::DS);
         });
 
         /**
@@ -39,10 +38,10 @@ class TemplateLoader extends ParamsBag implements TemplateLoaderContract
             if (is_woocommerce() || is_account_page() || is_cart() || is_checkout()) {
                 if (preg_match('/' . preg_quote(get_stylesheet_directory(), self::DS) . '/', $template)) {
                     $folder = 'wctheme';
-                    $directory = $this->viewer()->getFolders()->get($folder)->getPath();
+                    $directory = View::getFolder($folder)->getPath();
                 } else {
                     $folder = 'wcplugin';
-                    $directory = $this->viewer()->getFolders()->get($folder)->getPath();
+                    $directory = View::getFolder($folder)->getPath();
                 }
                 $template = "{$folder}::" . preg_replace('/' . preg_quote($directory, self::DS) . '/', '', $template);
             }
@@ -61,9 +60,7 @@ class TemplateLoader extends ParamsBag implements TemplateLoaderContract
          *
          * @return string
          */
-        add_filter(
-            'wc_get_template',
-            function (
+        add_filter('wc_get_template', function (
                 string $located,
                 string $template_name,
                 array $args,
@@ -77,7 +74,7 @@ class TemplateLoader extends ParamsBag implements TemplateLoaderContract
                 }
                 $this->loadWcTemplate($located, $args);
 
-                return $this->manager()->viewer()->getDirectory() . '/index.php';
+                return __DIR__ . '/index.php';
             }, 10, 5);
 
         /**
@@ -89,7 +86,8 @@ class TemplateLoader extends ParamsBag implements TemplateLoaderContract
          *
          * @return bool
          */
-        add_filter('wc_get_template_part', function (string $template, string $slug, string $name): bool {
+        add_filter('wc_get_template_part', function (string $template, string $slug, string $name): bool
+        {
             $this->loadWcTemplate($template);
 
             return $template = false;
@@ -103,10 +101,10 @@ class TemplateLoader extends ParamsBag implements TemplateLoaderContract
     {
         if (preg_match('#' . preg_quote(get_stylesheet_directory(), self::DS) . '#', $template)) {
             $folder = 'wctheme';
-            $directory = $this->viewer()->getFolders()->get($folder)->getPath();
+            $directory = View::getFolder($folder)->getPath();
         } else {
             $folder = 'wcplugin';
-            $directory = $this->viewer()->getFolders()->get($folder)->getPath();
+            $directory = View::getFolder($folder)->getPath();
         }
 
         $patterns = $replacements = [];
@@ -117,14 +115,6 @@ class TemplateLoader extends ParamsBag implements TemplateLoaderContract
 
         $name = "{$folder}::{$path}";
 
-        echo $this->viewer()->render($name, $args);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function viewer(): ViewEngine
-    {
-        return $this->manager()->getContainer()->viewer();
+        echo View::render($name, $args);
     }
 }

@@ -146,8 +146,12 @@ class WoocommerceServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        $this->manager = new Woocommerce($this->getContainer());
+
+        $this->getContainer()->share('woocommerce', $this->manager);
+
         add_action('after_setup_theme', function () {
-            $this->manager = $this->getContainer()->get('woocommerce');
+             $this->getContainer()->get('woocommerce');
 
             $providers = config('woocommerce.providers', []);
             array_walk($providers, function ($v, $k) {
@@ -195,10 +199,6 @@ class WoocommerceServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->getContainer()->share('woocommerce', function () {
-            return new Woocommerce($this->getContainer());
-        });
-
         $this->registerCart();
         $this->registerCheckout();
         $this->registerForm();
@@ -539,6 +539,7 @@ class WoocommerceServiceProvider extends ServiceProvider
             $instance = $concrete instanceof StoresContract ? $concrete : new $concrete();
 
             add_action('admin_init', function () use ($instance) {
+                /* * /
                 if ($instance->collect()->firstWhere('admin', '=', true)) {
                     Metabox::add('WoocommerceStoreOptions', [
                         'title' => __('Boutiques woocommerce', 'tify'),
@@ -546,6 +547,7 @@ class WoocommerceServiceProvider extends ServiceProvider
                         ->setScreen('tify_options@options')
                         ->setContext('tab');
                 }
+                /**/
             }, 999999);
 
             add_action('woocommerce_get_shop_page_id', function ($page_id) use ($instance) {
