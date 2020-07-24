@@ -1,9 +1,6 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace tiFy\Plugins\Woocommerce\Contracts;
-
-use tiFy\Contracts\View\ViewController;
-use tiFy\Contracts\View\ViewEngine;
 
 interface WoocommerceResolverTrait
 {
@@ -34,7 +31,7 @@ interface WoocommerceResolverTrait
      * @param null|string Nom de qualification du gabarit.
      * @param array $data Liste des variables passées en arguments au gabarit.
      *
-     * @return ViewController|ViewEngine
+     * @return string
      */
     public function viewer($view = null, $data = []);
 }
