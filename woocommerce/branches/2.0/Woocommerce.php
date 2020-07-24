@@ -2,7 +2,8 @@
 
 namespace tiFy\Plugins\Woocommerce;
 
-use tiFy\Contracts\{Container\Container, View\ViewEngine};
+use tiFy\Contracts\View\Engine;
+use tiFy\Contracts\Container\Container;
 use tiFy\Plugins\Woocommerce\Contracts\{
     Cart,
     Checkout,
@@ -20,7 +21,7 @@ use tiFy\Plugins\Woocommerce\Contracts\{
  * @desc Extension PresstiFy de court-circuitage et de fonctionnalités complémentaires woocommerce.
  * @author Jordy Manner <jordy@milkcreation.fr>
  * @package tiFy\Plugins\Woocommerce
- * @version 2.0.31
+ * @version 2.0.32
  *
  * @see https://docs.woocommerce.com/wc-apidocs/index.html
  *
@@ -171,15 +172,15 @@ class Woocommerce implements WoocommerceContract
     /**
      * @inheritDoc
      */
-    public function viewer($view = null, $data = []): ?object
+    public function viewer($view = null, $data = [])
     {
-        /** @var ViewEngine $viewer */
+        /** @var Engine $viewer */
         $viewer = $this->resolve('viewer');
 
         if (func_num_args() === 0) {
             return $viewer;
         }
 
-        return $viewer->make("_override::{$view}", $data);
+        return $viewer->render($view, $data);
     }
 }

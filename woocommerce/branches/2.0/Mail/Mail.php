@@ -19,12 +19,9 @@ class Mail implements MailContract
      */
     public function __construct()
     {
-        add_action(
-            'template_redirect',
-            function () {
+        add_action('template_redirect', function () {
                 $this->debugMail(request()->get('tfywc_email', false));
-            }
-        );
+        });
     }
 
     /**
@@ -41,12 +38,17 @@ class Mail implements MailContract
      */
     public function debugMail($mailName)
     {
-        if (!$mailName && !is_user_logged_in() && !array_intersect(wp_get_current_user()->roles, ['administrator'])) :
+        if (!$mailName) {
             return null;
-        endif;
+        }
+
+        if (!is_user_logged_in() && !array_intersect(wp_get_current_user()->roles, ['administrator'])) {
+            return null;
+        }
 
         $emails = WC()->mailer()->get_emails();
         $types[] = $mailName;
+
         $sanitized = $types[] = $this->formattingName($mailName);
         $types[] = 'WC_Email_' . $sanitized;
 
