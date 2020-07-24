@@ -104,7 +104,7 @@ interface Woocommerce extends WoocommerceResolverTrait
      * @param null|string Nom de qualification du gabarit.
      * @param array $data Liste des variables passées en arguments au gabarit.
      *
-     * @return object
+     * @return object|string
      */
-    public function viewer($view = null, $data = []): ?object;
+    public function viewer($view = null, $data = []);
 }

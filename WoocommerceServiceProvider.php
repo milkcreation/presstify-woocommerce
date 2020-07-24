@@ -56,7 +56,7 @@ use tiFy\Plugins\Woocommerce\Contracts\{Cart as CartContract,
     TemplateLoader as TemplateLoaderContract,
     Woocommerce as WoocommerceContract
 };
-use tiFy\Support\Proxy\Metabox;
+use tiFy\Support\Proxy\{Metabox, View};
 use WC_Product;
 
 class WoocommerceServiceProvider extends ServiceProvider
@@ -539,7 +539,7 @@ class WoocommerceServiceProvider extends ServiceProvider
             $instance = $concrete instanceof StoresContract ? $concrete : new $concrete();
 
             add_action('admin_init', function () use ($instance) {
-                /* * /
+                /* */
                 if ($instance->collect()->firstWhere('admin', '=', true)) {
                     Metabox::add('WoocommerceStoreOptions', [
                         'title' => __('Boutiques woocommerce', 'tify'),
@@ -613,15 +613,14 @@ class WoocommerceServiceProvider extends ServiceProvider
         $this->getContainer()->share('woocommerce.viewer', function () {
             $cinfo = class_info($this);
             $default_dir = $cinfo->getDirname() . '/Resources/views';
-            $viewer = view()
-                ->setDirectory(is_dir($default_dir) ? $default_dir : null)
-                ->setOverrideDir((($override_dir = config('woocommerce.viewer.override_dir')) && is_dir($override_dir))
-                    ? $override_dir
-                    : (is_dir($default_dir) ? $default_dir : $cinfo->getDirname()));
 
-            return $viewer;
-        }
-        );
+            return View::getPlatesEngine([
+                'directory'    => is_dir($default_dir) ? $default_dir : null,
+                'override_dir' => (($override_dir = config('woocommerce.viewer.override_dir')) && is_dir($override_dir))
+                    ? $override_dir
+                    : (is_dir($default_dir) ? $default_dir : $cinfo->getDirname())
+            ]);
+        });
     }
 
     /**
