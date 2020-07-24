@@ -1,6 +1,8 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace tiFy\Plugins\Woocommerce\Contracts;
+
+use WC_Email;
 
 interface Mail
 {
@@ -16,9 +18,10 @@ interface Mail
     /**
      * Debug de mail Woocommerce.
      *
-     * @see \WC_Emails
+     * @param string $mailName
      *
-     * @see \WC_Email
+     * @see \WC_Emails
+     * @see WC_Email
      * @see \WC_Email_New_Order
      * @see \WC_Email_Cancelled_Order
      * @see \WC_Email_Failed_Order
@@ -38,7 +41,7 @@ interface Mail
     /**
      * Récupération de la classe de rappel de l'email.
      *
-     * @return \WC_Email
+     * @return WC_Email
      */
     public function getEmail();
 

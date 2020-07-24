@@ -3,7 +3,7 @@
 namespace tiFy\Plugins\Woocommerce\Metabox;
 
 use tiFy\Plugins\Woocommerce\{Contracts\MetaboxProduct as MetaboxProductContract, WoocommerceAwareTrait};
-use tiFy\Support\ParamsBag;
+use tiFy\Support\{ParamsBag, Proxy\PostType};
 use WP_Screen;
 
 /**
@@ -28,7 +28,8 @@ class MetaboxProduct extends ParamsBag implements MetaboxProductContract
                         $meta = (string)$single;
                         $single = true;
                     }
-                    post_type()->post_meta()->register('product', $meta, $single);
+
+                    PostType::meta()->register('product', $meta, $single);
                 }
             }
         });
