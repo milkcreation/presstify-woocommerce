@@ -2,6 +2,8 @@
 
 namespace tiFy\Plugins\Woocommerce\Contracts;
 
+use WC_Product, WP_Post, WP_Query;
+
 interface Product extends WoocommerceAwareTrait
 {
     /**
@@ -14,9 +16,18 @@ interface Product extends WoocommerceAwareTrait
     /**
      * Récupération d'un produit.
      *
-     * @param null|int
+     * @param int|string|WC_Product|WP_Post|null $product
      *
      * @return null|QueryProduct
      */
-    public function get(?int $product_id = null): ?QueryProduct;
+    public function get($product = null): ?QueryProduct;
+
+    /**
+     * Récupération d'une liste des instances de commande courantes|selon une requête WP_Query|selon une liste d'arguments.
+     *
+     * @param WP_Query|array|null $query
+     *
+     * @return QueryProduct[]|array
+     */
+    public function fetch($query = null): array;
 }

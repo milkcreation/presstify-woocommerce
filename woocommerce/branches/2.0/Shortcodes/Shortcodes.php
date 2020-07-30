@@ -21,8 +21,8 @@ class Shortcodes extends ParamsBag implements ShortcodesContract
     public function __construct()
     {
         // Désactivation de l'éxecution du shortcode Woocommerce dans le contenu de page.
-        add_filter('pre_do_shortcode_tag', function ($output, $tag, $attr,$m) {
-            if (!in_array($tag, $this->keys()) || !in_the_loop() || $this->get($tag)) {
+        add_filter('pre_do_shortcode_tag', function ($output, $tag) {
+            if (!in_array($tag, $this->keys()) || $this->get($tag)) {
                 return $output;
             } else {
                 return null;

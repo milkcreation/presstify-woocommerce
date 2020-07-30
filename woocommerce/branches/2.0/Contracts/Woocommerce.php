@@ -57,16 +57,6 @@ interface Woocommerce extends WoocommerceResolverTrait
     public function productCat(): ?ProductCat;
 
     /**
-     * Récupération de l'instance d'un produit.
-     * {@internal Lorsque $product est null, récupère l'instance du produit courant.}
-     *
-     * @param WC_Product|int|null $product Instance du produit woocommerce|Identifiant de qualification|null
-     *
-     * @return QueryProduct|object|null
-     */
-    public function queryProduct($product = null): ?QueryProduct;
-
-    /**
      * Récupération d'une instance fournie par le conteneur d'injection de dépendance.
      *
      * @param string $alias Alias de qualification du service à fournir.

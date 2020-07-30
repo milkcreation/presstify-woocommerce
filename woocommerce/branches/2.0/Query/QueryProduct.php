@@ -6,15 +6,16 @@ use Illuminate\Support\Collection;
 use tiFy\Plugins\Woocommerce\Contracts\QueryProduct as QueryProductContract;
 use tiFy\Support\ParamsBag;
 use tiFy\Wordpress\{Contracts\Query\QueryPost as QueryPostContract, Query\QueryPost};
-use WC_Product;
-use WC_Product_Simple;
-use WC_Product_Variable;
-use WC_Product_Variation;
-use WP_Post;
-use WP_Query;
+use WC_Product, WC_Product_Simple, WC_Product_Variable, WC_Product_Variation, WP_Post;
 
 class QueryProduct extends QueryPost implements QueryProductContract
 {
+    /**
+     * Nom de qualification du type de post ou liste de types de post associés.
+     * @var string|string[]|null
+     */
+    protected static $postType = ['product', 'product_variation'];
+
     /**
      * Liste des attributs associées à un produit.
      * @var ParamsBag|null
@@ -75,7 +76,46 @@ class QueryProduct extends QueryPost implements QueryProductContract
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
+     */
+    public static function build(object $wc_product): ?QueryPostContract
+    {
+        if (!$wc_product instanceof WC_Product) {
+            return null;
+        }
+
+        $classes = self::$builtInClasses;
+        $post_type = $wc_product->get_type();
+
+        $class = $classes[$post_type] ?? (self::$fallbackClass ?: static::class);
+
+        return class_exists($class) ? new $class($wc_product) : new static($wc_product);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public static function create($id = null, ...$args): ?QueryPostContract
+    {
+        if (is_numeric($id)) {
+            return static::createFromId((int)$id);
+        } elseif (is_string($id)) {
+            return static::createFromName($id);
+        } elseif ($id instanceof WC_Product) {
+            return static::build($id);
+        } elseif ($id instanceof WP_Post) {
+            return static::createFromId($id->ID);
+        } elseif ($id instanceof QueryPostContract) {
+            return static::createFromId($id->getId());
+        } elseif (is_null($id)) {
+            return static::createFromGlobal();
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * @inheritDoc
      *
      * @return QueryProductContract|null
      */
@@ -84,56 +124,24 @@ class QueryProduct extends QueryPost implements QueryProductContract
         global $product, $post;
 
         if (!$product instanceof WC_Product) {
-            $product = wc_get_product($post);
+            $product = WC()->product_factory->get_product($post);
         }
 
-        return $product instanceof WC_Product ? new static($product) : null;
+        return $product instanceof WC_Product ? static::createFromId($product->get_id() ?? 0) : null;
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      *
      * @return QueryProductContract|null
      */
-    public static function createFromId($product_id): ?QueryPostContract
+    public static function createFromId(int $product_id): ?QueryPostContract
     {
-        return (
-            $product_id &&
-            is_numeric($product_id) &&
-            ($wp_product = wc_get_product($product_id)) &&
-            ($wp_product instanceof WC_Product)
-        )
-            ? new static($wp_product) : null;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @return QueryProductContract[]|array
-     */
-    public static function query(WP_Query $wp_query): array
-    {
-        $items = $wp_query->posts;
-        array_walk($items, function (WP_Post &$item, $key) {
-            $item = new static(WC()->product_factory->get_product($item));
-        });
-
-        return $items;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @return QueryProductContract[]|array
-     */
-    public static function queryFromIds(array $ids): array
-    {
-        return static::query(new WP_Query([
-            'post__in'       => $ids,
-            'post_type'      => ['product', 'product_variation'],
-            'post_status'    => ['publish', 'private'],
-            'posts_per_page' => -1,
-        ]));
+        if ($product_id && ($product = WC()->product_factory->get_product($product_id)) && ($product instanceof WC_Product)) {
+            return static::is($instance = static::build($product)) ? $instance : null;
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -335,7 +343,7 @@ class QueryProduct extends QueryPost implements QueryProductContract
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      *
      * @return QueryProductContract|null
      */
@@ -405,7 +413,7 @@ class QueryProduct extends QueryPost implements QueryProductContract
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      *
      * @return QueryProductContract[]|array
      */
@@ -414,7 +422,7 @@ class QueryProduct extends QueryPost implements QueryProductContract
         if (is_null($this->variations)) {
             $this->variations = [];
             if ($this->isVariable() && ($ids = $this->getWcProduct()->get_children())) {
-                $vars = static::queryFromArgs([
+                $vars = static::fetchFromArgs([
                     'post__in'       => $ids,
                     'post_type'      => 'product_variation',
                     'post_status'    => ['publish', 'private'],
@@ -428,7 +436,7 @@ class QueryProduct extends QueryPost implements QueryProductContract
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      *
      * @return QueryProductContract[]|array
      */
@@ -467,11 +475,9 @@ class QueryProduct extends QueryPost implements QueryProductContract
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * @return WC_Product|WC_Product_Simple|WC_Product_Variable|WC_Product_Variation
+     * @inheritDoc
      */
-    public function getWcProduct(): WC_Product
+    public function getWcProduct(): ?WC_Product
     {
         return $this->wcProduct;
     }

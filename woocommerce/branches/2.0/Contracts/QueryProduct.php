@@ -12,6 +12,13 @@ use WC_Product_Variation;
 interface QueryProduct extends QueryPost
 {
     /**
+     * @inheritDoc
+     *
+     * @param WC_Product|object $wc_product
+     */
+    public static function build(object $wc_product): ?QueryPost;
+
+    /**
      * {@inheritDoc}
      *
      * @return static|null
@@ -23,7 +30,7 @@ interface QueryProduct extends QueryPost
      *
      * @return static|null
      */
-    public static function createFromId($product_id): ?QueryPost;
+    public static function createFromId(int $product_id): ?QueryPost;
 
     /**
      * Récupération d'attributs associés à un produit.
@@ -123,11 +130,11 @@ interface QueryProduct extends QueryPost
     public function getVariationsAvailable(): array;
 
     /**
-     * Récupération de l'instance du produit associé.
+     * Récupération de l'instance du produit Woocommerce associé.
      *
-     * @return WC_Product|WC_Product_Simple|WC_Product_Variable|WC_Product_Variation
+     * @return WC_Product|WC_Product_Simple|WC_Product_Variable|WC_Product_Variation|null
      */
-    public function getWcProduct(): WC_Product;
+    public function getWcProduct(): ?WC_Product;
 
     /**
      * Vérifie l'existance de variations pour un produit variable.
