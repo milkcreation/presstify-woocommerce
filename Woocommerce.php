@@ -11,17 +11,17 @@ use tiFy\Plugins\Woocommerce\Contracts\{
     Order,
     Product,
     ProductCat,
-    QueryProduct,
     Routing,
     Stores,
     Shortcodes,
-    Woocommerce as WoocommerceContract};
+    Woocommerce as WoocommerceContract
+};
 
 /**
  * @desc Extension PresstiFy de court-circuitage et de fonctionnalités complémentaires woocommerce.
  * @author Jordy Manner <jordy@milkcreation.fr>
  * @package tiFy\Plugins\Woocommerce
- * @version 2.0.32
+ * @version 2.0.33
  *
  * @see https://docs.woocommerce.com/wc-apidocs/index.html
  *
@@ -124,14 +124,6 @@ class Woocommerce implements WoocommerceContract
     public function productCat(): ?ProductCat
     {
         return $this->resolve('product-cat');
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function queryProduct($product = null): ?QueryProduct
-    {
-        return $this->getContainer()->get('woocommerce.query.product', [$product]);
     }
 
     /**

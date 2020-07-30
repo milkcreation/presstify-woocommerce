@@ -21,6 +21,7 @@ use tiFy\Plugins\Woocommerce\{
     ProductCat\ProductCat,
     Query\Query,
     Query\QueryProduct,
+    Query\QueryOrder,
     Routing\Routing,
     ScriptLoader\ScriptLoader,
     Shipping\Shipping,
@@ -46,6 +47,7 @@ use tiFy\Plugins\Woocommerce\Contracts\{Cart as CartContract,
     ProductCat as ProductCatContract,
     Query as QueryContract,
     QueryProduct as QueryProductContract,
+    QueryOrder as QueryOrderContract,
     ScriptLoader as ScriptLoaderContract,
     Shipping as ShippingContract,
     Shortcodes as ShortcodesContract,
@@ -57,7 +59,6 @@ use tiFy\Plugins\Woocommerce\Contracts\{Cart as CartContract,
     Woocommerce as WoocommerceContract
 };
 use tiFy\Support\Proxy\{Metabox, View};
-use WC_Product;
 
 class WoocommerceServiceProvider extends ServiceProvider
 {
@@ -83,6 +84,7 @@ class WoocommerceServiceProvider extends ServiceProvider
         'product-cat'            => ProductCat::class,
         'query'                  => Query::class,
         'query.product'          => QueryProduct::class,
+        'query.order'            => QueryOrder::class,
         'routing'                => Routing::class,
         'script-loader'          => ScriptLoader::class,
         'shipping'               => Shipping::class,
@@ -123,7 +125,7 @@ class WoocommerceServiceProvider extends ServiceProvider
         'woocommerce.order',
         'woocommerce.query',
         'woocommerce.query.product',
-        'woocommerce.query.products',
+        'woocommerce.query.order',
         'woocommerce.routing',
         'woocommerce.script-loader',
         'woocommerce.shipping',
@@ -151,7 +153,7 @@ class WoocommerceServiceProvider extends ServiceProvider
         $this->getContainer()->share('woocommerce', $this->manager);
 
         add_action('after_setup_theme', function () {
-             $this->getContainer()->get('woocommerce');
+            $this->getContainer()->get('woocommerce');
 
             $providers = config('woocommerce.providers', []);
             array_walk($providers, function ($v, $k) {
@@ -328,7 +330,7 @@ class WoocommerceServiceProvider extends ServiceProvider
             /** @var OrderContract $instance */
             $instance = $concrete instanceof OrderContract ? $concrete : new $concrete();
 
-            return $instance->setManager($this->manager)->set(config('order', []))->parse();
+            return $instance->setManager($this->manager);
         });
     }
 
@@ -444,18 +446,26 @@ class WoocommerceServiceProvider extends ServiceProvider
             return $instance->setManager($this->manager)->set(config('woocommerce.query', []))->parse();
         });
 
-        $this->getContainer()->add('woocommerce.query.product', function ($wc_product = null): ?QueryProductContract {
+        $this->getContainer()->add('woocommerce.query.product', function (): ?QueryProductContract {
             /** @var QueryProductContract $concrete */
             $concrete = $this->getConcrete('query.product');
 
-            if ($wc_product instanceof WC_Product) {
-                return new $concrete($wc_product);
-            } elseif (is_numeric($wc_product)) {
-                return $concrete::createFromId($wc_product);
-            } elseif (is_null($wc_product)) {
-                return $concrete::createFromGlobal();
+            if (is_string($concrete)) {
+                $concrete = new $concrete();
             }
-            return null;
+
+            return $concrete;
+        });
+
+        $this->getContainer()->add('woocommerce.query.order', function (): ?QueryOrderContract {
+            /** @var QueryOrderContract $concrete */
+            $concrete = $this->getConcrete('query.order');
+
+            if (is_string($concrete)) {
+                $concrete = new $concrete();
+            }
+
+            return $concrete;
         });
     }
 
@@ -618,7 +628,7 @@ class WoocommerceServiceProvider extends ServiceProvider
                 'directory'    => is_dir($default_dir) ? $default_dir : null,
                 'override_dir' => (($override_dir = config('woocommerce.viewer.override_dir')) && is_dir($override_dir))
                     ? $override_dir
-                    : (is_dir($default_dir) ? $default_dir : $cinfo->getDirname())
+                    : (is_dir($default_dir) ? $default_dir : $cinfo->getDirname()),
             ]);
         });
     }

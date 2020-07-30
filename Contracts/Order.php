@@ -2,9 +2,9 @@
 
 namespace tiFy\Plugins\Woocommerce\Contracts;
 
-use tiFy\Contracts\Support\ParamsBag;
+use WP_Query, WP_Post;
 
-interface Order extends ParamsBag, WoocommerceAwareTrait
+interface Order extends WoocommerceAwareTrait
 {
     /**
      * Initialisation de la classe.
@@ -14,9 +14,20 @@ interface Order extends ParamsBag, WoocommerceAwareTrait
     public function boot(): void;
 
     /**
-     * {@inheritDoc}
+     * Récupération d'une commande.
      *
-     * @return static
+     * @param int|string|WP_Post|null $order
+     *
+     * @return QueryOrder|null
      */
-    public function parse(): Order;
+    public function get($order = null): ?QueryOrder;
+
+    /**
+     * Récupération d'une liste des instances de commande courantes|selon une requête WP_Query|selon une liste d'arguments.
+     *
+     * @param WP_Query|array|null $query
+     *
+     * @return QueryOrder[]|array
+     */
+    public function fetch($query = null): array;
 }

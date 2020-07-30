@@ -2,12 +2,18 @@
 
 namespace tiFy\Plugins\Woocommerce\Order;
 
-use tiFy\Plugins\Woocommerce\{Contracts\Order as OrderContract, WoocommerceAwareTrait};
-use tiFy\Support\ParamsBag;
+use tiFy\Plugins\Woocommerce\{Contracts\Order as OrderContract, Contracts\QueryOrder, WoocommerceAwareTrait};
+use tiFy\Wordpress\Contracts\Query\PaginationQuery;
 
-class Order extends ParamsBag implements OrderContract
+class Order implements OrderContract
 {
     use WoocommerceAwareTrait;
+
+    /**
+     * Instance de la requête de pagination.
+     * @var PaginationQuery|null
+     */
+    protected $pagination;
 
     /**
      * CONSTRUCTEUR.
@@ -27,10 +33,41 @@ class Order extends ParamsBag implements OrderContract
     /**
      * @inheritDoc
      */
-    public function parse(): OrderContract
+    public function get($id = null): ?QueryOrder
     {
-        parent::parse();
+        /** @var QueryOrder $instance */
+        $instance = $this->manager->resolve('query.order');
 
-        return $this;
+        return $instance::create($id);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function fetch($query = null): array
+    {
+        /** @var QueryOrder $instance */
+        $instance = $this->manager->resolve('query.order');
+
+        if ($orders = $instance::fetch($query)) {
+            $this->pagination = $instance::pagination();
+        }
+
+        return $orders;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function pagination($renew = false): PaginationQuery
+    {
+        if ($renew || is_null($this->pagination)) {
+            /** @var QueryOrder $instance */
+            $instance = $this->manager->resolve('query.order');
+
+            return $this->pagination = $instance::pagination();
+        }
+
+        return $this->pagination;
     }
 }
