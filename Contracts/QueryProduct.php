@@ -9,6 +9,12 @@ use WC_Product_Simple;
 use WC_Product_Variable;
 use WC_Product_Variation;
 
+/**
+ * @mixin WC_Product
+ * @mixin WC_Product_Simple
+ * @mixin WC_Product_Variable
+ * @mixin WC_Product_Variation
+ */
 interface QueryProduct extends QueryPost
 {
     /**

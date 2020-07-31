@@ -2,6 +2,8 @@
 
 namespace tiFy\Plugins\Woocommerce\Query;
 
+use Exception;
+use BadMethodCallException;
 use Illuminate\Support\Collection;
 use tiFy\Plugins\Woocommerce\Contracts\QueryProduct as QueryProductContract;
 use tiFy\Support\ParamsBag;
@@ -72,6 +74,32 @@ class QueryProduct extends QueryPost implements QueryProductContract
     {
         if ($this->wcProduct = $wc_product instanceof WC_Product ? $wc_product : null) {
             parent::__construct(get_post($this->wcProduct->get_id()));
+        }
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function __call(string $method, $parameters = [])
+    {
+        if ($order = $this->getWcProduct()) {
+            try {
+                return $order->$method(...$parameters);
+            } catch (Exception $e) {
+                throw new BadMethodCallException(
+                    sprintf(
+                        __('La méthode [%s] de l\'objet Woocommerce n\'est pas disponible.', 'tify'),
+                        $method
+                    )
+                );
+            }
+        } else {
+            throw new BadMethodCallException(
+                sprintf(
+                    __('La méthode [%s] n\'est pas disponible.', 'tify'),
+                    $method
+                )
+            );
         }
     }
 
