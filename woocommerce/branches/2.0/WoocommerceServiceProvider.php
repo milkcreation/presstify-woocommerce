@@ -59,6 +59,7 @@ use tiFy\Plugins\Woocommerce\Contracts\{Cart as CartContract,
     Woocommerce as WoocommerceContract
 };
 use tiFy\Support\Proxy\{Metabox, View};
+use tiFy\Wordpress\Query\QueryPost;
 
 class WoocommerceServiceProvider extends ServiceProvider
 {
@@ -451,7 +452,15 @@ class WoocommerceServiceProvider extends ServiceProvider
             $concrete = $this->getConcrete('query.product');
 
             if (is_string($concrete)) {
+                QueryPost::setBuiltInClass('product', $concrete);
+                QueryPost::setBuiltInClass('product_variation', $concrete);
+
                 $concrete = new $concrete();
+            } else {
+                $classname = get_class($concrete);
+
+                QueryPost::setBuiltInClass('product', $classname);
+                QueryPost::setBuiltInClass('product_variation', $classname);
             }
 
             return $concrete;
@@ -462,7 +471,11 @@ class WoocommerceServiceProvider extends ServiceProvider
             $concrete = $this->getConcrete('query.order');
 
             if (is_string($concrete)) {
+                QueryPost::setBuiltInClass('shop_order', $concrete);
+
                 $concrete = new $concrete();
+            } else {
+                QueryPost::setBuiltInClass('shop_order', get_class($concrete));
             }
 
             return $concrete;
