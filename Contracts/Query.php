@@ -22,7 +22,7 @@ interface Query extends ParamsBag, WoocommerceAwareTrait
      *
      * @return void
      */
-    public function get_posts(WP_Query &$wpQuery, $tag): void;
+    public function get_posts(WP_Query $wpQuery, $tag): void;
 
     /**
      * Court-circuitage de la requête de récupération de contexte is_account_page()
@@ -31,7 +31,7 @@ interface Query extends ParamsBag, WoocommerceAwareTrait
      *
      * @return void
      */
-    public function get_posts_account_page(WP_Query &$wpQuery): void;
+    public function get_posts_account_page(WP_Query $wpQuery): void;
 
     /**
      * Court-circuitage de la requête de récupération de contexte is_cart()
@@ -40,7 +40,7 @@ interface Query extends ParamsBag, WoocommerceAwareTrait
      *
      * @return void
      */
-    public function get_posts_cart(WP_Query &$wpQuery): void;
+    public function get_posts_cart(WP_Query $wpQuery): void;
 
     /**
      * Court-circuitage de la requête de récupération de contexte is_checkout()
@@ -49,7 +49,7 @@ interface Query extends ParamsBag, WoocommerceAwareTrait
      *
      * @return void
      */
-    public function get_posts_checkout(WP_Query &$wpQuery): void;
+    public function get_posts_checkout(WP_Query $wpQuery): void;
 
     /**
      * Court-circuitage de la requête de récupération de contexte is_product()
@@ -58,7 +58,7 @@ interface Query extends ParamsBag, WoocommerceAwareTrait
      *
      * @return void
      */
-    public function get_posts_product(WP_Query &$wpQuery): void;
+    public function get_posts_product(WP_Query $wpQuery): void;
 
     /**
      * Court-circuitage de la requête de récupération de contexte is_product_category()
@@ -67,7 +67,7 @@ interface Query extends ParamsBag, WoocommerceAwareTrait
      *
      * @return void
      */
-    public function get_posts_product_category(WP_Query &$wpQuery): void;
+    public function get_posts_product_category(WP_Query $wpQuery): void;
 
     /**
      * Court-circuitage de la requête de récupération de contexte is_product_tag()
@@ -76,7 +76,7 @@ interface Query extends ParamsBag, WoocommerceAwareTrait
      *
      * @return void
      */
-    public function get_posts_product_tag(WP_Query &$wpQuery): void;
+    public function get_posts_product_tag(WP_Query $wpQuery): void;
 
     /**
      * Court-circuitage de la requête de récupération de contexte is_shop()
@@ -85,7 +85,7 @@ interface Query extends ParamsBag, WoocommerceAwareTrait
      *
      * @return void
      */
-    public function get_posts_shop(WP_Query &$wpQuery): void;
+    public function get_posts_shop(WP_Query $wpQuery): void;
 
     /**
      * {@inheritDoc}
