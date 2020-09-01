@@ -2,7 +2,7 @@
 /**
  * @Overrideable
  */
-namespace tiFy\Plugins\WooCommerce\MultiShop;
+namespace tiFy\Plugins\Woocommerce\MultiShop;
 
 class Factory
 {  
@@ -59,7 +59,7 @@ class Factory
                 'parent'    => 'tiFyPluginsMultiShop-'. $this->getID(),
                 'title'     => __( 'Options générales', 'tify' ),
                 'order'     => 1,
-                'cb'        => '\tiFy\Plugins\WooCommerce\MultiShop\Taboox\Option\MultiShopGeneralOptions\Admin\MultiShopGeneralOptions',                
+                'cb'        => '\tiFy\Plugins\Woocommerce\MultiShop\Taboox\Option\MultiShopGeneralOptions\Admin\MultiShopGeneralOptions',
                 'args'      => array(
                    'shop_id'    => $this->getID() 
                 )                

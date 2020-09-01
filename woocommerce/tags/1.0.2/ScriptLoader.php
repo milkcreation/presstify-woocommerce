@@ -3,11 +3,11 @@
  * @Overrideable
  */
 
-namespace tiFy\Plugins\WooCommerce;
+namespace tiFy\Plugins\Woocommerce;
 
 use tiFy\Core\ScriptLoader\ScriptLoader as tiFyScriptLoader;
-use \tiFy\Plugins\WooCommerce\ConditionalTags as Tags;
-use \tiFy\Plugins\WooCommerce\Forms;
+use \tiFy\Plugins\Woocommerce\ConditionalTags as Tags;
+use \tiFy\Plugins\Woocommerce\Forms;
 
 /**
  * CHARGEMENT DES SCRIPTS

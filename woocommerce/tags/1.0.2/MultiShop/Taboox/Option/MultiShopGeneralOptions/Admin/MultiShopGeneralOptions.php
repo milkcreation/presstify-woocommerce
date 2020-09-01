@@ -1,5 +1,5 @@
 <?php
-namespace tiFy\Plugins\WooCommerce\MultiShop\Taboox\Option\MultiShopGeneralOptions\Admin;
+namespace tiFy\Plugins\Woocommerce\MultiShop\Taboox\Option\MultiShopGeneralOptions\Admin;
 
 use tiFy\Core\Field\Field;
 

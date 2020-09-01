@@ -5,7 +5,7 @@
  * @see /wp-content/plugins/woocommerce/includes/admin/meta-boxes/class-wc-meta-box-product-data.php
  * @see http://www.remicorson.com/mastering-woocommerce-products-custom-fields/
  */
-namespace tiFy\Plugins\WooCommerce\Admin\Product\MetaBoxes;
+namespace tiFy\Plugins\Woocommerce\Admin\Product\MetaBoxes;
 
 class MetaBoxes extends \tiFy\App\Factory
 {

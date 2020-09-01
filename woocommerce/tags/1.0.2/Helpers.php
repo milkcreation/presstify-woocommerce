@@ -2,7 +2,7 @@
 /**
  * FONCTIONS D'AIDE A LA SAISIE
  */
-use tiFy\Plugins\WooCommerce\Functions;
+use tiFy\Plugins\Woocommerce\Functions;
 
 /**
  * Encapsulation HTML de la décimal d'un prix
@@ -26,7 +26,7 @@ function tify_wc_cart_contents_count()
 /**
  * MULTIBOUTIQUE
  */
-use tiFy\Plugins\WooCommerce\MultiShop\MultiShop;
+use tiFy\Plugins\Woocommerce\MultiShop\MultiShop;
 
 /**
  * Récupération de l'identifiant de la boutique courante

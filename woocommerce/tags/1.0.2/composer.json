@@ -1,7 +1,7 @@
 {
   "name": "presstify-plugins/woocommerce",
-  "time": "2019-12-11",
-  "description": "PresstiFy Plugin WooCommerce",
+  "time": "2020-09-01",
+  "description": "PresstiFy Plugin Woocommerce",
   "type": "presstify-plugins",
   "keywords": ["presstify", "plugins", "wordpress", "woocommerce"],
   "homepage": "http://svn.milkcreation.fr/presstify-plugins/woocommerce",
@@ -20,7 +20,7 @@
   },
   "autoload": {
     "psr-4": {
-      "tiFy\\Plugins\\WooCommerce\\": ""
+      "tiFy\\Plugins\\Woocommerce\\": ""
     }
   },
   "minimum-stability": "dev",

@@ -1,10 +1,11 @@
 <?php
-namespace tiFy\Plugins\WooCommerce;
+
+namespace tiFy\Plugins\Woocommerce;
 
 /**
  * GESTION DES SHORTCODES 
  * Permet de désactiver l'exécution des shortcodes dans l'éditeur et de les lancer en dehors
- * ex: echo \tiFy\Plugins\WooCommerce\Shortcodes::doing( 'my_account' );
+ * ex: echo \tiFy\Plugins\Woocommerce\Shortcodes::doing( 'my_account' );
  * 
  * @see https://docs.woocommerce.com/document/woocommerce-shortcodes/
  * @see https://docs.woocommerce.com/document/shortcodes/

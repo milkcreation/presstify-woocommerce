@@ -1,5 +1,5 @@
 <?php
-namespace tiFy\Plugins\WooCommerce\MultiShop;
+namespace tiFy\Plugins\Woocommerce\MultiShop;
 
 use tiFy\Components;
 use tiFy\Components\HookArchive\HookArchive;
@@ -139,11 +139,11 @@ class MultiShop extends \tiFy\App
      * Déclaration d'une boutique
      * @param string $id
      * @param array $attrs
-     * @return \tiFy\Plugins\WooCommerce\MultiShop\Factory
+     * @return \tiFy\Plugins\Woocommerce\MultiShop\Factory
      */
     final public function register($id, $attrs)
     {
-        $FactoryClass = $this->appGetOverride('\tiFy\Plugins\WooCommerce\MultiShop\Factory');
+        $FactoryClass = $this->appGetOverride('\tiFy\Plugins\Woocommerce\MultiShop\Factory');
 
         return self::$Shops[$id] = new $FactoryClass($id, $attrs);
     }
