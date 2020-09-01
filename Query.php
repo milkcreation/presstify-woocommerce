@@ -8,9 +8,9 @@
  * @see woocommerce/includes/class-wc-query.php
  */
 
-namespace tiFy\Plugins\WooCommerce;
+namespace tiFy\Plugins\Woocommerce;
 
-use \tiFy\Plugins\WooCommerce\ConditionalTags as Tags;
+use \tiFy\Plugins\Woocommerce\ConditionalTags as Tags;
 
 class Query extends \tiFy\App\Factory
 {

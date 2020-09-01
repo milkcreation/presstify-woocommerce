@@ -1,5 +1,5 @@
 <?php
-namespace tiFy\Plugins\WooCommerce;
+namespace tiFy\Plugins\Woocommerce;
 
 /**
  * FONCTIONS UTILES

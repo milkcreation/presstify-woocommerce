@@ -2,7 +2,7 @@
 /**
  * @Overrideable
  */
-namespace tiFy\Plugins\WooCommerce;
+namespace tiFy\Plugins\Woocommerce;
 
 class CheckOut extends \tiFy\App\Factory
 {

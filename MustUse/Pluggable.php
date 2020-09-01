@@ -1,5 +1,5 @@
 <?php 
-use \tiFy\Plugins\WooCommerce\MultiShop\MultiShop;
+use \tiFy\Plugins\Woocommerce\MultiShop\MultiShop;
 
 if (!function_exists('is_shop')) :
     function is_shop()

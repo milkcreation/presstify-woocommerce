@@ -2,7 +2,7 @@
 /**
  * @Overrideable
  */
-namespace tiFy\Plugins\WooCommerce\PaymentGateway;
+namespace tiFy\Plugins\Woocommerce\PaymentGateway;
 
 class Custom extends \WC_Payment_Gateway
 {

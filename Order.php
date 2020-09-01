@@ -2,7 +2,7 @@
 /**
  * @Overrideable
  */
-namespace tiFy\Plugins\WooCommerce;
+namespace tiFy\Plugins\Woocommerce;
 
 class Order extends \tiFy\App\Factory
 {

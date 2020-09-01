@@ -12,9 +12,9 @@ Author URI: http://milkcreation.fr
  * PLUGIN DE SUPPORT WOOCOMMERCE
  * @see https://docs.woocommerce.com/wc-apidocs/index.html
  */
-namespace tiFy\Plugins\WooCommerce;
+namespace tiFy\Plugins\Woocommerce;
 
-class WooCommerce extends \tiFy\App\Plugin
+class Woocommerce extends \tiFy\App\Plugin
 {
     /**
      * CONSTRUCTEUR
@@ -31,48 +31,48 @@ class WooCommerce extends \tiFy\App\Plugin
         new ConditionalTags;
 
         // Tests et modification des emails
-        $Forms = self::getOverride('\tiFy\Plugins\WooCommerce\Emails');
+        $Forms = self::getOverride('\tiFy\Plugins\Woocommerce\Emails');
         new Emails(self::tFyAppConfig('emails'));
 
         // Modification des formulaires
-        $Forms = self::getOverride( '\tiFy\Plugins\WooCommerce\Forms' );
+        $Forms = self::getOverride( '\tiFy\Plugins\Woocommerce\Forms' );
         new $Forms( self::tFyAppConfig( 'forms' ) );
         
         // Requête de récupération des éléments de la boutique
-        self::loadOverride( '\tiFy\Plugins\WooCommerce\Query' );
+        self::loadOverride( '\tiFy\Plugins\Woocommerce\Query' );
         
         // Chargement des scripts
         // Commande
-        $ScriptLoader = self::getOverride( '\tiFy\Plugins\WooCommerce\ScriptLoader' );
+        $ScriptLoader = self::getOverride( '\tiFy\Plugins\Woocommerce\ScriptLoader' );
         new $ScriptLoader( self::tFyAppConfig( 'script_loader' ) );
         
         // Gestionnaire de shortcodes
         new Shortcodes( self::tFyAppConfig( 'shortcodes' ) );
         
         // Eléments de templates
-        self::loadOverride('\tiFy\Plugins\WooCommerce\Template');
+        self::loadOverride('\tiFy\Plugins\Woocommerce\Template');
         
         // Surchage des fonctions de template Woocommerce
         include self::tFyAppDirname() .'/TemplateFunctions.php';
         self::getOverrideAppFile('TemplateFunctions.php');
 
         // Accrochage / Décrochage / Ordonnacement des éléments de template
-        $templateHooks = self::getOverride('\tiFy\Plugins\WooCommerce\TemplateHooks');
+        $templateHooks = self::getOverride('\tiFy\Plugins\Woocommerce\TemplateHooks');
         new $templateHooks( self::tFyAppConfig( 'template-hooks' ) );
         
         // Panier
-        $Cart = self::loadOverride( '\tiFy\Plugins\WooCommerce\Cart' );
+        $Cart = self::loadOverride( '\tiFy\Plugins\Woocommerce\Cart' );
         
         // Livraison
-        $Shipping = self::getOverride( '\tiFy\Plugins\WooCommerce\Shipping' );
+        $Shipping = self::getOverride( '\tiFy\Plugins\Woocommerce\Shipping' );
         new $Shipping( self::tFyAppConfig('shipping'));
         
         // Commande
-        $Checkout = self::getOverride( '\tiFy\Plugins\WooCommerce\CheckOut' );
+        $Checkout = self::getOverride( '\tiFy\Plugins\Woocommerce\CheckOut' );
         new $Checkout( self::tFyAppConfig('checkout') );
         
         // Paiement
-        self::loadOverride( '\tiFy\Plugins\WooCommerce\Order' );
+        self::loadOverride( '\tiFy\Plugins\Woocommerce\Order' );
                 
         // Plateformes de paiement    
         if( self::tFyAppConfig( 'payment_gateway' ) ) :
@@ -88,7 +88,7 @@ class WooCommerce extends \tiFy\App\Plugin
         include self::tFyAppDirname() .'/Helpers.php';
         
         // Interface d'administration
-        self::loadOverride( '\tiFy\Plugins\WooCommerce\Admin\Product\MetaBoxes\MetaBoxes' );
+        self::loadOverride( '\tiFy\Plugins\Woocommerce\Admin\Product\MetaBoxes\MetaBoxes' );
     }
     
     /**
