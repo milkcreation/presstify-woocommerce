@@ -66,14 +66,24 @@ class QueryProduct extends QueryPost implements QueryProductContract
     /**
      * CONSTRUCTEUR.
      *
-     * @param WC_Product|null $wc_product Objet Product Woocommerce.
+     * @param WC_Product|WP_Post|object|null $obj.
      *
      * @return void
      */
-    public function __construct(?WC_Product $wc_product = null)
+    public function __construct(?object $obj = null)
     {
-        if ($this->wcProduct = $wc_product instanceof WC_Product ? $wc_product : null) {
-            parent::__construct(get_post($this->wcProduct->get_id()));
+        if ($obj instanceof WC_Product) {
+            $this->wcProduct = $obj;
+            $wp_post = get_post($obj->get_id());
+        } elseif ($obj instanceof WP_Post && ($product = WC()->product_factory->get_product($obj))) {
+            $wp_post = $obj;
+            $this->wcProduct = $product;
+        } else {
+            $wp_post = null;
+        }
+
+        if ($wp_post instanceof WP_Post) {
+            parent::__construct($wp_post);
         }
     }
 
@@ -166,7 +176,11 @@ class QueryProduct extends QueryPost implements QueryProductContract
     public static function createFromId(int $product_id): ?QueryPostContract
     {
         if ($product_id && ($product = WC()->product_factory->get_product($product_id)) && ($product instanceof WC_Product)) {
-            return static::is($instance = static::build($product)) ? $instance : null;
+            if (!$instance = static::build($product)) {
+                return null;
+            } else {
+                return $instance::is($instance) ? $instance : null;
+            }
         } else {
             return null;
         }

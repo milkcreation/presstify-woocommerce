@@ -8,8 +8,8 @@
     "wordpress",
     "woocommerce"
   ],
-  "homepage": "https://svn.tigreblanc.fr/presstify-plugins/woocommerce",
-  "time": "2020-08-05",
+  "homepage": "https://svn.tigreblanc.fr/presstify-plugins/woocommerce/",
+  "time": "2020-11-10",
   "license": "proprietary",
   "authors": [
     {
@@ -41,7 +41,6 @@
   "config" : {
     "optimize-autoloader": true,
     "preferred-install": "dist",
-    "secure-http": false,
     "sort-packages": true
   }
 }
