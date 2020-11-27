@@ -232,12 +232,12 @@ class StoreFactory extends ParamsBag implements StoreFactoryContract
      */
     public function setOptionsMetabox(string $name, array $attrs = []): StoreFactoryContract
     {
-        Metabox::add("WoocommerceStoreOptions-{$this->name}--{$name}", array_merge($attrs, [
+        /*Metabox::add("WoocommerceStoreOptions-{$this->name}--{$name}", array_merge($attrs, [
             'parent' => 'WoocommerceStoreOptions-' . $this->name,
             'store'  => $this
         ]))
             ->setScreen('tify_options@options')
-            ->setContext('tab');
+            ->setContext('tab'); */
 
         return $this;
     }
