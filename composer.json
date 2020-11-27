@@ -1,6 +1,6 @@
 {
   "name": "presstify-plugins/woocommerce",
-  "description": "PresstiFy Plugin WooCommerce",
+  "description": "Extension PresstiFy de court-circuitage et de fonctionnalités complémentaires woocommerce.",
   "type": "presstify-plugin",
   "keywords": [
     "presstify",
@@ -8,18 +8,13 @@
     "wordpress",
     "woocommerce"
   ],
-  "homepage": "https://svn.milkcreation.fr/presstify-plugins/woocommerce",
-  "time": "2018-08-20",
+  "homepage": "https://svn.tigreblanc.fr/presstify-plugins/woocommerce/",
+  "time": "2020-11-27",
   "license": "proprietary",
   "authors": [
     {
       "name": "Jordy Manner",
       "email": "jordy.manner@milkcreation.fr",
-      "role": "Developper"
-    },
-    {
-      "name": "Julien Picard",
-      "email": "julien@tigreblanc.fr",
       "role": "Developper"
     }
   ],
@@ -31,18 +26,21 @@
   ],
   "require": {
     "composer/installers": "~1.0",
-    "presstify/framework": "^1.4"
+    "presstify/framework": ">=1.4"
   },
   "autoload": {
+    "files": [
+       "helpers.php"
+    ],
     "psr-4": {
-      "tiFy\\Plugins\\WooCommerce\\": ""
+      "tiFy\\Plugins\\Woocommerce\\": ""
     }
   },
   "minimum-stability": "dev",
   "prefer-stable": true,
   "config" : {
+    "optimize-autoloader": true,
     "preferred-install": "dist",
-    "sort-packages": true,
-    "optimize-autoloader": true
+    "sort-packages": true
   }
 }
