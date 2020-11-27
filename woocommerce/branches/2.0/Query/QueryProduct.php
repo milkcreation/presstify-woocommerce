@@ -123,7 +123,7 @@ class QueryProduct extends QueryPost implements QueryProductContract
         }
 
         $classes = self::$builtInClasses;
-        $post_type = $wc_product->get_type();
+        $post_type = $wc_product->post_type;
 
         $class = $classes[$post_type] ?? (self::$fallbackClass ?: static::class);
 
