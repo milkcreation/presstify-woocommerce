@@ -11,6 +11,13 @@ use tiFy\Metabox\MetaboxDriver;
 class AbstractStoreMetabox extends MetaboxDriver
 {
     /**
+     * Instance de la boutique associée.
+     * @var StoreFactory|null|false
+     */
+    protected $store;
+
+
+    /**
      * {@inheritDoc}
      *
      * @return $this
@@ -27,6 +34,16 @@ class AbstractStoreMetabox extends MetaboxDriver
     }
 
     /**
+     * @inheritDoc
+     */
+    public function render(): string
+    {
+        $this->set('store', $this->store());
+
+        return parent::render();
+    }
+
+    /**
      * Récupération de l'instance du magasin associé.
      *
      * @param StoreFactory $store
@@ -35,7 +52,7 @@ class AbstractStoreMetabox extends MetaboxDriver
      */
     public function setStore(StoreFactory $store): self
     {
-        $this->set('store', $store);
+        $this->store = $store;
 
         return $this;
     }
@@ -43,11 +60,17 @@ class AbstractStoreMetabox extends MetaboxDriver
     /**
      * Récupération de l'instance du magasin associé.
      *
-     * @return StoreFactory
+     * @return StoreFactory|null
      */
-    public function store(): StoreFactory
+    public function store(): ?StoreFactory
     {
-        return $this->get('store');
+        if (is_null($this->store)) {
+            $store = $this->get('store');
+
+            $this->store = $store instanceof StoreFactory ? $store : false;
+        }
+
+        return $this->store ?: null;
     }
 
     /**
