@@ -28,6 +28,8 @@ class StoreOptionsMetabox extends AbstractStoreMetabox
      */
     public function render(): string
     {
+        $this->set('store', $this->store());
+
         return $this->woocommerce()->viewer('store/options-general', $this->all());
     }
 }

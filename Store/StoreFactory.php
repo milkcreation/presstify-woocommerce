@@ -2,10 +2,14 @@
 
 namespace tiFy\Plugins\Woocommerce\Store;
 
-use tiFy\Plugins\Woocommerce\Contracts\{StoreFactory as StoreFactoryContract, Stores as StoresContract};
-use tiFy\Support\{ParamsBag, Proxy\Metabox};
-use tiFy\Wordpress\Contracts\{Query\QueryPost as QueryPostContract, Query\QueryTerm as QueryTermContract};
-use tiFy\Wordpress\Query\{QueryPost, QueryTerm};
+use tiFy\Plugins\Woocommerce\Contracts\StoreFactory as StoreFactoryContract;
+use tiFy\Plugins\Woocommerce\Contracts\Stores as StoresContract;
+use tiFy\Support\ParamsBag;
+use tiFy\Support\Proxy\Metabox;
+use tiFy\Wordpress\Contracts\Query\QueryPost as QueryPostContract;
+use tiFy\Wordpress\Contracts\Query\QueryTerm as QueryTermContract;
+use tiFy\Wordpress\Query\QueryPost;
+use tiFy\Wordpress\Query\QueryTerm;
 use WP_Term;
 
 class StoreFactory extends ParamsBag implements StoreFactoryContract
@@ -157,8 +161,8 @@ class StoreFactory extends ParamsBag implements StoreFactoryContract
 
             add_action('admin_init', function () {
                 if ($this->get('admin')) {
-                    Metabox::add('WoocommerceStoreOptions-' . $this->name, [
-                        'parent' => 'WoocommerceStoreOptions',
+                    Metabox::add('woocommerce.store.options.' . $this->name, [
+                        'parent' => 'woocommerce.store.options',
                         'title'  => $this->get('title'),
                     ])
                         ->setScreen('tify_options@options')
@@ -166,7 +170,7 @@ class StoreFactory extends ParamsBag implements StoreFactoryContract
 
                     $this->setOptionsMetabox('general', [
                         'driver'   => (new StoreOptionsMetabox())->setStore($this),
-                        'position' => 1,
+                        'position' => -1,
                         'title'    => __('Options générales', 'tify'),
                     ]);
 
@@ -189,7 +193,7 @@ class StoreFactory extends ParamsBag implements StoreFactoryContract
                             update_term_meta($cat, 'display_type', $value);
 
                             return $value;
-                        }
+                        },
                     ]);
                     register_setting('tify_options', 'tify_wc_multi_default');
                 }
@@ -232,12 +236,15 @@ class StoreFactory extends ParamsBag implements StoreFactoryContract
      */
     public function setOptionsMetabox(string $name, array $attrs = []): StoreFactoryContract
     {
-        /*Metabox::add("WoocommerceStoreOptions-{$this->name}--{$name}", array_merge($attrs, [
-            'parent' => 'WoocommerceStoreOptions-' . $this->name,
-            'store'  => $this
-        ]))
-            ->setScreen('tify_options@options')
-            ->setContext('tab'); */
+        $driver = $attrs['driver'] ?? null;
+
+        if (!$driver instanceof AbstractStoreMetabox) {
+            $attrs['store'] = $this;
+        }
+
+        Metabox::add("woocommerce.store.options.{$this->name}.{$name}", array_merge($attrs, [
+            'parent' => "woocommerce.store.options.{$this->name}"
+        ]))->setScreen('tify_options@options')->setContext('tab');
 
         return $this;
     }
