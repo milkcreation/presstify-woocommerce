@@ -1,5 +1,12 @@
 # Release Notes
 
+## [v2.0.38 (2020-12-02)](https://svn.tigreblanc.fr/presstify-plugins/woocommerce/tags/2.0.39...v2.0.39)
+
+### Fixed
+
+- Réécriture des champs select_js select_js_country select_js_state
+
+
 ## [v2.0.38 (2020-11-30)](https://svn.tigreblanc.fr/presstify-plugins/woocommerce/tags/2.0.38...v2.0.38)
 
 ### Fixed

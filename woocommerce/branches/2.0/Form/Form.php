@@ -2,15 +2,13 @@
 
 namespace tiFy\Plugins\Woocommerce\Form;
 
-use tiFy\Plugins\Woocommerce\{Contracts\Form as FormContract, WoocommerceAwareTrait};
+use tiFy\Plugins\Woocommerce\Contracts\Form as FormContract;
+use tiFy\Plugins\Woocommerce\WoocommerceAwareTrait;
+use tiFy\Support\Proxy\Field;
+use tiFy\Support\Proxy\Partial;
 use tiFy\Support\ParamsBag;
-use WooCommerce;
 use WC_Customer;
 
-/**
- * @see Woocommerce/includes/wc-template-functions.php
- * @see https://docs.woocommerce.com/document/tutorial-customising-checkout-fields-using-actions-and-filters/
- */
 class Form extends ParamsBag implements FormContract
 {
     use WoocommerceAwareTrait;
@@ -22,86 +20,177 @@ class Form extends ParamsBag implements FormContract
      */
     public function __construct()
     {
-        // Définition du type de champ "Sélecteur JS".
+        /** Définition du type de champ select_js. */
         add_filter('woocommerce_form_field_select_js', function ($field, $key, $args, $value) {
-            $field_type = 'select-js';
+            $_field = $field;
+            $attrs = $this->getFieldWrapperAttrs($args);
+            $label = ($labelArgs = $this->getFieldLabelArgs($args)) ? Partial::get('tag', $labelArgs) : null;
 
-            $args['attrs'] = array_merge([
-                'class' => esc_attr(implode(' ', $args['input_class']))
-            ], $args['attrs'] ?? []);
+            $field = Field::get('select-js', array_merge([
+                'after'   => Partial::get('tag', [
+                    'attrs'   => [
+                        'id'          => esc_attr($args['id']) . '-description',
+                        'class'       => 'description',
+                        'aria-hidden' => 'true',
+                    ],
+                    'content' => $args['description'],
+                    'tag'     => 'span',
+                ]),
+                'attrs'   => array_merge([
+                    'class' => '%s ' . esc_attr(implode(' ', $args['input_class'])),
+                ], $args['custom_attributes'] ?? []),
+                'choices' => $args['options'],
+                'handler' => [
+                    'attrs' => [
+                        'id' => $args['id'],
+                    ],
+                ],
+                'name'    => $key,
+                'value'   => $value,
+            ], $args['extras']['input'] ?? []));
 
-            $args['picker'] = array_merge([
-                'class' => isset($args['picker_class']) ? esc_attr(implode(' ', $args['picker_class'])) : null
-            ], $args['picker'] ?? []);
-
-            $args['choices'] = $args['options'] ?? [];
-
-            return (string)$this->manager->viewer('field/field', compact('args', 'key', 'value', 'field_type'));
+            return $this->manager->viewer(
+                'field/index', compact('attrs', 'field', 'label', 'args', 'key', 'value', '_field')
+            );
         }, 10, 4);
+        /**/
 
-        // Définition du type de champ "Sélecteur JS de pays".
+        /** Définition du type de champ select_js_country. */
         add_filter('woocommerce_form_field_select_js_country', function ($field, $key, $args, $value) {
-            $countries = 'shipping_country' === $key
+            $_field = $field;
+            $attrs = $this->getFieldWrapperAttrs($args);
+            $label = ($labelArgs = $this->getFieldLabelArgs($args)) ? Partial::get('tag', $labelArgs) : null;
+            $choices = ('shipping_country' === $key)
                 ? WC()->countries->get_shipping_countries() : WC()->countries->get_allowed_countries();
 
-            $singleCountry = (1 === sizeof($countries));
+            $fieldArgs = [
+                'attrs' => array_merge([
+                    'class' => '%s ' . esc_attr(implode(' ', $args['input_class'])),
+                ], $args['custom_attributes'] ?? []),
+                'name'  => $key,
+            ];
+            if ((1 === sizeof($choices)) || isset($args['custom_attributes']['readonly'])) {
+                $fieldArgs['attrs']['id'] = $args['id'];
+                $fieldArgs['attrs']['class'] .= ' country_to_state';
+                $fieldArgs['attrs']['readonly'] = 'readonly';
 
-            $field_type = $singleCountry ? 'single-country' : 'select-js-country';
-
-            if (!$singleCountry) {
-                $args['attrs'] = array_merge([
-                    'class' => 'country_to_state country_select ' . esc_attr(implode(' ', $args['input_class']))
-                ], $args['attrs'] ?? []);
-
-                $args['picker'] = array_merge([
-                    'class' => 'country_to_state country_select_picker ' . (isset($args['picker_class'])
-                            ? esc_attr(implode(' ', $args['picker_class'])) : null)
-                ], $args['picker'] ?? []);
-
-                $countries = ['' => esc_html__('Select a country&hellip;', 'woocommerce')] + $countries;
-
-                $args['attrs'] = array_merge($args['attrs'], $args['custom_attributes']);
+                $field = Field::get('hidden', array_merge($fieldArgs, [
+                    'before' => Field::get('text', [
+                        'attrs' => [
+                            'readonly' => 'readonly'
+                        ],
+                        'value' => $choices[$value] ?? current(array_values($choices)),
+                    ])->render(),
+                    'value'  => $value ?: current(array_keys($choices)),
+                ], $args['extras']['input'] ?? []));
             } else {
-                $args['custom_attributes'] = $this->getCustomHtmlAttrs($args['custom_attributes']);
+                $fieldArgs['attrs']['class'] .= ' country_to_state country_select';
+
+                $fieldArgs = array_merge($fieldArgs, [
+                    'after'   => Partial::get('tag', [
+                        'attrs'   => [
+                            'id'          => esc_attr($args['id']) . '-description',
+                            'class'       => 'description',
+                            'aria-hidden' => 'true',
+                        ],
+                        'content' => $args['description'],
+                        'tag'     => 'span',
+                    ])->render(),
+                    'choices' => ['' => esc_html__('Select a country&hellip;', 'woocommerce')] + $choices,
+                    'handler' => [
+                        'attrs' => [
+                            'id' => $args['id'],
+                        ],
+                    ],
+                    'picker'  => [
+                        'attrs'  => [
+                            'class' => '%s country_to_state country_select_picker',
+                        ],
+                        'filter' => true,
+                    ],
+                    'value'   => $value,
+                ], $args['extras']['input'] ?? []);
+
+                $field = Field::get('select-js', $fieldArgs);
             }
 
-            $args['choices'] = $countries;
-
-            return (string)$this->manager->viewer('field/field', compact('args', 'key', 'value', 'field_type'));
+            return $this->manager->viewer(
+                'field/index', compact('attrs', 'field', 'label', 'args', 'key', 'value', '_field')
+            );
         }, 10, 4);
+        /**/
 
-        // Définition du type de champ "Sélecteur JS d'état/comté".
+        /** Définition du type de champ select_js_state. */
         add_filter('woocommerce_form_field_select_js_state', function ($field, $key, $args, $value) {
+            $_field = $field;
+            $attrs = $this->getFieldWrapperAttrs($args);
+            $label = ($labelArgs = $this->getFieldLabelArgs($args)) ? Partial::get('tag', $labelArgs) : null;
+
             $for_country = isset($args['country'])
                 ? $args['country']
                 : WC()->checkout->get_value('billing_state' === $key ? 'billing_country' : 'shipping_country');
 
             $states = WC()->countries->get_states($for_country);
 
+            $fieldArgs = [
+                'attrs' => array_merge([
+                    'class' => '%s ' . esc_attr(implode(' ', $args['input_class'])),
+                ], $args['custom_attributes'] ?? []),
+                'name'  => $key,
+            ];
+
             if (is_array($states) && empty($states)) {
-                $field_type = 'empty-state';
-                $args['custom_attributes'] = $this->getCustomHtmlAttrs($args['custom_attributes']);
-                $args['inline_style'] = 'style="display:none;"';
+                $fieldArgs['attrs']['id'] = $args['id'];
+                $fieldArgs['attrs']['class'] .= ' hidden';
+                $fieldArgs['attrs']['placeholder'] = $args['placeholder'];
+                $fieldArgs['attrs']['readonly'] = 'readonly';
+                $fieldArgs['attrs']['style'] = 'display:none;';
+
+                $field = Field::get('hidden', array_merge($fieldArgs, [
+                    'value' => '',
+                ], $args['extras']['input'] ?? []));
             } elseif (!is_null($for_country) && is_array($states)) {
-                $field_type = 'select-js';
+                $fieldArgs['attrs']['class'] .= ' state_select';
 
-                $args['attrs'] = array_merge([
-                    'class' => 'state_select ' . esc_attr(implode(' ', $args['input_class']))
-                ], $args['attrs'] ?? []);
+                $fieldArgs = array_merge($fieldArgs, [
+                    'after'   => Partial::get('tag', [
+                        'attrs'   => [
+                            'id'          => esc_attr($args['id']) . '-description',
+                            'class'       => 'description',
+                            'aria-hidden' => 'true',
+                        ],
+                        'content' => $args['description'],
+                        'tag'     => 'span',
+                    ])->render(),
+                    'choices' => ['' => esc_html__('Select a state&hellip;', 'woocommerce')] + $states,
+                    'handler' => [
+                        'attrs' => [
+                            'id' => $args['id'],
+                        ],
+                    ],
+                    'picker'  => [
+                        'attrs'  => [
+                            'class' => '%s country_to_state country_select_picker',
+                        ],
+                        'filter' => true,
+                    ],
+                    'value'   => $value,
+                ], $args['extras']['input'] ?? []);
 
-                $args['picker'] = array_merge([
-                    'class' => 'state_select_picker ' .
-                        (isset($args['picker_class']) ? esc_attr(implode(' ', $args['picker_class'])) : null)
-                ], $args['picker'] ?? []);
-
-                $args['choices'] = ['' => esc_html__('Select a state&hellip;', 'woocommerce')] + $states;
-                $args['attrs'] = array_merge($args['attrs'], $args['custom_attributes']);
+                $field = Field::get('select-js', $fieldArgs);
             } else {
-                $field_type = 'text-state';
-                $args['custom_attributes'] = $this->getCustomHtmlAttrs($args['custom_attributes']);
+                $fieldArgs['attrs']['id'] = $args['id'];
+                $fieldArgs['attrs']['class'] .= ' input-text';
+                $fieldArgs['attrs']['placeholder'] = $args['placeholder'];
+
+                $field = Field::get('text', array_merge($fieldArgs, [
+                    'value' => '',
+                ], $args['extras']['input'] ?? []));
             }
 
-            return (string)$this->manager->viewer('field/field', compact('args', 'key', 'value', 'field_type'));
+            return $this->manager->viewer(
+                'field/index', compact('attrs', 'field', 'label', 'args', 'key', 'value', '_field')
+            );
         }, 10, 4);
 
         // Ajout de champs personnalisés aux formulaires d'adresse de facturation et de livraison.
@@ -114,6 +203,7 @@ class Form extends ParamsBag implements FormContract
             }
             return $fields;
         });
+
         add_filter('woocommerce_customer_meta_fields', function (array $fields) {
             foreach ($this->get('add_address_fields', []) as $slug => $attrs) {
                 if (!empty($attrs['admin'])) {
@@ -132,10 +222,10 @@ class Form extends ParamsBag implements FormContract
                                         [
                                             'label'       => isset($attrs['label']) ? $attrs['label'] : '',
                                             'description' => '',
-                                            'class'       => ''
+                                            'class'       => '',
                                         ],
                                         $adminAttrs
-                                    )
+                                    ),
                                 ],
                                 array_slice($fields[$addressType]['fields'], $pos)
                             );
@@ -150,7 +240,7 @@ class Form extends ParamsBag implements FormContract
 
         // Surcharge des champs de formulaire d'adresse de facturation.
         // @see woocommerce_form_field()
-        add_filter("woocommerce_billing_fields", function (array $originalFields){
+        add_filter("woocommerce_billing_fields", function (array $originalFields) {
             if ($customfields = $this->get('billing', [])) {
                 return $this->overwriteFormFields('billing', $originalFields, $customfields);
             }
@@ -159,7 +249,7 @@ class Form extends ParamsBag implements FormContract
 
         // Surcharge des champs de formulaire d'adresse de livraison.
         // @see woocommerce_form_field()
-        add_filter("woocommerce_shipping_fields", function (array $originalFields){
+        add_filter("woocommerce_shipping_fields", function (array $originalFields) {
             if ($customfields = $this->get('shipping', [])) {
                 return $this->overwriteFormFields('shipping', $originalFields, $customfields);
             }
@@ -198,7 +288,7 @@ class Form extends ParamsBag implements FormContract
                             break;
                     }
                 }
-        }, 10, 3);
+            }, 10, 3);
 
         $this->boot();
     }
@@ -206,7 +296,7 @@ class Form extends ParamsBag implements FormContract
     /**
      * @inheritDoc
      */
-    public function boot(): void {}
+    public function boot(): void { }
 
     /**
      * @inheritDoc
@@ -294,5 +384,52 @@ class Form extends ParamsBag implements FormContract
         parent::parse();
 
         return $this;
+    }
+
+    /**
+     * Récupération des attributs de l'étiquette selon les paramètres de configuration d'un champ.
+     *
+     * @param $args
+     *
+     * @return array|null
+     */
+    public function getFieldLabelArgs(array $args = []): ?array
+    {
+        if ($content = $args['label'] ?? '') {
+            return array_merge([
+                'after'   => $args['required'] ? Partial::get('tag', [
+                    'attrs'   => [
+                        'class' => '%s required',
+                        'title' => __('required', 'woocommerce'),
+                    ],
+                    'content' => '*',
+                    'tag'     => 'abbr',
+                ]) : '',
+                'attrs'   => [
+                    'class' => '%s ' . esc_attr(implode(' ', $args['label_class'])),
+                    'for'   => $args['id'],
+                ],
+                'content' => $content,
+                'tag'     => 'label',
+            ], $args['extras']['label'] ?? []);
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Récupération des attributs de l'encapsuleur selon les paramètres de configuration d'un champ.
+     *
+     * @param $args
+     *
+     * @return array|null
+     */
+    public function getFieldWrapperAttrs(array $args)
+    {
+        return array_merge([
+            'id'            => esc_attr($args['id']) . '_field',
+            'class'         => '%s form-row ' . esc_attr(implode(' ', $args['class'])),
+            'data-priority' => $args['priority'] ?: '',
+        ], $args['extras']['wrapper_attrs'] ?? []);
     }
 }
