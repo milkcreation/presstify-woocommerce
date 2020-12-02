@@ -19,8 +19,6 @@ class TemplateFilters extends ParamsBag implements TemplateFiltersContract
      */
     public function __construct()
     {
-        add_filter('woocommerce_breadcrumb_defaults', [$this, 'woocommerce_breadcrumb_defaults']);
-
         $this->boot();
     }
 
@@ -37,24 +35,5 @@ class TemplateFilters extends ParamsBag implements TemplateFiltersContract
         parent::parse();
 
         return $this;
-    }
-
-    /**
-     * Exemple de court-circuitage des attributs du fil d'Ariane.
-     *
-     * @param array $args {
-     *      @var $delimiter, '&nbsp;&#47;&nbsp;' par défaut.
-     *      @var $wrap_before, '<nav class="woocommerce-breadcrumb">' par défaut.
-     *      @var $wrap_after, '</nav>' par défaut.
-     *      @var $before, '' par défaut.
-     *      @var $after, '' par défaut.
-     *      @var $home, _x( 'Home', 'breadcrumb', 'woocommerce' ) par défaut.
-     * }
-     *
-     * @return array
-     */
-    public function woocommerce_breadcrumb_defaults(array $args = []) : array
-    {
-        return $args;
     }
 }
