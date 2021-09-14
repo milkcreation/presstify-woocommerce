@@ -8,20 +8,13 @@
     "wordpress",
     "woocommerce"
   ],
-  "homepage": "https://svn.tigreblanc.fr/presstify-plugins/woocommerce/",
-  "time": "2020-12-02",
-  "license": "proprietary",
+  "homepage": "https://github.com/milkcreation/presstify-woocommerce.git",
+  "time": "2021-09-14",
   "authors": [
     {
       "name": "Jordy Manner",
       "email": "jordy.manner@milkcreation.fr",
       "role": "Developper"
-    }
-  ],
-  "repositories": [
-    {
-      "type": "composer",
-      "url": "http://composer.tigreblanc.fr/presstify/"
     }
   ],
   "require": {
